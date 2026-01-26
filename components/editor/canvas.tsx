@@ -19,6 +19,10 @@ const RenderedComponent = memo(function RenderedComponent({
   selectedId,
   onSelect,
 }: RenderedComponentProps) {
+  // Use store directly for actions to avoid prop drilling
+  const moveComponent = useEditorStore((state) => state.moveComponent);
+  const addComponent = useEditorStore((state) => state.addComponent);
+
   const isSelected = selectedId === component.id;
   const isVisible = component.isVisible ?? true;
 
@@ -27,6 +31,86 @@ const RenderedComponent = memo(function RenderedComponent({
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelect(component.id);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.stopPropagation();
+    e.dataTransfer.setData("componentId", component.id);
+    e.dataTransfer.setData("componentType", component.type);
+    e.dataTransfer.setData("text/plain", component.id); // Fallback
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const droppedId = e.dataTransfer.getData("componentId");
+    const droppedType = e.dataTransfer.getData(
+      "componentType",
+    ) as ComponentType;
+
+    // If we have an ID, it's a move
+    if (droppedId) {
+      if (droppedId === component.id) return; // Dropped on self
+
+      // If dropping ONTO a container, append to it
+      // Simple logic: If this component can accept children (Layout, etc), add to it.
+      // Otherwise, adding "swap" or "insert before" logic is harder without specific drop zones.
+      // For now, let's assume dropping ON a component means "Move into" if it's a container,
+      // or "Move next to" if not?
+      // User asked to "change places".
+
+      // Let's implement: Drop on Container -> Append to Container.
+      // Drop on Non-Container -> Do nothing (let Canvas handle it? or Insert After?)
+
+      // Check if this component is a container
+      const isContainer = [
+        "Layout",
+        "Div",
+        "Column",
+        "Row",
+        "Card",
+        "Panel",
+      ].includes(component.type);
+
+      if (isContainer) {
+        moveComponent(droppedId, component.id, component.children?.length || 0);
+        // toast.success("Moved into " + component.name);
+      } else {
+        // Maybe bubble up to parent?
+        // For now, let's keep it simple. Only containers accept drops.
+      }
+    } else if (droppedType) {
+      // New component from palette
+      const isContainer = [
+        "Layout",
+        "Div",
+        "Column",
+        "Row",
+        "Card",
+        "Panel",
+      ].includes(component.type);
+      if (isContainer) {
+        const def = COMPONENT_DEFINITIONS.find((d) => d.type === droppedType);
+        if (def) {
+          addComponent(
+            {
+              type: def.type,
+              name: def.label,
+              ...def.defaultProps,
+            },
+            component.id,
+          );
+        }
+      }
+    }
   };
 
   const getComponentStyle = (): React.CSSProperties => {
@@ -122,8 +206,48 @@ const RenderedComponent = memo(function RenderedComponent({
       }
     }
 
-    if (component.direction === "Horizontal") {
-      style.flexDirection = "row";
+    if (component.direction) {
+      style.flexDirection =
+        component.direction === "Vertical" ? "column" : "row";
+    }
+
+    if (component.textStyle) {
+      style.color = component.textStyle.textColor;
+      style.fontSize = component.textStyle.fontSize
+        ? `${component.textStyle.fontSize}px`
+        : undefined;
+      style.fontWeight = component.textStyle.renderBold ? "bold" : undefined;
+      style.textTransform = component.textStyle.renderUppercase
+        ? "uppercase"
+        : undefined;
+      // Map TitleCase TextAlignment to CSS textAlign
+      if (component.textStyle.alignment) {
+        style.textAlign =
+          component.textStyle.alignment.toLowerCase() as React.CSSProperties["textAlign"];
+
+        const align = component.textStyle.alignment;
+        style.justifyContent =
+          align === "Center"
+            ? "center"
+            : align === "Right"
+              ? "flex-end"
+              : "flex-start";
+      }
+    }
+
+    // Force Linear Layout for Group
+    if (component.type === "Group") {
+      style.display = "flex";
+      // Default to column if not specified, mimicking standard Linear Layout
+      if (!style.flexDirection) {
+        style.flexDirection = "column";
+      }
+    }
+
+    // Default to Full Width for all components if not explicitly set
+    // This matches Hytale's behavior where components often fill available space
+    if (!style.width) {
+      style.width = "100%";
     }
 
     return style;
@@ -315,16 +439,21 @@ export function EditorCanvas() {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const setDevicePreview = useEditorStore((state) => state.setDevicePreview);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setDevicePreview("Mobile");
+      }
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  }, [setDevicePreview]);
 
   const deviceSize = React.useMemo(() => {
     // Force mobile preview size on mobile devices, ignoring desktop preview setting
@@ -383,8 +512,6 @@ export function EditorCanvas() {
 
     return () => observer.disconnect();
   }, [fitToScreen, deviceSize, zoom, setZoom]); // depend on zoom to check diff, but be careful
-
-  // ... rest of component
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -490,7 +617,7 @@ export function EditorCanvas() {
           onClick={handleCanvasClick}
         >
           <div
-            className="h-[100px] bg-red-500 w-full origin-top-left p-4"
+            className="h-[100px] w-full origin-top-left p-4"
             style={{
               transform: `scale(${zoom / 100})`,
               width: `${100 / (zoom / 100)}%`,
