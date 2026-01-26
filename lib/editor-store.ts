@@ -231,6 +231,7 @@ interface EditorStore extends EditorState {
   setDevicePreview: (preview: DevicePreview) => void;
   toggleGrid: () => void;
   toggleSnap: () => void;
+  setCalculatedZoom: (zoom: number) => void;
   setZoom: (zoom: number) => void;
 
   // Components
@@ -282,12 +283,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   setDevicePreview: (preview) => set({ devicePreview: preview }),
 
-  fitToScreen: false,
+  fitToScreen: true,
 
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
 
   toggleSnap: () => set((state) => ({ snapToGrid: !state.snapToGrid })),
 
+  setCalculatedZoom: (zoom) => set({ zoom: Math.max(25, Math.min(200, zoom)) }),
   setZoom: (zoom) =>
     set({ zoom: Math.max(25, Math.min(200, zoom)), fitToScreen: false }),
 
