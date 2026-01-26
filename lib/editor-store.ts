@@ -115,32 +115,40 @@ function duplicateComponent(component: HytaleComponent): HytaleComponent {
   };
 }
 
-function componentsToCode(components: HytaleComponent[], indent = 0): string {
-  const spaces = "  ".repeat(indent);
+function componentsToCode(components: HytaleComponent[], depth = 0): string {
   let code = "";
+  const spaces = "  ".repeat(depth);
 
-  for (const comp of components) {
-    // Type with optional #name selector
-    const nameSelector = comp.name ? `#${comp.name}` : "";
+  components.forEach((comp) => {
+    // Header: Type #ID or Type
+    const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
+    code += `${spaces}${comp.type}${idPart} {\n`;
 
-    // Header line
-    code += `${spaces}${comp.type}${nameSelector} {\n`;
+    // Visible
+    if (typeof comp.isVisible === "boolean") {
+      code += `${spaces}  Visible: ${comp.isVisible};\n`;
+    }
 
-    // Core properties
-    if (comp.isVisible === false) code += `${spaces}  Visible: false\n`;
-    else code += `${spaces}  Visible: true\n`; // Explicitly export true for clarity if desired, or skip strict boolean default.
-    // User sample showed Visible: true unless default implies it. Let's keep explicit if defined.
+    // Text
+    if (comp.text) {
+      code += `${spaces}  Text: "${comp.text}";\n`;
+    }
+    if (comp.placeholderText) {
+      code += `${spaces}  Text: "${comp.placeholderText}";\n`;
+    }
 
-    if (comp.text) code += `${spaces}  Text: "${comp.text}"\n`;
-    if (comp.placeholderText)
-      code += `${spaces}  PlaceholderText: "${comp.placeholderText}"\n`;
-    if (comp.value !== undefined) code += `${spaces}  Value: ${comp.value}\n`;
-    if (comp.source) code += `${spaces}  Source: "${comp.source}"\n`;
+    // Value
+    if (comp.value !== undefined) {
+      code += `${spaces}  Value: ${comp.value};\n`;
+    }
+    if (comp.max !== undefined) {
+      code += `${spaces}  Max: ${comp.max};\n`;
+    }
 
     // Anchor: (Key: Val, ...) syntax
     if (comp.anchor) {
       if (comp.anchor.full) {
-        code += `${spaces}  Anchor: (Full: true)\n`;
+        code += `${spaces}  Anchor: (Full: true);\n`;
       } else {
         const parts: string[] = [];
         if (comp.anchor.width !== undefined)
@@ -155,27 +163,21 @@ function componentsToCode(components: HytaleComponent[], indent = 0): string {
           parts.push(`Left: ${comp.anchor.left}`);
         if (comp.anchor.right !== undefined)
           parts.push(`Right: ${comp.anchor.right}`);
+
         if (comp.anchor.centerX !== undefined)
           parts.push(`CenterX: ${comp.anchor.centerX}`);
         if (comp.anchor.centerY !== undefined)
           parts.push(`CenterY: ${comp.anchor.centerY}`);
 
         if (parts.length > 0) {
-          code += `${spaces}  Anchor: (${parts.join(", ")})\n`;
+          code += `${spaces}  Anchor: (${parts.join(", ")});\n`;
         }
       }
     }
 
-    // Layout
-    if (comp.layoutMode) code += `${spaces}  LayoutMode: ${comp.layoutMode}\n`;
-    if (comp.flexWeight) code += `${spaces}  FlexWeight: ${comp.flexWeight}\n`;
-    if (comp.direction) code += `${spaces}  Direction: ${comp.direction}\n`;
-
     // Padding: (Key: Val, ...)
     if (comp.padding) {
       const parts: string[] = [];
-      // Check for uniform padding first? Or just list sides.
-      // If all equal, maybe use Full? The types don't strictly track 'full' prop for padding, just numbers.
       if (comp.padding.top !== undefined)
         parts.push(`Top: ${comp.padding.top}`);
       if (comp.padding.bottom !== undefined)
@@ -184,16 +186,23 @@ function componentsToCode(components: HytaleComponent[], indent = 0): string {
         parts.push(`Left: ${comp.padding.left}`);
       if (comp.padding.right !== undefined)
         parts.push(`Right: ${comp.padding.right}`);
-
       if (parts.length > 0) {
-        code += `${spaces}  Padding: (${parts.join(", ")})\n`;
+        code += `${spaces}  Padding: (${parts.join(", ")});\n`;
       }
     }
 
-    // Background - usually Hytale uses Background: (Color: "#...") or similar if object syntax is preferred.
-    // The previous implementation used dot notation. "Background.Color".
-    // User request implies full object structure. "Anchor: (...)"
-    // Let's deduce Background syntax: Background is usually a struct.
+    // LayoutMode
+    if (comp.layoutMode) {
+      code += `${spaces}  LayoutMode: ${comp.layoutMode};\n`;
+    }
+    if (comp.direction) {
+      code += `${spaces}  Direction: ${comp.direction};\n`;
+    }
+    if (comp.flexWeight !== undefined) {
+      code += `${spaces}  FlexWeight: ${comp.flexWeight};\n`;
+    }
+
+    // Background: (Key: Val, ...)
     if (comp.background) {
       const parts: string[] = [];
       if (comp.background.color)
@@ -204,36 +213,33 @@ function componentsToCode(components: HytaleComponent[], indent = 0): string {
         parts.push(`Opacity: ${comp.background.opacity}`);
 
       if (parts.length > 0) {
-        // Check if user prefers "Background: (...)" or keep legacy?
-        // "Anchor: (...)" implies a pattern. Let's use Tuple syntax for Background too to be safe.
-        code += `${spaces}  Background: (${parts.join(", ")})\n`;
+        code += `${spaces}  Background: (${parts.join(", ")});\n`;
       }
     }
 
-    // Text Style - often mixed properties like FontSize, or a style object?
-    // User prompt didn't strictly specify text style grouping, but existing codebase treated them as top-level props (FontSize, TextColor).
-    // The parser Global Variables section has "@DefaultLabelStyle": { props: { FontSize: 14... } }.
-    // So strictly speaking, these are top-level properties on the component OR inside a style mixin.
-    // I will keep them as top-level properties consistent with the parser's examples unless they are inside a defined style object.
+    // TextStyle
     if (comp.textStyle) {
       if (comp.textStyle.fontSize)
-        code += `${spaces}  FontSize: ${comp.textStyle.fontSize}\n`;
-      if (comp.textStyle.renderBold) code += `${spaces}  RenderBold: true\n`;
-      if (comp.textStyle.renderUppercase)
-        code += `${spaces}  RenderUppercase: true\n`;
+        code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
+
+      // Handle Color ambiguity: if using TextStyle but outputting top-level, check property names
       if (comp.textStyle.textColor)
-        code += `${spaces}  TextColor: "${comp.textStyle.textColor}"\n`;
+        code += `${spaces}  Color: "${comp.textStyle.textColor}";\n`;
+
+      if (comp.textStyle.renderBold) code += `${spaces}  RenderBold: true;\n`;
+      if (comp.textStyle.renderUppercase)
+        code += `${spaces}  RenderUppercase: true;\n`;
       if (comp.textStyle.alignment)
-        code += `${spaces}  Alignment: ${comp.textStyle.alignment}\n`;
+        code += `${spaces}  Alignment: ${comp.textStyle.alignment};\n`;
     }
 
-    // Children
+    // Recursively process children
     if (comp.children && comp.children.length > 0) {
-      code += componentsToCode(comp.children, indent + 1);
+      code += componentsToCode(comp.children, depth + 1);
     }
 
     code += `${spaces}}\n`;
-  }
+  });
 
   return code;
 }
