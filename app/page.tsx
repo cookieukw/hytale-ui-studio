@@ -1,6 +1,15 @@
 "use client";
 
 import { EditorToolbar } from "@/components/editor/toolbar";
+import {
+  Layout,
+  FileCode,
+  Layers,
+  Undo2,
+  Redo2,
+  Download,
+  Upload,
+} from "lucide-react";
 import { ComponentPalette } from "@/components/editor/component-palette";
 import { ComponentTree } from "@/components/editor/component-tree";
 import { EditorCanvas } from "@/components/editor/canvas";
@@ -88,8 +97,68 @@ export default function HytaleUIStudio() {
         </ResizablePanelGroup>
       </div>
 
-      {/* Main Content - Mobile (only shown on small screens) */}
-      <div className="md:hidden flex-1 overflow-hidden relative flex flex-col">
+      {/* Mobile Layout */}
+      <div className="md:hidden flex h-full flex-col bg-background">
+        {/* Mobile Header with Actions */}
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-panel-header px-3">
+          <div className="flex items-center gap-2">
+            <img
+              src="/hytale-studio_foreground.png"
+              alt="Logo"
+              className="h-8 w-8 rounded bg-primary"
+            />
+            <span className="text-sm font-semibold">Studio</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => useEditorStore.getState().undo()}
+              className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => useEditorStore.getState().redo()}
+              className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted"
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-border mx-1" />
+            <button
+              onClick={() => {
+                const code = useEditorStore.getState().exportToUI();
+                const blob = new Blob([code], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "interface.ui";
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted"
+            >
+              <Download className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = ".ui,.txt";
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) {
+                    const text = await file.text();
+                    useEditorStore.getState().importFromUI(text);
+                  }
+                };
+                input.click();
+              }}
+              className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted"
+            >
+              <Upload className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
         <MobileNav />
         <div className="flex-1 overflow-hidden relative flex">
           {/* VIEW TAB */}
