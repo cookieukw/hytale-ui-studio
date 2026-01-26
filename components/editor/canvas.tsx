@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
-
-import { useRef, useState, useCallback, memo } from "react";
+import React, { useRef, useState, useCallback, memo, useEffect } from "react";
 import { useEditorStore } from "@/lib/editor-store";
 import { COMPONENT_DEFINITIONS } from "@/lib/component-definitions";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
@@ -398,14 +396,35 @@ export function EditorCanvas() {
     setIsDragOver(false);
   }, []);
 
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragOver(true);
+  }, []);
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragOver(false);
 
-      const componentType = e.dataTransfer.getData(
+      let componentType = e.dataTransfer.getData(
         "componentType",
       ) as ComponentType;
+
+      // Fallback to text/plain for mobile
+      if (!componentType) {
+        componentType = e.dataTransfer.getData("text/plain") as ComponentType;
+      }
+
+      // Debugging
+      if (componentType) {
+        // toast.success(`Dropped: ${componentType}`);
+      } else {
+        // toast.error("Drop failed: No component type received");
+        // Try getting everything to debug
+        // const types = e.dataTransfer.types;
+        // toast.error(`Types available: ${JSON.stringify(types)}`);
+      }
 
       if (!componentType) return;
 
@@ -465,6 +484,7 @@ export function EditorCanvas() {
             height: deviceSize.height * (zoom / 130),
           }}
           onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={handleCanvasClick}
