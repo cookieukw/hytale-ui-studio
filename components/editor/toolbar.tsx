@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import React from "react"
+import React from "react";
 
 import {
   Undo2,
@@ -18,81 +18,91 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { useEditorStore } from '@/lib/editor-store'
-import type { ViewMode, DevicePreview } from '@/lib/hytale-types'
-import { cn } from '@/lib/utils'
+} from "@/components/ui/dropdown-menu";
+import { useEditorStore } from "@/lib/editor-store";
+import type { ViewMode, DevicePreview } from "@/lib/hytale-types";
+import { cn } from "@/lib/utils";
 
 export function EditorToolbar() {
-  const viewMode = useEditorStore((s) => s.viewMode)
-  const setViewMode = useEditorStore((s) => s.setViewMode)
-  const devicePreview = useEditorStore((s) => s.devicePreview)
-  const setDevicePreview = useEditorStore((s) => s.setDevicePreview)
-  const showGrid = useEditorStore((s) => s.showGrid)
-  const toggleGrid = useEditorStore((s) => s.toggleGrid)
-  const snapToGrid = useEditorStore((s) => s.snapToGrid)
-  const toggleSnap = useEditorStore((s) => s.toggleSnap)
-  const zoom = useEditorStore((s) => s.zoom)
-  const setZoom = useEditorStore((s) => s.setZoom)
-  const undo = useEditorStore((s) => s.undo)
-  const redo = useEditorStore((s) => s.redo)
-  const historyIndex = useEditorStore((s) => s.historyIndex)
-  const historyLength = useEditorStore((s) => s.history.length)
-  const exportToUI = useEditorStore((s) => s.exportToUI)
+  const viewMode = useEditorStore((s) => s.viewMode);
+  const setViewMode = useEditorStore((s) => s.setViewMode);
+  const devicePreview = useEditorStore((s) => s.devicePreview);
+  const setDevicePreview = useEditorStore((s) => s.setDevicePreview);
+  const showGrid = useEditorStore((s) => s.showGrid);
+  const toggleGrid = useEditorStore((s) => s.toggleGrid);
+  const snapToGrid = useEditorStore((s) => s.snapToGrid);
+  const toggleSnap = useEditorStore((s) => s.toggleSnap);
+  const zoom = useEditorStore((s) => s.zoom);
+  const setZoom = useEditorStore((s) => s.setZoom);
+  const fitToScreen = useEditorStore((s) => s.fitToScreen);
+  const setFitToScreen = useEditorStore((s) => s.setFitToScreen);
+  const undo = useEditorStore((s) => s.undo);
+  const redo = useEditorStore((s) => s.redo);
+  const historyIndex = useEditorStore((s) => s.historyIndex);
+  const historyLength = useEditorStore((s) => s.history.length);
+  const exportToUI = useEditorStore((s) => s.exportToUI);
 
-  const canUndo = historyIndex > 0
-  const canRedo = historyIndex < historyLength - 1
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < historyLength - 1;
 
   const handleExport = () => {
-    const code = exportToUI()
-    const blob = new Blob([code], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'interface.ui'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const code = exportToUI();
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "interface.ui";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleImport = () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.ui,.txt'
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".ui,.txt";
     input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
+      const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        const text = await file.text()
-        useEditorStore.getState().setCode(text)
+        const text = await file.text();
+        useEditorStore.getState().setCode(text);
       }
-    }
-    input.click()
-  }
+    };
+    input.click();
+  };
 
-  const viewModeOptions: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
-    { value: 'Design', label: 'Design', icon: <Eye className="h-4 w-4" /> },
-    { value: 'Blueprint', label: 'Blueprint', icon: <Layers className="h-4 w-4" /> },
-    { value: 'Split', label: 'Split', icon: <Columns2 className="h-4 w-4" /> },
-  ]
+  const viewModeOptions: {
+    value: ViewMode;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
+    { value: "Design", label: "Design", icon: <Eye className="h-4 w-4" /> },
+    {
+      value: "Blueprint",
+      label: "Blueprint",
+      icon: <Layers className="h-4 w-4" />,
+    },
+    { value: "Split", label: "Split", icon: <Columns2 className="h-4 w-4" /> },
+  ];
 
   const deviceOptions: { value: DevicePreview; icon: React.ReactNode }[] = [
-    { value: 'Desktop', icon: <Monitor className="h-4 w-4" /> },
-    { value: 'Tablet', icon: <Tablet className="h-4 w-4" /> },
-    { value: 'Mobile', icon: <Smartphone className="h-4 w-4" /> },
-  ]
+    { value: "Desktop", icon: <Monitor className="h-4 w-4" /> },
+    { value: "Tablet", icon: <Tablet className="h-4 w-4" /> },
+    { value: "Mobile", icon: <Smartphone className="h-4 w-4" /> },
+  ];
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -103,7 +113,9 @@ export function EditorToolbar() {
             <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
               <span className="font-mono text-xs font-bold">H</span>
             </div>
-            <span className="text-sm font-semibold text-foreground">Hytale UI Studio</span>
+            <span className="text-sm font-semibold text-foreground">
+              Hytale UI Studio
+            </span>
           </div>
 
           <Separator orientation="vertical" className="mx-2 h-6" />
@@ -145,7 +157,10 @@ export function EditorToolbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn('h-8 w-8', showGrid && 'bg-secondary text-secondary-foreground')}
+                className={cn(
+                  "h-8 w-8",
+                  showGrid && "bg-secondary text-secondary-foreground",
+                )}
                 onClick={toggleGrid}
               >
                 <Grid3X3 className="h-4 w-4" />
@@ -159,7 +174,10 @@ export function EditorToolbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn('h-8 w-8', snapToGrid && 'bg-secondary text-secondary-foreground')}
+                className={cn(
+                  "h-8 w-8",
+                  snapToGrid && "bg-secondary text-secondary-foreground",
+                )}
                 onClick={toggleSnap}
               >
                 <Magnet className="h-4 w-4" />
@@ -177,8 +195,9 @@ export function EditorToolbar() {
               variant="ghost"
               size="sm"
               className={cn(
-                'h-7 gap-1.5 px-3 text-xs',
-                viewMode === option.value && 'bg-background text-foreground shadow-sm'
+                "h-7 gap-1.5 px-3 text-xs",
+                viewMode === option.value &&
+                  "bg-background text-foreground shadow-sm",
               )}
               onClick={() => setViewMode(option.value)}
             >
@@ -199,8 +218,9 @@ export function EditorToolbar() {
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      'h-7 w-7',
-                      devicePreview === option.value && 'bg-background text-foreground shadow-sm'
+                      "h-7 w-7",
+                      devicePreview === option.value &&
+                        "bg-background text-foreground shadow-sm",
                     )}
                     onClick={() => setDevicePreview(option.value)}
                   >
@@ -232,8 +252,12 @@ export function EditorToolbar() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-14 px-2 font-mono text-xs">
-                  {zoom}%
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-14 px-2 font-mono text-xs"
+                >
+                  {fitToScreen ? "Fit" : `${zoom}%`}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -264,13 +288,18 @@ export function EditorToolbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setZoom(100)}
+                  className={cn(
+                    "h-8 w-8",
+                    fitToScreen && "bg-secondary text-secondary-foreground",
+                  )}
+                  onClick={() => setFitToScreen(!fitToScreen)}
                 >
                   <Maximize2 className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Reset Zoom</TooltipContent>
+              <TooltipContent>
+                {fitToScreen ? "Disable Fit" : "Fit to Screen"}
+              </TooltipContent>
             </Tooltip>
           </div>
 
@@ -279,7 +308,12 @@ export function EditorToolbar() {
           {/* Import/Export */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleImport}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleImport}
+              >
                 <Upload className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -288,7 +322,12 @@ export function EditorToolbar() {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="default" size="sm" className="h-8 gap-1.5" onClick={handleExport}>
+              <Button
+                variant="default"
+                size="sm"
+                className="h-8 gap-1.5"
+                onClick={handleExport}
+              >
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">Export</span>
               </Button>
@@ -298,5 +337,5 @@ export function EditorToolbar() {
         </div>
       </div>
     </TooltipProvider>
-  )
+  );
 }
