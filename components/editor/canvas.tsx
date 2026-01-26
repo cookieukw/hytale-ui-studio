@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { useRef, useState, useCallback, memo } from "react";
 import { useEditorStore } from "@/lib/editor-store";
@@ -457,12 +457,12 @@ export function EditorCanvas() {
         <div
           ref={canvasRef}
           className={cn(
-            "relative shrink-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
+            "relative  shrink-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
             isDragOver && "border-primary border-dashed",
           )}
           style={{
-            width: deviceSize.width * (zoom / 100),
-            height: deviceSize.height * (zoom / 100),
+            width: deviceSize.width * (zoom / 130),
+            height: deviceSize.height * (zoom / 130),
           }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -470,7 +470,7 @@ export function EditorCanvas() {
           onClick={handleCanvasClick}
         >
           <div
-            className="h-full w-full origin-top-left p-4"
+            className="h-[100px] bg-red-500 w-full origin-top-left p-4"
             style={{
               transform: `scale(${zoom / 100})`,
               width: `${100 / (zoom / 100)}%`,
