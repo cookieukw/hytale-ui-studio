@@ -113,7 +113,7 @@ export function EditorToolbar() {
             <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
               <span className="font-mono text-xs font-bold">H</span>
             </div>
-            <span className="text-sm font-semibold text-foreground">
+            <span className="hidden sm:inline text-sm font-semibold text-foreground">
               Hytale UI Studio
             </span>
           </div>
@@ -188,7 +188,7 @@ export function EditorToolbar() {
         </div>
 
         {/* Center section - View Mode */}
-        <div className="flex items-center gap-1 rounded-lg bg-secondary p-1">
+        <div className="hidden md:flex items-center gap-1 rounded-lg bg-secondary p-1">
           {viewModeOptions.map((option) => (
             <Button
               key={option.value}
@@ -210,7 +210,7 @@ export function EditorToolbar() {
         {/* Right section */}
         <div className="flex items-center gap-1">
           {/* Device Preview */}
-          <div className="mr-2 flex items-center gap-0.5 rounded-lg bg-secondary p-1">
+          <div className="mr-2 hidden md:flex items-center gap-0.5 rounded-lg bg-secondary p-1">
             {deviceOptions.map((option) => (
               <Tooltip key={option.value}>
                 <TooltipTrigger asChild>
