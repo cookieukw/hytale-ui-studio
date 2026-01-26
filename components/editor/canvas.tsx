@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { useRef, useState, useCallback, memo } from 'react'
-import { useEditorStore } from '@/lib/editor-store'
-import { COMPONENT_DEFINITIONS } from '@/lib/component-definitions'
-import type { HytaleComponent, ComponentType } from '@/lib/hytale-types'
-import { cn } from '@/lib/utils'
+import { useRef, useState, useCallback, memo } from "react";
+import { useEditorStore } from "@/lib/editor-store";
+import { COMPONENT_DEFINITIONS } from "@/lib/component-definitions";
+import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
+import { cn } from "@/lib/utils";
 
 interface RenderedComponentProps {
-  component: HytaleComponent
-  isBlueprint: boolean
-  selectedId: string | null
-  onSelect: (id: string) => void
+  component: HytaleComponent;
+  isBlueprint: boolean;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
 }
 
 const RenderedComponent = memo(function RenderedComponent({
@@ -21,165 +21,196 @@ const RenderedComponent = memo(function RenderedComponent({
   selectedId,
   onSelect,
 }: RenderedComponentProps) {
-  const isSelected = selectedId === component.id
-  const isVisible = component.isVisible ?? true
+  const isSelected = selectedId === component.id;
+  const isVisible = component.isVisible ?? true;
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
 
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onSelect(component.id)
-  }
+    e.stopPropagation();
+    onSelect(component.id);
+  };
 
   const getComponentStyle = (): React.CSSProperties => {
-    const style: React.CSSProperties = {}
+    const style: React.CSSProperties = {};
 
     if (component.anchor) {
       if (component.anchor.width) {
         style.width =
-          typeof component.anchor.width === 'string'
+          typeof component.anchor.width === "string"
             ? component.anchor.width
-            : `${component.anchor.width}px`
+            : `${component.anchor.width}px`;
       }
       if (component.anchor.height) {
         style.height =
-          typeof component.anchor.height === 'string'
+          typeof component.anchor.height === "string"
             ? component.anchor.height
-            : `${component.anchor.height}px`
+            : `${component.anchor.height}px`;
       }
       if (component.anchor.full) {
-        style.width = '100%'
-        style.height = '100%'
+        style.width = "100%";
+        style.height = "100%";
       }
     }
 
     if (component.padding) {
-      style.paddingTop = component.padding.top ? `${component.padding.top}px` : undefined
-      style.paddingBottom = component.padding.bottom ? `${component.padding.bottom}px` : undefined
-      style.paddingLeft = component.padding.left ? `${component.padding.left}px` : undefined
-      style.paddingRight = component.padding.right ? `${component.padding.right}px` : undefined
+      style.paddingTop = component.padding.top
+        ? `${component.padding.top}px`
+        : undefined;
+      style.paddingBottom = component.padding.bottom
+        ? `${component.padding.bottom}px`
+        : undefined;
+      style.paddingLeft = component.padding.left
+        ? `${component.padding.left}px`
+        : undefined;
+      style.paddingRight = component.padding.right
+        ? `${component.padding.right}px`
+        : undefined;
     }
 
     if (component.margin) {
-      style.marginTop = component.margin.top ? `${component.margin.top}px` : undefined
-      style.marginBottom = component.margin.bottom ? `${component.margin.bottom}px` : undefined
-      style.marginLeft = component.margin.left ? `${component.margin.left}px` : undefined
-      style.marginRight = component.margin.right ? `${component.margin.right}px` : undefined
+      style.marginTop = component.margin.top
+        ? `${component.margin.top}px`
+        : undefined;
+      style.marginBottom = component.margin.bottom
+        ? `${component.margin.bottom}px`
+        : undefined;
+      style.marginLeft = component.margin.left
+        ? `${component.margin.left}px`
+        : undefined;
+      style.marginRight = component.margin.right
+        ? `${component.margin.right}px`
+        : undefined;
     }
 
     if (component.background && !isBlueprint) {
-      style.backgroundColor = component.background.color
+      style.backgroundColor = component.background.color;
       if (component.background.border) {
-        style.border = `1px solid ${component.background.border}`
+        style.border = `1px solid ${component.background.border}`;
       }
       if (component.background.opacity !== undefined) {
-        style.opacity = component.background.opacity
+        style.opacity = component.background.opacity;
       }
     }
 
     if (component.flexWeight) {
-      style.flex = component.flexWeight
+      style.flex = component.flexWeight;
     }
 
     if (component.layoutMode) {
-      style.display = 'flex'
+      style.display = "flex";
       switch (component.layoutMode) {
-        case 'Top':
-          style.flexDirection = 'column'
-          style.alignItems = 'flex-start'
-          break
-        case 'Bottom':
-          style.flexDirection = 'column'
-          style.justifyContent = 'flex-end'
-          break
-        case 'Left':
-          style.flexDirection = 'row'
-          style.alignItems = 'center'
-          break
-        case 'Right':
-          style.flexDirection = 'row'
-          style.justifyContent = 'flex-end'
-          style.alignItems = 'center'
-          break
-        case 'Middle':
-          style.justifyContent = 'center'
-          style.alignItems = 'center'
-          break
+        case "Top":
+          style.flexDirection = "column";
+          style.alignItems = "flex-start";
+          break;
+        case "Bottom":
+          style.flexDirection = "column";
+          style.justifyContent = "flex-end";
+          break;
+        case "Left":
+          style.flexDirection = "row";
+          style.alignItems = "center";
+          break;
+        case "Right":
+          style.flexDirection = "row";
+          style.justifyContent = "flex-end";
+          style.alignItems = "center";
+          break;
+        case "Middle":
+          style.justifyContent = "center";
+          style.alignItems = "center";
+          break;
       }
     }
 
-    if (component.direction === 'Horizontal') {
-      style.flexDirection = 'row'
+    if (component.direction === "Horizontal") {
+      style.flexDirection = "row";
     }
 
-    return style
-  }
+    return style;
+  };
 
   const getTextStyle = (): React.CSSProperties => {
-    const style: React.CSSProperties = {}
+    const style: React.CSSProperties = {};
     if (component.textStyle) {
       if (component.textStyle.fontSize) {
-        style.fontSize = `${component.textStyle.fontSize}px`
+        style.fontSize = `${component.textStyle.fontSize}px`;
       }
       if (component.textStyle.textColor && !isBlueprint) {
-        style.color = component.textStyle.textColor
+        style.color = component.textStyle.textColor;
       }
       if (component.textStyle.renderBold) {
-        style.fontWeight = 'bold'
+        style.fontWeight = "bold";
       }
       if (component.textStyle.renderUppercase) {
-        style.textTransform = 'uppercase'
+        style.textTransform = "uppercase";
       }
       if (component.textStyle.alignment) {
-        style.textAlign = component.textStyle.alignment.toLowerCase() as React.CSSProperties['textAlign']
+        style.textAlign =
+          component.textStyle.alignment.toLowerCase() as React.CSSProperties["textAlign"];
       }
     }
-    return style
-  }
+    return style;
+  };
 
   const blueprintClass = isBlueprint
-    ? 'border border-dashed border-primary/50 bg-primary/5'
-    : ''
+    ? "border border-dashed border-primary/50 bg-primary/5"
+    : "";
 
   const selectedClass = isSelected
-    ? 'ring-2 ring-primary ring-offset-1 ring-offset-canvas'
-    : ''
+    ? "ring-2 ring-primary ring-offset-1 ring-offset-canvas"
+    : "";
 
   const baseProps = {
-    className: cn('cursor-pointer transition-shadow', blueprintClass, selectedClass),
+    className: cn(
+      "cursor-pointer transition-shadow",
+      blueprintClass,
+      selectedClass,
+    ),
     style: getComponentStyle(),
     onClick: handleClick,
-  }
+  };
 
   switch (component.type) {
-    case 'Label':
+    case "Label":
       return (
         <div {...baseProps} style={{ ...baseProps.style, ...getTextStyle() }}>
-          {component.text || 'Label'}
+          {component.text || "Label"}
         </div>
-      )
+      );
 
-    case 'TextField':
+    case "TextField":
       return (
-        <div {...baseProps} className={cn(baseProps.className, 'rounded')}>
-          <span className={cn('text-sm', isBlueprint ? 'text-primary/70' : 'text-muted-foreground')}>
-            {component.placeholderText || 'Enter text...'}
+        <div {...baseProps} className={cn(baseProps.className, "rounded")}>
+          <span
+            className={cn(
+              "text-sm",
+              isBlueprint ? "text-primary/70" : "text-muted-foreground",
+            )}
+          >
+            {component.placeholderText || "Enter text..."}
           </span>
         </div>
-      )
+      );
 
-    case 'NumberField':
+    case "NumberField":
       return (
-        <div {...baseProps} className={cn(baseProps.className, 'rounded')}>
-          <span className={cn('font-mono text-sm', isBlueprint ? 'text-primary/70' : 'text-foreground')}>
+        <div {...baseProps} className={cn(baseProps.className, "rounded")}>
+          <span
+            className={cn(
+              "font-mono text-sm",
+              isBlueprint ? "text-primary/70" : "text-foreground",
+            )}
+          >
             {component.value ?? 0}
           </span>
         </div>
-      )
+      );
 
-    case 'Button':
+    case "Button":
       return (
-        <div {...baseProps} className={cn(baseProps.className, 'rounded')}>
+        <div {...baseProps} className={cn(baseProps.className, "rounded")}>
           {component.children?.map((child) => (
             <RenderedComponent
               key={child.id}
@@ -190,23 +221,24 @@ const RenderedComponent = memo(function RenderedComponent({
             />
           ))}
         </div>
-      )
+      );
 
-    case 'TextButton':
+    case "TextButton":
       return (
         <div {...baseProps} style={{ ...baseProps.style, ...getTextStyle() }}>
-          {component.text || 'Text Button'}
+          {component.text || "Text Button"}
         </div>
-      )
+      );
 
-    case 'Image':
+    case "Image":
       return (
         <div
           {...baseProps}
           className={cn(
             baseProps.className,
-            'rounded',
-            !component.source && 'flex items-center justify-center bg-secondary'
+            "rounded",
+            !component.source &&
+              "flex items-center justify-center bg-secondary",
           )}
         >
           {component.source ? (
@@ -219,14 +251,24 @@ const RenderedComponent = memo(function RenderedComponent({
             <span className="text-xs text-muted-foreground">Image</span>
           )}
         </div>
-      )
+      );
 
-    case 'ProgressBar':
-      const progress = ((component.value as number) / (component.max || 100)) * 100
+    case "ProgressBar":
+      const progress =
+        ((component.value as number) / (component.max || 100)) * 100;
       return (
-        <div {...baseProps} className={cn(baseProps.className, 'relative overflow-hidden rounded')}>
+        <div
+          {...baseProps}
+          className={cn(
+            baseProps.className,
+            "relative overflow-hidden rounded",
+          )}
+        >
           <div
-            className={cn('h-full transition-all', isBlueprint ? 'bg-primary/30' : 'bg-primary')}
+            className={cn(
+              "h-full transition-all",
+              isBlueprint ? "bg-primary/30" : "bg-primary",
+            )}
             style={{ width: `${progress}%` }}
           />
           {component.showLabel && (
@@ -235,11 +277,14 @@ const RenderedComponent = memo(function RenderedComponent({
             </span>
           )}
         </div>
-      )
+      );
 
     default:
       return (
-        <div {...baseProps} className={cn(baseProps.className, 'overflow-hidden rounded')}>
+        <div
+          {...baseProps}
+          className={cn(baseProps.className, "overflow-hidden rounded")}
+        >
           {component.children?.map((child) => (
             <RenderedComponent
               key={child.id}
@@ -250,55 +295,105 @@ const RenderedComponent = memo(function RenderedComponent({
             />
           ))}
         </div>
-      )
+      );
   }
-})
+});
 
 export function EditorCanvas() {
-  const canvasRef = useRef<HTMLDivElement>(null)
-  const [isDragOver, setIsDragOver] = useState(false)
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  const components = useEditorStore((state) => state.components)
-  const viewMode = useEditorStore((state) => state.viewMode)
-  const devicePreview = useEditorStore((state) => state.devicePreview)
-  const showGrid = useEditorStore((state) => state.showGrid)
-  const zoom = useEditorStore((state) => state.zoom)
-  const addComponent = useEditorStore((state) => state.addComponent)
-  const setSelectedId = useEditorStore((state) => state.setSelectedId)
-  const selectedId = useEditorStore((state) => state.selectedId)
+  const components = useEditorStore((state) => state.components);
+  const viewMode = useEditorStore((state) => state.viewMode);
+  const devicePreview = useEditorStore((state) => state.devicePreview);
+  const showGrid = useEditorStore((state) => state.showGrid);
+  const zoom = useEditorStore((state) => state.zoom);
+  const addComponent = useEditorStore((state) => state.addComponent);
+  const setSelectedId = useEditorStore((state) => state.setSelectedId);
+  const selectedId = useEditorStore((state) => state.selectedId);
+  const fitToScreen = useEditorStore((state) => state.fitToScreen);
+  const setZoom = useEditorStore((state) => state.setZoom);
+  const setCalculatedZoom = useEditorStore((state) => state.setCalculatedZoom);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getDeviceSize = useCallback(() => {
     switch (devicePreview) {
-      case 'Mobile':
-        return { width: 375, height: 667 }
-      case 'Tablet':
-        return { width: 768, height: 1024 }
-      case 'Desktop':
+      case "Mobile":
+        return { width: 375, height: 667 };
+      case "Tablet":
+        return { width: 768, height: 1024 };
+      case "Desktop":
       default:
-        return { width: 1280, height: 720 }
+        return { width: 1280, height: 720 };
     }
-  }, [devicePreview])
+  }, [devicePreview]);
 
-  const deviceSize = getDeviceSize()
+  const deviceSize = getDeviceSize();
+
+  // Fit to screen logic
+  React.useEffect(() => {
+    if (!fitToScreen || !containerRef.current) return;
+
+    const handleResize = () => {
+      if (!containerRef.current) return;
+
+      const { width: containerWidth, height: containerHeight } =
+        containerRef.current.getBoundingClientRect();
+      const padding = 64; // 32px padding on each side roughly
+
+      const availableWidth = containerWidth - padding;
+      const availableHeight = containerHeight - padding;
+
+      const deviceW = deviceSize.width;
+      const deviceH = deviceSize.height;
+
+      const scaleX = availableWidth / deviceW;
+      const scaleY = availableHeight / deviceH;
+
+      // Use the smaller scale factor to ensure it fits
+      const scale = Math.min(scaleX, scaleY);
+
+      // Convert to percentage, clamp between 25 and 200 (or allow standard zoom limits)
+      // We might want to allow going lower than 25 if strictly fitting, but for now stick to limits
+      const zoomPercentage = Math.floor(scale * 100);
+
+      // Only update if difference is significant to avoid loops/jitters
+      if (Math.abs(zoomPercentage - zoom) > 1 && zoomPercentage > 0) {
+        setCalculatedZoom(zoomPercentage);
+      }
+    };
+
+    handleResize();
+
+    const observer = new ResizeObserver(handleResize);
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, [fitToScreen, deviceSize, zoom, setZoom]); // depend on zoom to check diff, but be careful
+
+  // ... rest of component
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragOver(true)
-  }, [])
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
 
   const handleDragLeave = useCallback(() => {
-    setIsDragOver(false)
-  }, [])
+    setIsDragOver(false);
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
-      e.preventDefault()
-      setIsDragOver(false)
+      e.preventDefault();
+      setIsDragOver(false);
 
-      const componentType = e.dataTransfer.getData('componentType') as ComponentType
-      if (!componentType) return
+      const componentType = e.dataTransfer.getData(
+        "componentType",
+      ) as ComponentType;
+      if (!componentType) return;
 
-      const def = COMPONENT_DEFINITIONS.find((d) => d.type === componentType)
+      const def = COMPONENT_DEFINITIONS.find((d) => d.type === componentType);
       if (def) {
         addComponent(
           {
@@ -306,30 +401,30 @@ export function EditorCanvas() {
             name: def.label,
             ...def.defaultProps,
           },
-          null
-        )
+          null,
+        );
       }
     },
-    [addComponent]
-  )
+    [addComponent],
+  );
 
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent) => {
       if (e.target === e.currentTarget) {
-        setSelectedId(null)
+        setSelectedId(null);
       }
     },
-    [setSelectedId]
-  )
+    [setSelectedId],
+  );
 
   const handleSelect = useCallback(
     (id: string) => {
-      setSelectedId(id)
+      setSelectedId(id);
     },
-    [setSelectedId]
-  )
+    [setSelectedId],
+  );
 
-  const isBlueprint = viewMode === 'Blueprint'
+  const isBlueprint = viewMode === "Blueprint";
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-canvas">
@@ -340,14 +435,14 @@ export function EditorCanvas() {
             ? `linear-gradient(to right, var(--canvas-grid) 1px, transparent 1px),
                linear-gradient(to bottom, var(--canvas-grid) 1px, transparent 1px)`
             : undefined,
-          backgroundSize: showGrid ? '20px 20px' : undefined,
+          backgroundSize: showGrid ? "20px 20px" : undefined,
         }}
       >
         <div
           ref={canvasRef}
           className={cn(
-            'relative shrink-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors',
-            isDragOver && 'border-primary border-dashed'
+            "relative shrink-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
+            isDragOver && "border-primary border-dashed",
           )}
           style={{
             width: deviceSize.width * (zoom / 100),
@@ -411,5 +506,5 @@ export function EditorCanvas() {
         </span>
       </div>
     </div>
-  )
+  );
 }
