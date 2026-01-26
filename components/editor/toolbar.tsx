@@ -110,9 +110,11 @@ export function EditorToolbar() {
         {/* Left section */}
         <div className="flex items-center gap-1">
           <div className="mr-3 flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground">
-              <span className="font-mono text-xs font-bold">H</span>
-            </div>
+            <img
+              src="/hytale-studio_foreground.png"
+              alt="Logo"
+              className="h-8 w-8 bg-primary rounded "
+            />
             <span className="hidden sm:inline text-sm font-semibold text-foreground">
               Hytale UI Studio
             </span>
