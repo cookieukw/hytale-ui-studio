@@ -18,8 +18,11 @@ import { MobileNav } from "@/components/editor/mobile-nav";
 
 export default function HytaleUIStudio() {
   const viewMode = useEditorStore((state) => state.viewMode);
+  const devicePreview = useEditorStore((state) => state.devicePreview);
   const activeMobileTab = useEditorStore((state) => state.activeMobileTab);
 
+  /* Main Content - Desktop Layout */
+  /* Hidden on mobile, visible on desktop */
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       {/* Toolbar */}
@@ -85,51 +88,53 @@ export default function HytaleUIStudio() {
         </ResizablePanelGroup>
       </div>
 
-      {/* Main Content - Mobile */}
+      {/* Main Content - Mobile (only shown on small screens) */}
       <div className="md:hidden flex-1 overflow-hidden relative flex flex-col">
-        <div className="flex-1 overflow-hidden relative">
+        <MobileNav />
+        <div className="flex-1 overflow-hidden relative flex">
+          {/* VIEW TAB */}
           <div
             className={cn(
-              "absolute inset-0",
-              activeMobileTab === "Palette" ? "block" : "hidden",
+              "absolute inset-0 flex bg-background",
+              activeMobileTab === "View" ? "flex" : "hidden",
             )}
           >
-            <ComponentPalette />
+            {/* Split View: Palette (Left) + Canvas (Right) */}
+            <div className="w-[120px] shrink-0 border-r border-border bg-panel overflow-hidden flex flex-col">
+              {/* Minimal Palette for Split View */}
+              <ComponentPalette />
+            </div>
+            <div className="flex-1 overflow-hidden bg-canvas relative">
+              <EditorCanvas />
+            </div>
           </div>
+
+          {/* EVENT TAB (Code) */}
           <div
             className={cn(
               "absolute inset-0",
-              activeMobileTab === "Tree" ? "block" : "hidden",
-            )}
-          >
-            <ComponentTree />
-          </div>
-          <div
-            className={cn(
-              "absolute inset-0",
-              activeMobileTab === "Canvas" ? "block" : "hidden",
-            )}
-          >
-            <EditorCanvas />
-          </div>
-          <div
-            className={cn(
-              "absolute inset-0",
-              activeMobileTab === "Inspector" ? "block" : "hidden",
-            )}
-          >
-            <Inspector />
-          </div>
-          <div
-            className={cn(
-              "absolute inset-0",
-              activeMobileTab === "Code" ? "block" : "hidden",
+              activeMobileTab === "Event" ? "block" : "hidden",
             )}
           >
             <CodeEditor />
           </div>
+
+          {/* COMPONENT TAB (Tree + Inspector) */}
+          <div
+            className={cn(
+              "absolute inset-0 flex flex-col",
+              activeMobileTab === "Component" ? "flex" : "hidden",
+            )}
+          >
+            {/* We can split this too or toggle, for now split vertically 50/50 or top/bottom */}
+            <div className="flex-1 border-b border-border overflow-hidden">
+              <ComponentTree />
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <Inspector />
+            </div>
+          </div>
         </div>
-        <MobileNav />
       </div>
     </div>
   );
