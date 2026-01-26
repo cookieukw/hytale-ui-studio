@@ -71,7 +71,9 @@ const CategorySection = memo(function CategorySection({
 
   const handleDragStart = (e: React.DragEvent, item: ComponentDefinition) => {
     e.dataTransfer.setData("componentType", item.type);
+    e.dataTransfer.setData("text/plain", item.type); // Fallback for mobile
     e.dataTransfer.setData("isPreset", "false");
+    e.dataTransfer.effectAllowed = "copy";
   };
 
   const handleClick = (item: ComponentDefinition) => {
