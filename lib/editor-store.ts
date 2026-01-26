@@ -8,6 +8,8 @@ import type {
   DevicePreview,
 } from "./hytale-types";
 
+export type MobileTab = "Palette" | "Tree" | "Canvas" | "Inspector" | "Code";
+
 function generateId(): string {
   return `comp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
@@ -234,6 +236,9 @@ interface EditorStore extends EditorState {
   setCalculatedZoom: (zoom: number) => void;
   setZoom: (zoom: number) => void;
 
+  activeMobileTab: MobileTab;
+  setActiveMobileTab: (tab: MobileTab) => void;
+
   // Components
   addComponent: (
     component: Omit<HytaleComponent, "id">,
@@ -292,6 +297,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   setCalculatedZoom: (zoom) => set({ zoom: Math.max(25, Math.min(200, zoom)) }),
   setZoom: (zoom) =>
     set({ zoom: Math.max(25, Math.min(200, zoom)), fitToScreen: false }),
+
+  activeMobileTab: "Canvas",
+  setActiveMobileTab: (tab) => set({ activeMobileTab: tab }),
 
   setFitToScreen: (fit) => set({ fitToScreen: fit }),
 
