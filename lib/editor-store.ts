@@ -6,6 +6,7 @@ import type {
   EditorState,
   ViewMode,
   DevicePreview,
+  ComponentType,
 } from "./hytale-types";
 
 export type MobileTab = "View" | "Event" | "Component";
@@ -119,32 +120,49 @@ function componentsToCode(components: HytaleComponent[], indent = 0): string {
   let code = "";
 
   for (const comp of components) {
-    // Type with optional #name selector (CSS-like format)
+    // Type with optional #name selector
     const nameSelector = comp.name ? `#${comp.name}` : "";
+
+    // Header line
     code += `${spaces}${comp.type}${nameSelector} {\n`;
+
+    // Core properties
+    if (comp.isVisible === false) code += `${spaces}  Visible: false\n`;
+    else code += `${spaces}  Visible: true\n`; // Explicitly export true for clarity if desired, or skip strict boolean default.
+    // User sample showed Visible: true unless default implies it. Let's keep explicit if defined.
+
     if (comp.text) code += `${spaces}  Text: "${comp.text}"\n`;
     if (comp.placeholderText)
       code += `${spaces}  PlaceholderText: "${comp.placeholderText}"\n`;
     if (comp.value !== undefined) code += `${spaces}  Value: ${comp.value}\n`;
     if (comp.source) code += `${spaces}  Source: "${comp.source}"\n`;
 
-    // Anchor
+    // Anchor: (Key: Val, ...) syntax
     if (comp.anchor) {
       if (comp.anchor.full) {
-        code += `${spaces}  Anchor: Full\n`;
+        code += `${spaces}  Anchor: (Full: true)\n`;
       } else {
-        if (comp.anchor.width)
-          code += `${spaces}  Anchor.Width: ${comp.anchor.width}\n`;
-        if (comp.anchor.height)
-          code += `${spaces}  Anchor.Height: ${comp.anchor.height}\n`;
+        const parts: string[] = [];
+        if (comp.anchor.width !== undefined)
+          parts.push(`Width: ${comp.anchor.width}`);
+        if (comp.anchor.height !== undefined)
+          parts.push(`Height: ${comp.anchor.height}`);
         if (comp.anchor.top !== undefined)
-          code += `${spaces}  Anchor.Top: ${comp.anchor.top}\n`;
+          parts.push(`Top: ${comp.anchor.top}`);
         if (comp.anchor.bottom !== undefined)
-          code += `${spaces}  Anchor.Bottom: ${comp.anchor.bottom}\n`;
+          parts.push(`Bottom: ${comp.anchor.bottom}`);
         if (comp.anchor.left !== undefined)
-          code += `${spaces}  Anchor.Left: ${comp.anchor.left}\n`;
+          parts.push(`Left: ${comp.anchor.left}`);
         if (comp.anchor.right !== undefined)
-          code += `${spaces}  Anchor.Right: ${comp.anchor.right}\n`;
+          parts.push(`Right: ${comp.anchor.right}`);
+        if (comp.anchor.centerX !== undefined)
+          parts.push(`CenterX: ${comp.anchor.centerX}`);
+        if (comp.anchor.centerY !== undefined)
+          parts.push(`CenterY: ${comp.anchor.centerY}`);
+
+        if (parts.length > 0) {
+          code += `${spaces}  Anchor: (${parts.join(", ")})\n`;
+        }
       }
     }
 
@@ -153,29 +171,50 @@ function componentsToCode(components: HytaleComponent[], indent = 0): string {
     if (comp.flexWeight) code += `${spaces}  FlexWeight: ${comp.flexWeight}\n`;
     if (comp.direction) code += `${spaces}  Direction: ${comp.direction}\n`;
 
-    // Padding
+    // Padding: (Key: Val, ...)
     if (comp.padding) {
-      if (comp.padding.top)
-        code += `${spaces}  Padding.Top: ${comp.padding.top}\n`;
-      if (comp.padding.bottom)
-        code += `${spaces}  Padding.Bottom: ${comp.padding.bottom}\n`;
-      if (comp.padding.left)
-        code += `${spaces}  Padding.Left: ${comp.padding.left}\n`;
-      if (comp.padding.right)
-        code += `${spaces}  Padding.Right: ${comp.padding.right}\n`;
+      const parts: string[] = [];
+      // Check for uniform padding first? Or just list sides.
+      // If all equal, maybe use Full? The types don't strictly track 'full' prop for padding, just numbers.
+      if (comp.padding.top !== undefined)
+        parts.push(`Top: ${comp.padding.top}`);
+      if (comp.padding.bottom !== undefined)
+        parts.push(`Bottom: ${comp.padding.bottom}`);
+      if (comp.padding.left !== undefined)
+        parts.push(`Left: ${comp.padding.left}`);
+      if (comp.padding.right !== undefined)
+        parts.push(`Right: ${comp.padding.right}`);
+
+      if (parts.length > 0) {
+        code += `${spaces}  Padding: (${parts.join(", ")})\n`;
+      }
     }
 
-    // Background
+    // Background - usually Hytale uses Background: (Color: "#...") or similar if object syntax is preferred.
+    // The previous implementation used dot notation. "Background.Color".
+    // User request implies full object structure. "Anchor: (...)"
+    // Let's deduce Background syntax: Background is usually a struct.
     if (comp.background) {
+      const parts: string[] = [];
       if (comp.background.color)
-        code += `${spaces}  Background.Color: "${comp.background.color}"\n`;
+        parts.push(`Color: "${comp.background.color}"`);
       if (comp.background.border)
-        code += `${spaces}  Background.Border: "${comp.background.border}"\n`;
+        parts.push(`Border: "${comp.background.border}"`);
       if (comp.background.opacity !== undefined)
-        code += `${spaces}  Background.Opacity: ${comp.background.opacity}\n`;
+        parts.push(`Opacity: ${comp.background.opacity}`);
+
+      if (parts.length > 0) {
+        // Check if user prefers "Background: (...)" or keep legacy?
+        // "Anchor: (...)" implies a pattern. Let's use Tuple syntax for Background too to be safe.
+        code += `${spaces}  Background: (${parts.join(", ")})\n`;
+      }
     }
 
-    // Text Style
+    // Text Style - often mixed properties like FontSize, or a style object?
+    // User prompt didn't strictly specify text style grouping, but existing codebase treated them as top-level props (FontSize, TextColor).
+    // The parser Global Variables section has "@DefaultLabelStyle": { props: { FontSize: 14... } }.
+    // So strictly speaking, these are top-level properties on the component OR inside a style mixin.
+    // I will keep them as top-level properties consistent with the parser's examples unless they are inside a defined style object.
     if (comp.textStyle) {
       if (comp.textStyle.fontSize)
         code += `${spaces}  FontSize: ${comp.textStyle.fontSize}\n`;
@@ -186,31 +225,6 @@ function componentsToCode(components: HytaleComponent[], indent = 0): string {
         code += `${spaces}  TextColor: "${comp.textStyle.textColor}"\n`;
       if (comp.textStyle.alignment)
         code += `${spaces}  Alignment: ${comp.textStyle.alignment}\n`;
-    }
-
-    // States
-    if (comp.states) {
-      if (comp.states.hovered) {
-        code += `${spaces}  Hovered {\n`;
-        if (comp.states.hovered.background?.color) {
-          code += `${spaces}    Background.Color: "${comp.states.hovered.background.color}"\n`;
-        }
-        code += `${spaces}  }\n`;
-      }
-      if (comp.states.pressed) {
-        code += `${spaces}  Pressed {\n`;
-        if (comp.states.pressed.background?.color) {
-          code += `${spaces}    Background.Color: "${comp.states.pressed.background.color}"\n`;
-        }
-        code += `${spaces}  }\n`;
-      }
-      if (comp.states.disabled) {
-        code += `${spaces}  Disabled {\n`;
-        if (comp.states.disabled.background?.opacity !== undefined) {
-          code += `${spaces}    Background.Opacity: ${comp.states.disabled.background.opacity}\n`;
-        }
-        code += `${spaces}  }\n`;
-      }
     }
 
     // Children
@@ -280,7 +294,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   devicePreview: "Desktop",
   showGrid: true,
   snapToGrid: true,
-  zoom: 100,
+  zoom: 80,
   code: "",
   history: [[]],
   historyIndex: 0,
@@ -289,7 +303,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   setViewMode: (mode) => set({ viewMode: mode }),
 
-  setDevicePreview: (preview) => set({ devicePreview: preview }),
+  setDevicePreview: (preview) => {
+    let newZoom = 80; // Default Desktop
+    if (preview === "Desktop") newZoom = 80;
+    if (preview === "Tablet") newZoom = 70;
+    if (preview === "Mobile") newZoom = 100;
+    set({ devicePreview: preview, zoom: newZoom, fitToScreen: false });
+  },
 
   fitToScreen: true,
 
@@ -473,10 +493,15 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   },
 
   importFromUI: (code) => {
-    // Basic parser - in production this would be more robust
-    // For now, we'll just set the code and let the user know
-    set({ code });
-    // TODO: Implement full parser
+    try {
+      const components = parseComponentsFromCode(code);
+      if (components.length > 0) {
+        set({ components, code });
+        get().saveToHistory();
+      }
+    } catch (e) {
+      console.error("Failed to parse", e);
+    }
   },
 
   loadComponents: (components) => {
@@ -485,3 +510,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     get().syncCodeFromComponents();
   },
 }));
+
+// Basic parser implementation replaced by full Hytale Parser
+import { parseAndMapCode } from "./hytale-parser";
+
+// Helper/Wrapper to match existing signature if needed, or simply use parseAndMapCode
+function parseComponentsFromCode(code: string): HytaleComponent[] {
+  return parseAndMapCode(code);
+}
