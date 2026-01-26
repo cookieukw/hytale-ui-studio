@@ -317,7 +317,7 @@ export function EditorCanvas() {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const getDeviceSize = useCallback(() => {
+  const deviceSize = React.useMemo(() => {
     switch (devicePreview) {
       case "Mobile":
         return { width: 375, height: 667 };
@@ -328,8 +328,6 @@ export function EditorCanvas() {
         return { width: 1280, height: 720 };
     }
   }, [devicePreview]);
-
-  const deviceSize = getDeviceSize();
 
   // Fit to screen logic
   React.useEffect(() => {
