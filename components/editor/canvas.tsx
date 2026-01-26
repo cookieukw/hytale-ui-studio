@@ -288,7 +288,7 @@ const RenderedComponent = memo(function RenderedComponent({
 
   const baseProps = {
     className: cn(
-      "cursor-pointer transition-shadow",
+      "cursor-pointer transition-all duration-300 ease-in-out",
       blueprintClass,
       selectedClass,
     ),
@@ -392,7 +392,7 @@ const RenderedComponent = memo(function RenderedComponent({
         >
           <div
             className={cn(
-              "h-full transition-all",
+              "h-full transition-all duration-300 ease-in-out",
               isBlueprint ? "bg-primary/30" : "bg-primary",
             )}
             style={{ width: `${percentage}%` }}
