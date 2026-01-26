@@ -131,7 +131,9 @@ const RenderedComponent = memo(function RenderedComponent({
       }
       if (component.anchor.full) {
         style.width = "100%";
-        style.height = "100%";
+        // Use flex-grow to fill available space instead of height: 100% which collapses in auto-height containers
+        style.flexGrow = 1;
+        style.minHeight = "100%"; // Ensure it tries to fill parent if parent has height
       }
     }
 
@@ -376,8 +378,10 @@ const RenderedComponent = memo(function RenderedComponent({
       );
 
     case "ProgressBar":
-      const progress =
-        ((component.value as number) / (component.max || 100)) * 100;
+      const val = Number(component.value) || 0;
+      const max = Number(component.max) || 100;
+      const percentage = Math.min(100, Math.max(0, (val / max) * 100));
+
       return (
         <div
           {...baseProps}
@@ -391,11 +395,11 @@ const RenderedComponent = memo(function RenderedComponent({
               "h-full transition-all",
               isBlueprint ? "bg-primary/30" : "bg-primary",
             )}
-            style={{ width: `${progress}%` }}
+            style={{ width: `${percentage}%` }}
           />
-          {component.showLabel && (
+          {component.showLabel !== false && (
             <span className="absolute inset-0 flex items-center justify-center text-xs text-foreground">
-              {component.value}/{component.max || 100}
+              {val}/{max}
             </span>
           )}
         </div>
