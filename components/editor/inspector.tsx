@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { useState } from 'react'
+import { useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -10,32 +10,41 @@ import {
   Palette,
   MousePointer,
   Settings2,
-} from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Slider } from '@/components/ui/slider'
-import { useEditorStore } from '@/lib/editor-store'
-import type { HytaleComponent, LayoutMode, TextAlignment, Direction } from '@/lib/hytale-types'
-import { cn } from '@/lib/utils'
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { useEditorStore } from "@/lib/editor-store";
+import type {
+  HytaleComponent,
+  LayoutMode,
+  TextAlignment,
+  Direction,
+} from "@/lib/hytale-types";
+import { cn } from "@/lib/utils";
 
 interface CollapsibleSectionProps {
-  title: string
-  children: React.ReactNode
-  defaultOpen?: boolean
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
 }
 
-function CollapsibleSection({ title, children, defaultOpen = true }: CollapsibleSectionProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen)
+function CollapsibleSection({
+  title,
+  children,
+  defaultOpen = true,
+}: CollapsibleSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <div className="border-b border-border">
@@ -53,49 +62,57 @@ function CollapsibleSection({ title, children, defaultOpen = true }: Collapsible
       </button>
       {isOpen && <div className="space-y-3 px-3 pb-3">{children}</div>}
     </div>
-  )
+  );
 }
 
 interface FieldRowProps {
-  label: string
-  children: React.ReactNode
+  label: string;
+  children: React.ReactNode;
 }
 
 function FieldRow({ label, children }: FieldRowProps) {
   return (
     <div className="flex items-center gap-2">
-      <Label className="w-20 shrink-0 text-xs text-muted-foreground">{label}</Label>
+      <Label className="w-20 shrink-0 text-xs text-muted-foreground">
+        {label}
+      </Label>
       <div className="flex-1">{children}</div>
     </div>
-  )
+  );
 }
 
 interface AnchorFieldsProps {
-  component: HytaleComponent
-  onUpdate: (updates: Partial<HytaleComponent>) => void
+  component: HytaleComponent;
+  onUpdate: (updates: Partial<HytaleComponent>) => void;
 }
 
 function AnchorFields({ component, onUpdate }: AnchorFieldsProps) {
-  const anchor = component.anchor || {}
+  const anchor = component.anchor || {};
 
-  const updateAnchor = (key: string, value: number | string | boolean | undefined) => {
+  const updateAnchor = (
+    key: string,
+    value: number | string | boolean | undefined,
+  ) => {
     onUpdate({
       anchor: {
         ...anchor,
         [key]: value,
       },
-    })
-  }
+    });
+  };
 
   return (
     <>
       <FieldRow label="Width">
         <Input
           type="text"
-          value={anchor.width || ''}
+          value={anchor.width || ""}
           onChange={(e) => {
-            const val = e.target.value
-            updateAnchor('width', val.includes('%') ? val : Number(val) || undefined)
+            const val = e.target.value;
+            updateAnchor(
+              "width",
+              val.includes("%") ? val : Number(val) || undefined,
+            );
           }}
           className="h-7 text-xs"
           placeholder="auto"
@@ -104,10 +121,13 @@ function AnchorFields({ component, onUpdate }: AnchorFieldsProps) {
       <FieldRow label="Height">
         <Input
           type="text"
-          value={anchor.height || ''}
+          value={anchor.height || ""}
           onChange={(e) => {
-            const val = e.target.value
-            updateAnchor('height', val.includes('%') ? val : Number(val) || undefined)
+            const val = e.target.value;
+            updateAnchor(
+              "height",
+              val.includes("%") ? val : Number(val) || undefined,
+            );
           }}
           className="h-7 text-xs"
           placeholder="auto"
@@ -116,20 +136,22 @@ function AnchorFields({ component, onUpdate }: AnchorFieldsProps) {
       <FieldRow label="Full">
         <Switch
           checked={anchor.full || false}
-          onCheckedChange={(checked) => updateAnchor('full', checked || undefined)}
+          onCheckedChange={(checked) =>
+            updateAnchor("full", checked || undefined)
+          }
         />
       </FieldRow>
     </>
-  )
+  );
 }
 
 interface PaddingFieldsProps {
-  component: HytaleComponent
-  onUpdate: (updates: Partial<HytaleComponent>) => void
+  component: HytaleComponent;
+  onUpdate: (updates: Partial<HytaleComponent>) => void;
 }
 
 function PaddingFields({ component, onUpdate }: PaddingFieldsProps) {
-  const padding = component.padding || {}
+  const padding = component.padding || {};
 
   const updatePadding = (key: string, value: number | undefined) => {
     onUpdate({
@@ -137,8 +159,8 @@ function PaddingFields({ component, onUpdate }: PaddingFieldsProps) {
         ...padding,
         [key]: value,
       },
-    })
-  }
+    });
+  };
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -146,8 +168,10 @@ function PaddingFields({ component, onUpdate }: PaddingFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Top</Label>
         <Input
           type="number"
-          value={padding.top || ''}
-          onChange={(e) => updatePadding('top', Number(e.target.value) || undefined)}
+          value={padding.top || ""}
+          onChange={(e) =>
+            updatePadding("top", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -156,8 +180,10 @@ function PaddingFields({ component, onUpdate }: PaddingFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Bottom</Label>
         <Input
           type="number"
-          value={padding.bottom || ''}
-          onChange={(e) => updatePadding('bottom', Number(e.target.value) || undefined)}
+          value={padding.bottom || ""}
+          onChange={(e) =>
+            updatePadding("bottom", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -166,8 +192,10 @@ function PaddingFields({ component, onUpdate }: PaddingFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Left</Label>
         <Input
           type="number"
-          value={padding.left || ''}
-          onChange={(e) => updatePadding('left', Number(e.target.value) || undefined)}
+          value={padding.left || ""}
+          onChange={(e) =>
+            updatePadding("left", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -176,23 +204,25 @@ function PaddingFields({ component, onUpdate }: PaddingFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Right</Label>
         <Input
           type="number"
-          value={padding.right || ''}
-          onChange={(e) => updatePadding('right', Number(e.target.value) || undefined)}
+          value={padding.right || ""}
+          onChange={(e) =>
+            updatePadding("right", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
     </div>
-  )
+  );
 }
 
 interface MarginFieldsProps {
-  component: HytaleComponent
-  onUpdate: (updates: Partial<HytaleComponent>) => void
+  component: HytaleComponent;
+  onUpdate: (updates: Partial<HytaleComponent>) => void;
 }
 
 function MarginFields({ component, onUpdate }: MarginFieldsProps) {
-  const margin = component.margin || {}
+  const margin = component.margin || {};
 
   const updateMargin = (key: string, value: number | undefined) => {
     onUpdate({
@@ -200,8 +230,8 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
         ...margin,
         [key]: value,
       },
-    })
-  }
+    });
+  };
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -209,8 +239,10 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Top</Label>
         <Input
           type="number"
-          value={margin.top || ''}
-          onChange={(e) => updateMargin('top', Number(e.target.value) || undefined)}
+          value={margin.top || ""}
+          onChange={(e) =>
+            updateMargin("top", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -219,8 +251,10 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Bottom</Label>
         <Input
           type="number"
-          value={margin.bottom || ''}
-          onChange={(e) => updateMargin('bottom', Number(e.target.value) || undefined)}
+          value={margin.bottom || ""}
+          onChange={(e) =>
+            updateMargin("bottom", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -229,8 +263,10 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Left</Label>
         <Input
           type="number"
-          value={margin.left || ''}
-          onChange={(e) => updateMargin('left', Number(e.target.value) || undefined)}
+          value={margin.left || ""}
+          onChange={(e) =>
+            updateMargin("left", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -239,34 +275,39 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
         <Label className="text-[10px] text-muted-foreground">Right</Label>
         <Input
           type="number"
-          value={margin.right || ''}
-          onChange={(e) => updateMargin('right', Number(e.target.value) || undefined)}
+          value={margin.right || ""}
+          onChange={(e) =>
+            updateMargin("right", Number(e.target.value) || undefined)
+          }
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
     </div>
-  )
+  );
 }
 
 export function Inspector() {
-  const selectedId = useEditorStore((state) => state.selectedId)
-  const components = useEditorStore((state) => state.components)
-  const updateComponent = useEditorStore((state) => state.updateComponent)
+  const selectedId = useEditorStore((state) => state.selectedId);
+  const components = useEditorStore((state) => state.components);
+  const updateComponent = useEditorStore((state) => state.updateComponent);
 
   // Find component by ID
-  const findById = (comps: HytaleComponent[], id: string): HytaleComponent | null => {
+  const findById = (
+    comps: HytaleComponent[],
+    id: string,
+  ): HytaleComponent | null => {
     for (const c of comps) {
-      if (c.id === id) return c
+      if (c.id === id) return c;
       if (c.children) {
-        const found = findById(c.children, id)
-        if (found) return found
+        const found = findById(c.children, id);
+        if (found) return found;
       }
     }
-    return null
-  }
+    return null;
+  };
 
-  const component = selectedId ? findById(components, selectedId) : null
+  const component = selectedId ? findById(components, selectedId) : null;
 
   if (!component) {
     return (
@@ -283,22 +324,33 @@ export function Inspector() {
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   const handleUpdate = (updates: Partial<HytaleComponent>) => {
-    updateComponent(component.id, updates)
-  }
+    updateComponent(component.id, updates);
+  };
 
-  const layoutModes: LayoutMode[] = ['Top', 'Bottom', 'Left', 'Right', 'Middle']
-  const directions: Direction[] = ['Vertical', 'Horizontal']
-  const alignments: TextAlignment[] = ['Left', 'Center', 'Right']
+  const layoutModes: LayoutMode[] = [
+    "Top",
+    "Bottom",
+    "Left",
+    "Right",
+    "Middle",
+  ];
+  const directions: Direction[] = ["Vertical", "Horizontal"];
+  const alignments: TextAlignment[] = ["Left", "Center", "Right"];
 
-  const hasTextStyle = ['Label', 'TextButton'].includes(component.type)
-  const hasPlaceholder = component.type === 'TextField'
-  const hasValue = ['NumberField', 'ProgressBar'].includes(component.type)
-  const hasStates = ['Button', 'TextButton', 'TextField', 'ProgressBar'].includes(component.type)
-  const hasText = ['Label', 'TextButton'].includes(component.type)
+  const hasTextStyle = ["Label", "TextButton"].includes(component.type);
+  const hasPlaceholder = component.type === "TextField";
+  const hasValue = ["NumberField", "ProgressBar"].includes(component.type);
+  const hasStates = [
+    "Button",
+    "TextButton",
+    "TextField",
+    "ProgressBar",
+  ].includes(component.type);
+  const hasText = ["Label", "TextButton"].includes(component.type);
 
   return (
     <div className="flex h-full flex-col border-l border-border bg-panel">
@@ -306,12 +358,17 @@ export function Inspector() {
       <div className="border-b border-border px-3 py-2">
         <div className="flex items-center gap-2">
           <Square className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-foreground">{component.type}</span>
+          <span className="text-sm font-medium text-foreground">
+            {component.type}
+          </span>
         </div>
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="layout" className="flex flex-1 flex-col overflow-hidden">
+      <Tabs
+        defaultValue="layout"
+        className="flex flex-1 flex-col overflow-hidden"
+      >
         <TabsList className="mx-2 mt-2 grid h-8 grid-cols-4 bg-secondary">
           <TabsTrigger value="layout" className="h-6 text-xs">
             <Square className="h-3 w-3" />
@@ -319,7 +376,11 @@ export function Inspector() {
           <TabsTrigger value="style" className="h-6 text-xs">
             <Palette className="h-3 w-3" />
           </TabsTrigger>
-          <TabsTrigger value="states" className="h-6 text-xs" disabled={!hasStates}>
+          <TabsTrigger
+            value="states"
+            className="h-6 text-xs"
+            disabled={!hasStates}
+          >
             <MousePointer className="h-3 w-3" />
           </TabsTrigger>
           <TabsTrigger value="advanced" className="h-6 text-xs">
@@ -345,8 +406,10 @@ export function Inspector() {
             <CollapsibleSection title="Layout">
               <FieldRow label="Mode">
                 <Select
-                  value={component.layoutMode || 'Top'}
-                  onValueChange={(value) => handleUpdate({ layoutMode: value as LayoutMode })}
+                  value={component.layoutMode || "Top"}
+                  onValueChange={(value) =>
+                    handleUpdate({ layoutMode: value as LayoutMode })
+                  }
                 >
                   <SelectTrigger className="h-7 text-xs">
                     <SelectValue />
@@ -363,8 +426,10 @@ export function Inspector() {
 
               <FieldRow label="Direction">
                 <Select
-                  value={component.direction || 'Vertical'}
-                  onValueChange={(value) => handleUpdate({ direction: value as Direction })}
+                  value={component.direction || "Vertical"}
+                  onValueChange={(value) =>
+                    handleUpdate({ direction: value as Direction })
+                  }
                 >
                   <SelectTrigger className="h-7 text-xs">
                     <SelectValue />
@@ -382,9 +447,11 @@ export function Inspector() {
               <FieldRow label="FlexWeight">
                 <Input
                   type="number"
-                  value={component.flexWeight || ''}
+                  value={component.flexWeight || ""}
                   onChange={(e) =>
-                    handleUpdate({ flexWeight: Number(e.target.value) || undefined })
+                    handleUpdate({
+                      flexWeight: Number(e.target.value) || undefined,
+                    })
                   }
                   className="h-7 text-xs"
                   placeholder="0"
@@ -400,7 +467,7 @@ export function Inspector() {
                 <FieldRow label="Content">
                   <Input
                     type="text"
-                    value={component.text || ''}
+                    value={component.text || ""}
                     onChange={(e) => handleUpdate({ text: e.target.value })}
                     className="h-7 text-xs"
                     placeholder="Enter text..."
@@ -414,8 +481,10 @@ export function Inspector() {
                 <FieldRow label="Text">
                   <Input
                     type="text"
-                    value={component.placeholderText || ''}
-                    onChange={(e) => handleUpdate({ placeholderText: e.target.value })}
+                    value={component.placeholderText || ""}
+                    onChange={(e) =>
+                      handleUpdate({ placeholderText: e.target.value })
+                    }
                     className="h-7 text-xs"
                     placeholder="Enter placeholder..."
                   />
@@ -428,25 +497,31 @@ export function Inspector() {
                 <FieldRow label="Value">
                   <Input
                     type="number"
-                    value={(component.value as number) || 0}
-                    onChange={(e) => handleUpdate({ value: Number(e.target.value) })}
+                    value={component.value ?? 0}
+                    onChange={(e) =>
+                      handleUpdate({ value: Number(e.target.value) })
+                    }
                     className="h-7 text-xs"
                   />
                 </FieldRow>
-                {component.type === 'ProgressBar' && (
+                {component.type === "ProgressBar" && (
                   <>
                     <FieldRow label="Max">
                       <Input
                         type="number"
-                        value={component.max || 100}
-                        onChange={(e) => handleUpdate({ max: Number(e.target.value) })}
+                        value={component.max ?? 100}
+                        onChange={(e) =>
+                          handleUpdate({ max: Number(e.target.value) })
+                        }
                         className="h-7 text-xs"
                       />
                     </FieldRow>
                     <FieldRow label="Show Label">
                       <Switch
-                        checked={component.showLabel || false}
-                        onCheckedChange={(checked) => handleUpdate({ showLabel: checked })}
+                        checked={component.showLabel ?? true}
+                        onCheckedChange={(checked) =>
+                          handleUpdate({ showLabel: checked })
+                        }
                       />
                     </FieldRow>
                   </>
@@ -476,7 +551,7 @@ export function Inspector() {
                   <div className="flex gap-2">
                     <Input
                       type="color"
-                      value={component.textStyle?.textColor || '#ffffff'}
+                      value={component.textStyle?.textColor || "#ffffff"}
                       onChange={(e) =>
                         handleUpdate({
                           textStyle: {
@@ -489,7 +564,7 @@ export function Inspector() {
                     />
                     <Input
                       type="text"
-                      value={component.textStyle?.textColor || '#ffffff'}
+                      value={component.textStyle?.textColor || "#ffffff"}
                       onChange={(e) =>
                         handleUpdate({
                           textStyle: {
@@ -505,7 +580,7 @@ export function Inspector() {
 
                 <FieldRow label="Align">
                   <Select
-                    value={component.textStyle?.alignment || 'Left'}
+                    value={component.textStyle?.alignment || "Left"}
                     onValueChange={(value) =>
                       handleUpdate({
                         textStyle: {
@@ -563,7 +638,7 @@ export function Inspector() {
                 <div className="flex gap-2">
                   <Input
                     type="color"
-                    value={component.background?.color || '#2a2a3a'}
+                    value={component.background?.color || "#2a2a3a"}
                     onChange={(e) =>
                       handleUpdate({
                         background: {
@@ -576,7 +651,7 @@ export function Inspector() {
                   />
                   <Input
                     type="text"
-                    value={component.background?.color || '#2a2a3a'}
+                    value={component.background?.color || "#2a2a3a"}
                     onChange={(e) =>
                       handleUpdate({
                         background: {
@@ -594,7 +669,7 @@ export function Inspector() {
                 <div className="flex gap-2">
                   <Input
                     type="color"
-                    value={component.background?.border || '#3a3a4a'}
+                    value={component.background?.border || "#3a3a4a"}
                     onChange={(e) =>
                       handleUpdate({
                         background: {
@@ -607,7 +682,7 @@ export function Inspector() {
                   />
                   <Input
                     type="text"
-                    value={component.background?.border || ''}
+                    value={component.background?.border || ""}
                     onChange={(e) =>
                       handleUpdate({
                         background: {
@@ -656,7 +731,10 @@ export function Inspector() {
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={component.states?.hovered?.background?.color || '#5aafff'}
+                        value={
+                          component.states?.hovered?.background?.color ||
+                          "#5aafff"
+                        }
                         onChange={(e) =>
                           handleUpdate({
                             states: {
@@ -675,7 +753,9 @@ export function Inspector() {
                       />
                       <Input
                         type="text"
-                        value={component.states?.hovered?.background?.color || ''}
+                        value={
+                          component.states?.hovered?.background?.color || ""
+                        }
                         onChange={(e) =>
                           handleUpdate({
                             states: {
@@ -702,7 +782,10 @@ export function Inspector() {
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={component.states?.pressed?.background?.color || '#3a8eef'}
+                        value={
+                          component.states?.pressed?.background?.color ||
+                          "#3a8eef"
+                        }
                         onChange={(e) =>
                           handleUpdate({
                             states: {
@@ -721,7 +804,9 @@ export function Inspector() {
                       />
                       <Input
                         type="text"
-                        value={component.states?.pressed?.background?.color || ''}
+                        value={
+                          component.states?.pressed?.background?.color || ""
+                        }
                         onChange={(e) =>
                           handleUpdate({
                             states: {
@@ -747,7 +832,10 @@ export function Inspector() {
                   <FieldRow label="Opacity">
                     <div className="flex items-center gap-2">
                       <Slider
-                        value={[component.states?.disabled?.background?.opacity ?? 0.5]}
+                        value={[
+                          component.states?.disabled?.background?.opacity ??
+                            0.5,
+                        ]}
                         min={0}
                         max={1}
                         step={0.1}
@@ -768,7 +856,10 @@ export function Inspector() {
                         className="flex-1"
                       />
                       <span className="w-8 text-right text-xs text-muted-foreground">
-                        {((component.states?.disabled?.background?.opacity ?? 0.5) * 100).toFixed(0)}
+                        {(
+                          (component.states?.disabled?.background?.opacity ??
+                            0.5) * 100
+                        ).toFixed(0)}
                         %
                       </span>
                     </div>
@@ -803,13 +894,17 @@ export function Inspector() {
               <FieldRow label="Visible">
                 <Switch
                   checked={component.isVisible ?? true}
-                  onCheckedChange={(checked) => handleUpdate({ isVisible: checked })}
+                  onCheckedChange={(checked) =>
+                    handleUpdate({ isVisible: checked })
+                  }
                 />
               </FieldRow>
               <FieldRow label="Locked">
                 <Switch
                   checked={component.isLocked ?? false}
-                  onCheckedChange={(checked) => handleUpdate({ isLocked: checked })}
+                  onCheckedChange={(checked) =>
+                    handleUpdate({ isLocked: checked })
+                  }
                 />
               </FieldRow>
             </CollapsibleSection>
@@ -817,5 +912,5 @@ export function Inspector() {
         </ScrollArea>
       </Tabs>
     </div>
-  )
+  );
 }
