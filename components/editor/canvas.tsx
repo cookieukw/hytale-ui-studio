@@ -317,7 +317,23 @@ export function EditorCanvas() {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const deviceSize = React.useMemo(() => {
+    // Force mobile preview size on mobile devices, ignoring desktop preview setting
+    if (isMobile) {
+      return { width: 375, height: 667 };
+    }
+
     switch (devicePreview) {
       case "Mobile":
         return { width: 375, height: 667 };
@@ -327,7 +343,7 @@ export function EditorCanvas() {
       default:
         return { width: 1280, height: 720 };
     }
-  }, [devicePreview]);
+  }, [devicePreview, isMobile]);
 
   // Fit to screen logic
   React.useEffect(() => {
@@ -374,6 +390,7 @@ export function EditorCanvas() {
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
     setIsDragOver(true);
   }, []);
 
@@ -389,6 +406,7 @@ export function EditorCanvas() {
       const componentType = e.dataTransfer.getData(
         "componentType",
       ) as ComponentType;
+
       if (!componentType) return;
 
       const def = COMPONENT_DEFINITIONS.find((d) => d.type === componentType);
