@@ -341,18 +341,20 @@ export function Inspector() {
   const directions: Direction[] = ["Vertical", "Horizontal"];
   const alignments: TextAlignment[] = ["Left", "Center", "Right"];
 
-  const hasTextStyle = ["Label", "TextButton", "TimerLabel"].includes(
+  const hasTextStyle = ["Label", "Button", "TextButton", "TextField", "TimerLabel", "Dropdown", "CheckBox", "ProgressBar", "Slider"].includes(
     component.type,
   );
-  const hasPlaceholder = component.type === "TextField";
-  const hasValue = ["NumberField", "ProgressBar"].includes(component.type);
+  const hasPlaceholder = ["TextField", "NumberField"].includes(component.type);
+  const hasValue = ["ProgressBar", "NumberField", "Slider"].includes(component.type);
   const hasStates = [
     "Button",
     "TextButton",
     "TextField",
     "ProgressBar",
   ].includes(component.type);
-  const hasText = ["Label", "TextButton"].includes(component.type);
+  const hasText = ["Label", "TextButton", "Dropdown"].includes(component.type);
+  const hasChecked = ["CheckBox"].includes(component.type);
+  const hasOptions = ["Dropdown"].includes(component.type);
 
   return (
     <div className="flex h-full flex-col border-l border-border bg-panel">
@@ -543,6 +545,72 @@ export function Inspector() {
                     className="h-7 text-xs"
                   />
                 </FieldRow>
+              </CollapsibleSection>
+            )}
+
+            {hasChecked && (
+              <CollapsibleSection title="State">
+                <FieldRow label="Checked">
+                  <Switch
+                    checked={component.checked ?? false}
+                    onCheckedChange={(checked) => handleUpdate({ checked })}
+                  />
+                </FieldRow>
+              </CollapsibleSection>
+            )}
+
+            {component.type === "Slider" && (
+              <CollapsibleSection title="Range">
+                <FieldRow label="Min">
+                  <Input
+                    type="number"
+                    value={component.min ?? 0}
+                    onChange={(e) =>
+                      handleUpdate({ min: Number(e.target.value) })
+                    }
+                    className="h-7 text-xs"
+                  />
+                </FieldRow>
+                <FieldRow label="Max">
+                  <Input
+                    type="number"
+                    value={component.max ?? 100}
+                    onChange={(e) =>
+                      handleUpdate({ max: Number(e.target.value) })
+                    }
+                    className="h-7 text-xs"
+                  />
+                </FieldRow>
+                <FieldRow label="Step">
+                  <Input
+                    type="number"
+                    value={component.step ?? 1}
+                    onChange={(e) =>
+                      handleUpdate({ step: Number(e.target.value) })
+                    }
+                    className="h-7 text-xs"
+                  />
+                </FieldRow>
+              </CollapsibleSection>
+            )}
+
+            {hasOptions && (
+              <CollapsibleSection title="Options">
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    Comma separated
+                  </span>
+                  <Input
+                    type="text"
+                    value={component.options?.join(", ") || ""}
+                    onChange={(e) =>
+                      handleUpdate({
+                        options: e.target.value.split(",").map((s) => s.trim()),
+                      })
+                    }
+                    className="h-7 text-xs"
+                  />
+                </div>
               </CollapsibleSection>
             )}
 
