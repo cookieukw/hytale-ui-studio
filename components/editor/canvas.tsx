@@ -11,6 +11,9 @@ interface RenderedComponentProps {
   isBlueprint: boolean;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  index?: number;
+  parentId?: string | null;
+  parentType?: ComponentType | null;
 }
 
 const RenderedComponent = memo(function RenderedComponent({
@@ -18,6 +21,9 @@ const RenderedComponent = memo(function RenderedComponent({
   isBlueprint,
   selectedId,
   onSelect,
+  index,
+  parentId = null,
+  parentType,
 }: RenderedComponentProps) {
   // Use store directly for actions to avoid prop drilling
   const moveComponent = useEditorStore((state) => state.moveComponent);
@@ -25,6 +31,9 @@ const RenderedComponent = memo(function RenderedComponent({
 
   const isSelected = selectedId === component.id;
   const isVisible = component.isVisible ?? true;
+
+  // Lock dragging if parent is a Button (so the button itself is dragged)
+  const isLockedInParent = parentType === "Button";
 
   if (!isVisible) return null;
 
@@ -34,80 +43,107 @@ const RenderedComponent = memo(function RenderedComponent({
   };
 
   const handleDragStart = (e: React.DragEvent) => {
+    if (isLockedInParent) return; // Should be handled by draggable=false but for safety
+
     e.stopPropagation();
     e.dataTransfer.setData("componentId", component.id);
     e.dataTransfer.setData("componentType", component.type);
     e.dataTransfer.setData("text/plain", component.id); // Fallback
     e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setDragImage(e.currentTarget as Element, 0, 0);
   };
+
+  const [dragState, setDragState] = useState<{
+    position: "before" | "after" | "inside";
+  } | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+
+    // Check if this component is a container
+    const isContainer = [
+      "Layout",
+      "Div",
+      "Column",
+      "Row",
+      "Card",
+      "Panel",
+      "Group",
+      "Button",
+      "ScrollArea",
+    ].includes(component.type);
+
+    let position: "before" | "after" | "inside" = "inside";
+
+    const edgeThreshold = 10; // pixels, or percentage? using percentage is safer for small items
+    // Using 25% zone for before/after
+    const zone = height * 0.25;
+
+    if (isContainer) {
+      if (y < zone) position = "before";
+      else if (y > height - zone) position = "after";
+      else position = "inside";
+    } else {
+      if (y < height * 0.5) position = "before";
+      else position = "after";
+    }
+
+    // Constraint for root components has been removed to allow reordering
+    // if (!parentId && position !== "inside") return;
+
+    setDragState({ position });
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragState(null);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setDragState(null);
 
     const droppedId = e.dataTransfer.getData("componentId");
     const droppedType = e.dataTransfer.getData(
       "componentType",
     ) as ComponentType;
 
-    // If we have an ID, it's a move
+    // Move existing component
     if (droppedId) {
       if (droppedId === component.id) return; // Dropped on self
 
-      // If dropping ONTO a container, append to it
-      // Simple logic: If this component can accept children (Layout, etc), add to it.
-      // Otherwise, adding "swap" or "insert before" logic is harder without specific drop zones.
-      // For now, let's assume dropping ON a component means "Move into" if it's a container,
-      // or "Move next to" if not?
-      // User asked to "change places".
-
-      // Let's implement: Drop on Container -> Append to Container.
-      // Drop on Non-Container -> Do nothing (let Canvas handle it? or Insert After?)
-
-      // Check if this component is a container
-      const isContainer = [
-        "Layout",
-        "Div",
-        "Column",
-        "Row",
-        "Card",
-        "Panel",
-      ].includes(component.type);
-
-      if (isContainer) {
+      if (dragState?.position === "inside") {
         moveComponent(droppedId, component.id, component.children?.length || 0);
-        // toast.success("Moved into " + component.name);
-      } else {
-        // Maybe bubble up to parent?
-        // For now, let's keep it simple. Only containers accept drops.
+      } else if (dragState?.position === "before") {
+        moveComponent(droppedId, parentId, index ?? 0);
+      } else if (dragState?.position === "after") {
+        moveComponent(droppedId, parentId, (index ?? 0) + 1);
       }
-    } else if (droppedType) {
-      // New component from palette
-      const isContainer = [
-        "Layout",
-        "Div",
-        "Column",
-        "Row",
-        "Card",
-        "Panel",
-      ].includes(component.type);
-      if (isContainer) {
-        const def = COMPONENT_DEFINITIONS.find((d) => d.type === droppedType);
-        if (def) {
-          addComponent(
-            {
-              type: def.type,
-              name: def.label,
-              ...def.defaultProps,
-            },
-            component.id,
-          );
+    }
+    // New component from palette
+    else if (droppedType) {
+      const def = COMPONENT_DEFINITIONS.find((d) => d.type === droppedType);
+      if (def) {
+        const newComp = {
+          type: def.type,
+          name: def.label,
+          ...def.defaultProps,
+        };
+
+        if (dragState?.position === "inside") {
+          addComponent(newComp, component.id);
+        } else if (dragState?.position === "before") {
+          addComponent(newComp, parentId, index ?? 0);
+        } else if (dragState?.position === "after") {
+          addComponent(newComp, parentId, (index ?? 0) + 1);
         }
       }
     }
@@ -170,7 +206,8 @@ const RenderedComponent = memo(function RenderedComponent({
     if (component.background && !isBlueprint) {
       style.backgroundColor = component.background.color;
       if (component.background.border) {
-        style.border = `1px solid ${component.background.border}`;
+        // Hytale "Border" is often used as Border Radius
+        style.borderRadius = `${component.background.border}px`;
       }
       if (component.background.opacity !== undefined) {
         style.opacity = component.background.opacity;
@@ -294,87 +331,127 @@ const RenderedComponent = memo(function RenderedComponent({
     ),
     style: getComponentStyle(),
     onClick: handleClick,
+    // Disable dragging if inside a button, so the button handles the drag
+    draggable: !isLockedInParent,
+    onDragStart: handleDragStart,
+    onDragOver: handleDragOver,
+    onDragLeave: handleDragLeave,
+    onDrop: handleDrop,
   };
+
+  // Helper to wrap content with indicators
+  const renderWithIndicators = (
+    content: React.ReactNode,
+    extraClass?: string,
+    extraStyle?: React.CSSProperties,
+  ) => (
+    <>
+      <div
+        {...baseProps}
+        style={{ ...baseProps.style, ...extraStyle }}
+        className={cn(
+          baseProps.className,
+          extraClass,
+          dragState?.position === "inside" &&
+            "ring-2 ring-blue-500 ring-offset-2",
+        )}
+      >
+        {dragState?.position === "before" && (
+          <div className="absolute top-0 left-0 right-0 h-1 -mt-1 bg-blue-500 z-50 pointer-events-none" />
+        )}
+        {content}
+        {dragState?.position === "after" && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 -mb-1 bg-blue-500 z-50 pointer-events-none" />
+        )}
+      </div>
+    </>
+  );
 
   switch (component.type) {
     case "Label":
-      return (
-        <div {...baseProps} style={{ ...baseProps.style, ...getTextStyle() }}>
-          {component.text || "Label"}
-        </div>
+      return renderWithIndicators(
+        component.text || "Label",
+        undefined,
+        getTextStyle(),
       );
 
+    case "TimerLabel":
+      // Format seconds to MM:SS
+      const seconds = component.seconds || 0;
+      const mm = Math.floor(seconds / 60)
+        .toString()
+        .padStart(2, "0");
+      const ss = (seconds % 60).toString().padStart(2, "0");
+
+      return renderWithIndicators(`${mm}:${ss}`, undefined, getTextStyle());
+
     case "TextField":
-      return (
-        <div {...baseProps} className={cn(baseProps.className, "rounded")}>
-          <span
-            className={cn(
-              "text-sm",
-              isBlueprint ? "text-primary/70" : "text-muted-foreground",
-            )}
-          >
-            {component.placeholderText || "Enter text..."}
-          </span>
-        </div>
+      return renderWithIndicators(
+        <span
+          className={cn(
+            "text-sm",
+            isBlueprint ? "text-primary/70" : "text-muted-foreground",
+          )}
+        >
+          {component.placeholderText || "Enter text..."}
+        </span>,
+        "rounded",
       );
 
     case "NumberField":
-      return (
-        <div {...baseProps} className={cn(baseProps.className, "rounded")}>
-          <span
-            className={cn(
-              "font-mono text-sm",
-              isBlueprint ? "text-primary/70" : "text-foreground",
-            )}
-          >
-            {component.value ?? 0}
-          </span>
-        </div>
+      return renderWithIndicators(
+        <span
+          className={cn(
+            "font-mono text-sm",
+            isBlueprint ? "text-primary/70" : "text-foreground",
+          )}
+        >
+          {component.value ?? 0}
+        </span>,
+        "rounded",
       );
 
     case "Button":
-      return (
-        <div {...baseProps} className={cn(baseProps.className, "rounded")}>
-          {component.children?.map((child) => (
+      return renderWithIndicators(
+        <>
+          {component.children?.map((child, i) => (
             <RenderedComponent
               key={child.id}
               component={child}
               isBlueprint={isBlueprint}
               selectedId={selectedId}
               onSelect={onSelect}
+              index={i}
+              parentId={component.id}
+              parentType={component.type}
             />
           ))}
-        </div>
+        </>,
+        "rounded",
       );
 
     case "TextButton":
-      return (
-        <div {...baseProps} style={{ ...baseProps.style, ...getTextStyle() }}>
-          {component.text || "Text Button"}
-        </div>
+      return renderWithIndicators(
+        component.text || "Text Button",
+        undefined,
+        getTextStyle(),
       );
 
     case "Image":
-      return (
-        <div
-          {...baseProps}
-          className={cn(
-            baseProps.className,
-            "rounded",
-            !component.source &&
-              "flex items-center justify-center bg-secondary",
-          )}
-        >
-          {component.source ? (
-            <img
-              src={component.source || "/placeholder.svg"}
-              alt={component.name}
-              className="h-full w-full object-contain"
-            />
-          ) : (
-            <span className="text-xs text-muted-foreground">Image</span>
-          )}
-        </div>
+      return renderWithIndicators(
+        component.source ? (
+          <img
+            src={component.source || "/placeholder.svg"}
+            alt={component.name}
+            className="h-full w-full object-contain"
+          />
+        ) : (
+          <span className="text-xs text-muted-foreground">Image</span>
+        ),
+        cn(
+          "rounded",
+          !component.source && "flex items-center justify-center bg-secondary",
+        ),
       );
 
     case "ProgressBar":
@@ -382,14 +459,8 @@ const RenderedComponent = memo(function RenderedComponent({
       const max = Number(component.max) || 100;
       const percentage = Math.min(100, Math.max(0, (val / max) * 100));
 
-      return (
-        <div
-          {...baseProps}
-          className={cn(
-            baseProps.className,
-            "relative overflow-hidden rounded",
-          )}
-        >
+      return renderWithIndicators(
+        <>
           <div
             className={cn(
               "h-full transition-all duration-300 ease-in-out",
@@ -402,25 +473,27 @@ const RenderedComponent = memo(function RenderedComponent({
               {val}/{max}
             </span>
           )}
-        </div>
+        </>,
+        "relative overflow-hidden rounded",
       );
 
     default:
-      return (
-        <div
-          {...baseProps}
-          className={cn(baseProps.className, "overflow-hidden rounded")}
-        >
-          {component.children?.map((child) => (
+      return renderWithIndicators(
+        <>
+          {component.children?.map((child, i) => (
             <RenderedComponent
               key={child.id}
               component={child}
               isBlueprint={isBlueprint}
               selectedId={selectedId}
               onSelect={onSelect}
+              index={i}
+              parentId={component.id}
+              parentType={component.type}
             />
           ))}
-        </div>
+        </>,
+        "overflow-hidden rounded",
       );
   }
 });
@@ -435,6 +508,7 @@ export function EditorCanvas() {
   const showGrid = useEditorStore((state) => state.showGrid);
   const zoom = useEditorStore((state) => state.zoom);
   const addComponent = useEditorStore((state) => state.addComponent);
+  const moveComponent = useEditorStore((state) => state.moveComponent);
   const setSelectedId = useEditorStore((state) => state.setSelectedId);
   const selectedId = useEditorStore((state) => state.selectedId);
   const fitToScreen = useEditorStore((state) => state.fitToScreen);
@@ -537,6 +611,12 @@ export function EditorCanvas() {
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragOver(false);
+
+      const componentId = e.dataTransfer.getData("componentId");
+      if (componentId) {
+        moveComponent(componentId, null, components.length);
+        return;
+      }
 
       let componentType = e.dataTransfer.getData(
         "componentType",
@@ -652,13 +732,15 @@ export function EditorCanvas() {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                {components.map((component) => (
+                {components.map((component, i) => (
                   <RenderedComponent
                     key={component.id}
                     component={component}
                     isBlueprint={isBlueprint}
                     selectedId={selectedId}
                     onSelect={handleSelect}
+                    index={i}
+                    parentId={null}
                   />
                 ))}
               </div>
