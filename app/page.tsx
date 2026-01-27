@@ -25,10 +25,34 @@ import {
 import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/editor/mobile-nav";
 
+import { useEffect } from "react";
+
 export default function HytaleUIStudio() {
   const viewMode = useEditorStore((state) => state.viewMode);
   const devicePreview = useEditorStore((state) => state.devicePreview);
   const activeMobileTab = useEditorStore((state) => state.activeMobileTab);
+  const selectedId = useEditorStore((state) => state.selectedId);
+  const removeComponent = useEditorStore((state) => state.removeComponent);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Delete" || e.key === "Backspace") {
+        const activeTag = document.activeElement?.tagName;
+        const isInputActive =
+          activeTag === "INPUT" ||
+          activeTag === "TEXTAREA" ||
+          (document.activeElement as HTMLElement)?.isContentEditable;
+
+        if (!isInputActive && selectedId) {
+          e.preventDefault(); // Prevent back navigation on some browsers
+          removeComponent(selectedId);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedId, removeComponent]);
 
   /* Main Content - Desktop Layout */
   /* Hidden on mobile, visible on desktop */
