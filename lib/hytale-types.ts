@@ -61,6 +61,7 @@ export type ComponentType =
   | "Button"
   | "TextButton"
   | "Label"
+  | "TimerLabel"
   | "Image"
   | "ProgressBar";
 
@@ -81,6 +82,7 @@ export interface HytaleComponent {
   text?: string;
   placeholderText?: string;
   value?: number | string;
+  seconds?: number;
   source?: string;
   fit?: ImageFit;
   direction?: Direction;
