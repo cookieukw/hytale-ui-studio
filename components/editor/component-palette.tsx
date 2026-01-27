@@ -73,7 +73,7 @@ const CategorySection = memo(function CategorySection({
     e.dataTransfer.setData("componentType", item.type);
     e.dataTransfer.setData("text/plain", item.type); // Fallback for mobile
     e.dataTransfer.setData("isPreset", "false");
-    e.dataTransfer.effectAllowed = "copy";
+    e.dataTransfer.effectAllowed = "copyMove";
   };
 
   const handleClick = (item: ComponentDefinition) => {
