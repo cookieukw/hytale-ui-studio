@@ -11,6 +11,28 @@ import type {
 
 export type MobileTab = "View" | "Event" | "Component";
 
+// Helper to find parent and index (0-based)
+function findComponentLocation(
+  components: HytaleComponent[],
+  targetId: string,
+  parentId: string | null = null,
+): { parentId: string | null; index: number } | null {
+  for (let i = 0; i < components.length; i++) {
+    if (components[i].id === targetId) {
+      return { parentId, index: i };
+    }
+    if (components[i].children) {
+      const result = findComponentLocation(
+        components[i].children!,
+        targetId,
+        components[i].id,
+      );
+      if (result) return result;
+    }
+  }
+  return null;
+}
+
 function generateId(): string {
   return `comp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
@@ -115,6 +137,26 @@ function duplicateComponent(component: HytaleComponent): HytaleComponent {
   };
 }
 
+// Helper to format Hytale colors: #RRGGBB or #RRGGBB(Alpha) checks if hex is 3 or 6 digits
+const formatHytaleColor = (hex?: string, opacity?: number): string => {
+  if (!hex) return "";
+
+  // Normalize hex to 6 digits
+  let cleanHex = hex.replace("#", "");
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex
+      .split("")
+      .map((c) => c + c)
+      .join("");
+  }
+
+  if (opacity !== undefined && opacity < 1) {
+    return `#${cleanHex}(${opacity})`;
+  }
+
+  return `#${cleanHex}`;
+};
+
 function componentsToCode(components: HytaleComponent[], depth = 0): string {
   let code = "";
   const spaces = "  ".repeat(depth);
@@ -129,7 +171,7 @@ function componentsToCode(components: HytaleComponent[], depth = 0): string {
       code += `${spaces}  Visible: ${comp.isVisible};\n`;
     }
 
-    // Text
+    // Text (quoted)
     if (comp.text) {
       code += `${spaces}  Text: "${comp.text}";\n`;
     }
@@ -205,32 +247,65 @@ function componentsToCode(components: HytaleComponent[], depth = 0): string {
     // Background: (Key: Val, ...)
     if (comp.background) {
       const parts: string[] = [];
-      if (comp.background.color)
-        parts.push(`Color: "${comp.background.color}"`);
-      if (comp.background.border)
-        parts.push(`Border: "${comp.background.border}"`);
-      if (comp.background.opacity !== undefined)
-        parts.push(`Opacity: ${comp.background.opacity}`);
+
+      // Color: #RRGGBB(Opacity) format, no quotes
+      const colorString = formatHytaleColor(
+        comp.background.color,
+        comp.background.opacity,
+      );
+      if (colorString) parts.push(`Color: ${colorString}`);
+
+      // Border: Value (Radius)
+      if (comp.background.border) {
+        parts.push(`Border: ${comp.background.border}`);
+      }
+
+      // Opacity is now merged into Color, so we don't list it separately for Background
+      // unless user wants standalone Opacity property? Request said: "opacidade nao é um atributo. ele vai sempre do lado da cor"
 
       if (parts.length > 0) {
         code += `${spaces}  Background: (${parts.join(", ")});\n`;
       }
     }
 
+    // TimerLabel Seconds
+    if (comp.type === "TimerLabel" && comp.seconds !== undefined) {
+      code += `${spaces}  Seconds: ${comp.seconds};\n`;
+    }
+
     // TextStyle
+    // TimerLabel uses Style: (...) syntax
     if (comp.textStyle) {
-      if (comp.textStyle.fontSize)
-        code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
+      if (comp.type === "TimerLabel") {
+        const parts: string[] = [];
+        if (comp.textStyle.fontSize)
+          parts.push(`FontSize: ${comp.textStyle.fontSize}`);
+        if (comp.textStyle.alignment)
+          parts.push(`Alignment: ${comp.textStyle.alignment}`);
+        if (comp.textStyle.textColor)
+          parts.push(`Color: ${formatHytaleColor(comp.textStyle.textColor)}`);
+        if (comp.textStyle.renderBold) parts.push(`RenderBold: true`);
 
-      // Handle Color ambiguity: if using TextStyle but outputting top-level, check property names
-      if (comp.textStyle.textColor)
-        code += `${spaces}  Color: "${comp.textStyle.textColor}";\n`;
+        if (parts.length > 0) {
+          code += `${spaces}  Style: (${parts.join(", ")});\n`;
+        }
+      } else {
+        // Standard Element export
+        if (comp.textStyle.fontSize)
+          code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
 
-      if (comp.textStyle.renderBold) code += `${spaces}  RenderBold: true;\n`;
-      if (comp.textStyle.renderUppercase)
-        code += `${spaces}  RenderUppercase: true;\n`;
-      if (comp.textStyle.alignment)
-        code += `${spaces}  Alignment: ${comp.textStyle.alignment};\n`;
+        // Color: #RRGGBB(Opacity), no quotes
+        if (comp.textStyle.textColor) {
+          const textColor = formatHytaleColor(comp.textStyle.textColor);
+          code += `${spaces}  Color: ${textColor};\n`;
+        }
+
+        if (comp.textStyle.renderBold) code += `${spaces}  RenderBold: true;\n`;
+        if (comp.textStyle.renderUppercase)
+          code += `${spaces}  RenderUppercase: true;\n`;
+        if (comp.textStyle.alignment)
+          code += `${spaces}  Alignment: ${comp.textStyle.alignment};\n`;
+      }
     }
 
     // Recursively process children
@@ -380,37 +455,15 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     if (!comp) return;
 
     const duplicate = duplicateComponent(comp);
+    const location = findComponentLocation(state.components, id);
 
-    // Find parent and add duplicate as sibling
-    const findParentAndIndex = (
-      components: HytaleComponent[],
-      targetId: string,
-      parent: string | null = null,
-    ): { parentId: string | null; index: number } | null => {
-      for (let i = 0; i < components.length; i++) {
-        if (components[i].id === targetId) {
-          return { parentId: parent, index: i + 1 };
-        }
-        if (components[i].children) {
-          const result = findParentAndIndex(
-            components[i].children!,
-            targetId,
-            components[i].id,
-          );
-          if (result) return result;
-        }
-      }
-      return null;
-    };
-
-    const location = findParentAndIndex(state.components, id);
     if (location) {
       set((state) => ({
         components: addComponentToParent(
           state.components,
           location.parentId,
           duplicate,
-          location.index,
+          location.index + 1, // Add after original
         ),
         selectedId: duplicate.id,
       }));
@@ -424,6 +477,18 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const comp = findComponentById(state.components, id);
     if (!comp) return;
 
+    // Determine if we need to adjust the index
+    // If moving within the same parent, and moving downwards (sourceIndex < targetIndex),
+    // we need to decrement targetIndex by 1 because removal shifts subsequent items up.
+    let targetIndex = index;
+    const location = findComponentLocation(state.components, id);
+
+    if (location && location.parentId === newParentId) {
+      if (location.index < index) {
+        targetIndex = index - 1;
+      }
+    }
+
     // Remove from current position
     let newComponents = removeComponentFromTree(state.components, id);
     // Add to new position
@@ -431,7 +496,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       newComponents,
       newParentId,
       comp,
-      index,
+      targetIndex,
     );
 
     set({ components: newComponents });
