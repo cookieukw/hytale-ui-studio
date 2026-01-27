@@ -163,8 +163,13 @@ function componentsToCode(components: HytaleComponent[], depth = 0): string {
 
   components.forEach((comp) => {
     // Header: Type #ID or Type
+    let typeToExport = comp.type;
+    if (typeToExport === "ScrollArea") {
+      typeToExport = "Group";
+    }
+
     const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
-    code += `${spaces}${comp.type}${idPart} {\n`;
+    code += `${spaces}${typeToExport}${idPart} {\n`;
 
     // Visible
     if (typeof comp.isVisible === "boolean") {
@@ -271,6 +276,30 @@ function componentsToCode(components: HytaleComponent[], depth = 0): string {
     // TimerLabel Seconds
     if (comp.type === "TimerLabel" && comp.seconds !== undefined) {
       code += `${spaces}  Seconds: ${comp.seconds};\n`;
+    }
+
+    // CheckBox
+    if (comp.type === "CheckBox" && comp.checked !== undefined) {
+      code += `${spaces}  Checked: ${comp.checked};\n`;
+    }
+
+    // Slider
+    if (comp.type === "Slider") {
+      if (comp.min !== undefined) code += `${spaces}  Min: ${comp.min};\n`;
+      if (comp.max !== undefined) code += `${spaces}  Max: ${comp.max};\n`;
+      if (comp.step !== undefined) code += `${spaces}  Step: ${comp.step};\n`;
+    }
+
+    // Dropdown
+    if (comp.type === "Dropdown" && comp.options) {
+      // Assuming Hytale uses a string list? Or children?
+      // Standard Hytale Dropdown often renders options via Code or Children.
+      // For now, we export as parameter if exists.
+      // NOTE: Hytale UI format usually doesn't have inline lists like ["A","B"].
+      // It might use child items. But preserving data:
+      // code += `${spaces}  Options: [${comp.options.map(o => `"${o}"`).join(", ")}];\n`;
+      // User Reference shows DropdownBox using `EntriesInViewport` etc, but not options list directly in UI script typically.
+      // We will skip exporting options to code for now to avoid syntax errors, holding it in internal state.
     }
 
     // TextStyle
