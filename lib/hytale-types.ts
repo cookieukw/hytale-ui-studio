@@ -55,7 +55,6 @@ export interface ComponentState {
 
 export type ComponentType =
   | "Group"
-  | "ScrollArea"
   | "TextField"
   | "NumberField"
   | "Button"
@@ -63,6 +62,11 @@ export type ComponentType =
   | "Label"
   | "TimerLabel"
   | "Image"
+  | "CheckBox"
+  | "Dropdown"
+  | "Slider"
+  | "ScrollArea"
+  | "Spinner"
   | "ProgressBar";
 
 export interface HytaleComponent {
@@ -90,6 +94,10 @@ export interface HytaleComponent {
   maxHeight?: number;
   showScrollbar?: boolean;
   max?: number;
+  min?: number;
+  step?: number;
+  checked?: boolean;
+  options?: string[]; // For Dropdown
   showLabel?: boolean;
   // States
   states?: ComponentState;
