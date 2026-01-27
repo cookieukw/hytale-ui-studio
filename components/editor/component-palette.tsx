@@ -7,7 +7,6 @@ import { useState, memo } from "react";
 import {
   Search,
   Square,
-  ScrollText,
   TextCursor,
   Hash,
   MousePointerClick,
@@ -24,6 +23,8 @@ import {
   Bell,
   ChevronDown,
   ChevronRight,
+  ScrollText,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -48,6 +49,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   BarChart3,
   Bell,
   Search,
+  SlidersHorizontal,
 };
 
 interface CategorySectionProps {
