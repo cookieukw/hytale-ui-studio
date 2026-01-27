@@ -30,7 +30,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "ScrollArea",
       anchor: { width: 200, height: 300 },
-      direction: "Vertical",
+      layoutMode: "Top",
       showScrollbar: true,
       background: { color: "#1a1a2a", opacity: 1 },
     },
@@ -112,6 +112,49 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     },
   },
 
+  {
+    type: "CheckBox",
+    label: "Check Box",
+    icon: "Square",
+    category: "Input",
+    defaultProps: {
+      name: "CheckBox",
+      checked: false,
+      anchor: { width: 22, height: 22 },
+      background: { color: "#000000", opacity: 0, border: "7" },
+      padding: { top: 4, bottom: 4, left: 4, right: 4 },
+    },
+  },
+  {
+    type: "Slider",
+    label: "Slider",
+    icon: "SlidersHorizontal",
+    category: "Input",
+    defaultProps: {
+      name: "Slider",
+      value: 50,
+      min: 0,
+      max: 100,
+      step: 1,
+      anchor: { width: 200, height: 20 },
+      background: { color: "#1a1a2a", border: "2" },
+    },
+  },
+  {
+    type: "Dropdown",
+    label: "Dropdown",
+    icon: "ChevronDown",
+    category: "Input",
+    defaultProps: {
+      name: "Dropdown",
+      text: "Select Option", // Used as current selection label
+      options: ["Option 1", "Option 2", "Option 3"],
+      anchor: { width: 220, height: 32 },
+      background: { color: "#1a1a2a", border: "16" },
+      padding: { left: 8, right: 8 },
+    },
+  },
+
   // Display
   {
     type: "Label",
@@ -126,6 +169,16 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
         textColor: "#ffffff",
         alignment: "Left",
       },
+    },
+  },
+  {
+    type: "Spinner",
+    label: "Spinner",
+    icon: "Loader",
+    category: "Display",
+    defaultProps: {
+      name: "Spinner",
+      anchor: { width: 32, height: 32 },
     },
   },
   {
