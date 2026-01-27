@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { memo, useCallback } from 'react'
+import { memo, useCallback } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -22,20 +22,28 @@ import {
   Text,
   ImageIcon,
   Gauge,
-} from 'lucide-react'
-import { ScrollArea } from '@/components/ui/scroll-area'
+  Timer,
+  CheckSquare,
+  List,
+  SlidersHorizontal,
+  Loader2,
+} from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { useEditorStore } from '@/lib/editor-store'
-import type { HytaleComponent, ComponentType } from '@/lib/hytale-types'
-import { cn } from '@/lib/utils'
+} from "@/components/ui/dropdown-menu";
+import { useEditorStore } from "@/lib/editor-store";
+import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
+import { cn } from "@/lib/utils";
 
-const componentIcons: Record<ComponentType, React.ComponentType<{ className?: string }>> = {
+const componentIcons: Record<
+  ComponentType,
+  React.ComponentType<{ className?: string }>
+> = {
   Group: Square,
   ScrollArea: ScrollText,
   TextField: TextCursor,
@@ -45,16 +53,21 @@ const componentIcons: Record<ComponentType, React.ComponentType<{ className?: st
   Label: Text,
   Image: ImageIcon,
   ProgressBar: Gauge,
-}
+  TimerLabel: Timer,
+  CheckBox: CheckSquare,
+  Dropdown: List,
+  Slider: SlidersHorizontal,
+  Spinner: Loader2,
+};
 
 interface TreeNodeProps {
-  component: HytaleComponent
-  depth: number
-  selectedId: string | null
-  onSelect: (id: string) => void
-  onUpdate: (id: string, updates: Partial<HytaleComponent>) => void
-  onRemove: (id: string) => void
-  onDuplicate: (id: string) => void
+  component: HytaleComponent;
+  depth: number;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<HytaleComponent>) => void;
+  onRemove: (id: string) => void;
+  onDuplicate: (id: string) => void;
 }
 
 const TreeNode = memo(function TreeNode({
@@ -66,36 +79,36 @@ const TreeNode = memo(function TreeNode({
   onRemove,
   onDuplicate,
 }: TreeNodeProps) {
-  const isSelected = selectedId === component.id
-  const hasChildren = component.children && component.children.length > 0
-  const isExpanded = component.isExpanded ?? true
-  const isVisible = component.isVisible ?? true
-  const isLocked = component.isLocked ?? false
+  const isSelected = selectedId === component.id;
+  const hasChildren = component.children && component.children.length > 0;
+  const isExpanded = component.isExpanded ?? true;
+  const isVisible = component.isVisible ?? true;
+  const isLocked = component.isLocked ?? false;
 
-  const Icon = componentIcons[component.type] || Square
+  const Icon = componentIcons[component.type] || Square;
 
   const handleToggleExpand = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onUpdate(component.id, { isExpanded: !isExpanded })
-  }
+    e.stopPropagation();
+    onUpdate(component.id, { isExpanded: !isExpanded });
+  };
 
   const handleToggleVisibility = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onUpdate(component.id, { isVisible: !isVisible })
-  }
+    e.stopPropagation();
+    onUpdate(component.id, { isVisible: !isVisible });
+  };
 
   const handleToggleLock = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onUpdate(component.id, { isLocked: !isLocked })
-  }
+    e.stopPropagation();
+    onUpdate(component.id, { isLocked: !isLocked });
+  };
 
   return (
     <div>
       <div
         className={cn(
-          'group flex cursor-pointer items-center gap-1 py-1 pr-2 text-xs transition-colors hover:bg-hover',
-          isSelected && 'bg-selection text-foreground',
-          !isVisible && 'opacity-50'
+          "group flex cursor-pointer items-center gap-1 py-1 pr-2 text-xs transition-colors hover:bg-hover",
+          isSelected && "bg-selection text-foreground",
+          !isVisible && "opacity-50",
         )}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
         onClick={() => onSelect(component.id)}
@@ -103,8 +116,8 @@ const TreeNode = memo(function TreeNode({
         <button
           type="button"
           className={cn(
-            'flex h-4 w-4 shrink-0 items-center justify-center rounded hover:bg-secondary',
-            !hasChildren && 'invisible'
+            "flex h-4 w-4 shrink-0 items-center justify-center rounded hover:bg-secondary",
+            !hasChildren && "invisible",
           )}
           onClick={handleToggleExpand}
         >
@@ -188,32 +201,46 @@ const TreeNode = memo(function TreeNode({
         </div>
       )}
     </div>
-  )
-})
+  );
+});
 
 export function ComponentTree() {
-  const components = useEditorStore((state) => state.components)
-  const selectedId = useEditorStore((state) => state.selectedId)
-  const setSelectedId = useEditorStore((state) => state.setSelectedId)
-  const updateComponent = useEditorStore((state) => state.updateComponent)
-  const removeComponent = useEditorStore((state) => state.removeComponent)
-  const duplicateComponent = useEditorStore((state) => state.duplicateComponent)
+  const components = useEditorStore((state) => state.components);
+  const selectedId = useEditorStore((state) => state.selectedId);
+  const setSelectedId = useEditorStore((state) => state.setSelectedId);
+  const updateComponent = useEditorStore((state) => state.updateComponent);
+  const removeComponent = useEditorStore((state) => state.removeComponent);
+  const duplicateComponent = useEditorStore(
+    (state) => state.duplicateComponent,
+  );
 
-  const handleSelect = useCallback((id: string) => {
-    setSelectedId(id)
-  }, [setSelectedId])
+  const handleSelect = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+    },
+    [setSelectedId],
+  );
 
-  const handleUpdate = useCallback((id: string, updates: Partial<HytaleComponent>) => {
-    updateComponent(id, updates)
-  }, [updateComponent])
+  const handleUpdate = useCallback(
+    (id: string, updates: Partial<HytaleComponent>) => {
+      updateComponent(id, updates);
+    },
+    [updateComponent],
+  );
 
-  const handleRemove = useCallback((id: string) => {
-    removeComponent(id)
-  }, [removeComponent])
+  const handleRemove = useCallback(
+    (id: string) => {
+      removeComponent(id);
+    },
+    [removeComponent],
+  );
 
-  const handleDuplicate = useCallback((id: string) => {
-    duplicateComponent(id)
-  }, [duplicateComponent])
+  const handleDuplicate = useCallback(
+    (id: string) => {
+      duplicateComponent(id);
+    },
+    [duplicateComponent],
+  );
 
   return (
     <div className="flex h-full flex-col border-t border-border bg-panel">
@@ -245,5 +272,5 @@ export function ComponentTree() {
         )}
       </ScrollArea>
     </div>
-  )
+  );
 }
