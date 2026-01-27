@@ -341,7 +341,9 @@ export function Inspector() {
   const directions: Direction[] = ["Vertical", "Horizontal"];
   const alignments: TextAlignment[] = ["Left", "Center", "Right"];
 
-  const hasTextStyle = ["Label", "TextButton"].includes(component.type);
+  const hasTextStyle = ["Label", "TextButton", "TimerLabel"].includes(
+    component.type,
+  );
   const hasPlaceholder = component.type === "TextField";
   const hasValue = ["NumberField", "ProgressBar"].includes(component.type);
   const hasStates = [
@@ -529,6 +531,21 @@ export function Inspector() {
               </CollapsibleSection>
             )}
 
+            {component.type === "TimerLabel" && (
+              <CollapsibleSection title="Timer">
+                <FieldRow label="Seconds">
+                  <Input
+                    type="number"
+                    value={component.seconds ?? 0}
+                    onChange={(e) =>
+                      handleUpdate({ seconds: Number(e.target.value) })
+                    }
+                    className="h-7 text-xs"
+                  />
+                </FieldRow>
+              </CollapsibleSection>
+            )}
+
             {hasTextStyle && (
               <CollapsibleSection title="Typography">
                 <FieldRow label="Font Size">
@@ -666,35 +683,20 @@ export function Inspector() {
               </FieldRow>
 
               <FieldRow label="Border">
-                <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    value={component.background?.border || "#3a3a4a"}
-                    onChange={(e) =>
-                      handleUpdate({
-                        background: {
-                          ...component.background,
-                          border: e.target.value,
-                        },
-                      })
-                    }
-                    className="h-7 w-10 cursor-pointer p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={component.background?.border || ""}
-                    onChange={(e) =>
-                      handleUpdate({
-                        background: {
-                          ...component.background,
-                          border: e.target.value,
-                        },
-                      })
-                    }
-                    className="h-7 flex-1 font-mono text-xs"
-                    placeholder="none"
-                  />
-                </div>
+                <Input
+                  type="number"
+                  value={component.background?.border || ""}
+                  onChange={(e) =>
+                    handleUpdate({
+                      background: {
+                        ...component.background,
+                        border: e.target.value,
+                      },
+                    })
+                  }
+                  className="h-7 cursor-text p-1 text-xs"
+                  placeholder="Radius (px)"
+                />
               </FieldRow>
 
               <FieldRow label="Opacity">
