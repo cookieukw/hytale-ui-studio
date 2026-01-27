@@ -274,12 +274,17 @@ const RenderedComponent = memo(function RenderedComponent({
       }
     }
 
-    // Force Linear Layout for Group
-    if (component.type === "Group") {
+    // Force Linear Layout for Group and ScrollArea
+    if (component.type === "Group" || component.type === "ScrollArea") {
       style.display = "flex";
       // Default to column if not specified, mimicking standard Linear Layout
       if (!style.flexDirection) {
         style.flexDirection = "column";
+      }
+
+      if (component.type === "ScrollArea") {
+        style.overflowY = "auto";
+        style.overflowX = "hidden";
       }
     }
 
@@ -454,6 +459,106 @@ const RenderedComponent = memo(function RenderedComponent({
         ),
       );
 
+    case "CheckBox":
+      return renderWithIndicators(
+        component.checked && (
+          <div className="flex h-full w-full items-center justify-center text-primary">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        ),
+        "border border-muted",
+      );
+
+    case "Slider":
+      const slidVal = Number(component.value) || 0;
+      const slidMin = Number(component.min) || 0;
+      const slidMax = Number(component.max) || 100;
+      const slidPercent = Math.min(
+        100,
+        Math.max(0, ((slidVal - slidMin) / (slidMax - slidMin)) * 100),
+      );
+
+      return renderWithIndicators(
+        <div className="relative flex h-full w-full items-center px-1">
+          {/* Track */}
+          <div className="h-1 w-full rounded-full bg-secondary" />
+          {/* Loaded Track */}
+          <div
+            className="absolute h-1 rounded-full bg-primary"
+            style={{ width: `${slidPercent}%`, left: 0 }}
+          />
+          {/* Handle */}
+          <div
+            className="absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border border-border bg-foreground shadow-sm"
+            style={{ left: `calc(${slidPercent}% - 8px)` }}
+          />
+        </div>,
+        undefined,
+      );
+
+    case "Dropdown":
+      return renderWithIndicators(
+        <div className="flex h-full w-full items-center justify-between px-2">
+          <span
+            style={getTextStyle()}
+            className="truncate text-sm text-foreground"
+          >
+            {component.text || "Select..."}
+          </span>
+          <svg
+            className="h-4 w-4 opacity-50"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>,
+        undefined,
+      );
+
+    case "Spinner":
+      return renderWithIndicators(
+        <div className="flex h-full w-full items-center justify-center">
+          <svg
+            className="h-full w-full animate-spin text-muted-foreground"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </div>,
+        undefined,
+      );
+
     case "ProgressBar":
       const val = Number(component.value) || 0;
       const max = Number(component.max) || 100;
@@ -475,6 +580,25 @@ const RenderedComponent = memo(function RenderedComponent({
           )}
         </>,
         "relative overflow-hidden rounded",
+      );
+
+    case "ScrollArea":
+      return renderWithIndicators(
+        <>
+          {component.children?.map((child, i) => (
+            <RenderedComponent
+              key={child.id}
+              component={child}
+              isBlueprint={isBlueprint}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              index={i}
+              parentId={component.id}
+              parentType={component.type}
+            />
+          ))}
+        </>,
+        "overflow-hidden rounded",
       );
 
     default:
@@ -593,7 +717,7 @@ export function EditorCanvas() {
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
+    e.dataTransfer.dropEffect = "move";
     setIsDragOver(true);
   }, []);
 
@@ -603,7 +727,7 @@ export function EditorCanvas() {
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
+    e.dataTransfer.dropEffect = "move";
     setIsDragOver(true);
   }, []);
 
