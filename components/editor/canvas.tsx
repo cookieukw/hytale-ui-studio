@@ -35,6 +35,10 @@ const RenderedComponent = memo(function RenderedComponent({
   // Lock dragging if parent is a Button (so the button itself is dragged)
   const isLockedInParent = parentType === "Button";
 
+  const [dragState, setDragState] = useState<{
+    position: "before" | "after" | "inside";
+  } | null>(null);
+
   if (!isVisible) return null;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -53,9 +57,6 @@ const RenderedComponent = memo(function RenderedComponent({
     e.dataTransfer.setDragImage(e.currentTarget as Element, 0, 0);
   };
 
-  const [dragState, setDragState] = useState<{
-    position: "before" | "after" | "inside";
-  } | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -599,6 +600,25 @@ const RenderedComponent = memo(function RenderedComponent({
           ))}
         </>,
         "overflow-hidden rounded",
+      );
+
+    case "Group":
+      return renderWithIndicators(
+        <>
+          {component.children?.map((child, i) => (
+            <RenderedComponent
+              key={child.id}
+              component={child}
+              isBlueprint={isBlueprint}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              index={i}
+              parentId={component.id}
+              parentType={component.type}
+            />
+          ))}
+        </>,
+        "rounded",
       );
 
     default:
