@@ -37,6 +37,33 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       background: { color: "#1a1a2a", opacity: 1 },
     },
   },
+  {
+    type: "DecoratedContainer",
+    label: "Decorated Container",
+    icon: "Layout",
+    category: "Layout",
+    defaultProps: {
+      name: "DecoratedContainer",
+      alias: "$C.@DecoratedContainer",
+      anchor: { width: "100%", height: 300 },
+      layoutMode: "Top",
+      background: { color: "#2a2a3a", opacity: 1 },
+      padding: { top: 40, left: 17, right: 17, bottom: 17 }, // Approximate Frame padding + Title height
+    },
+  },
+  {
+    type: "Panel",
+    label: "Panel",
+    icon: "PanelTop",
+    category: "Layout",
+    defaultProps: {
+      name: "Panel",
+      alias: "$C.@Panel",
+      anchor: { width: "100%", height: "100%" },
+      background: { color: "#2E2A20", opacity: 1 },
+      padding: { top: 20, left: 20, right: 20, bottom: 20 }, // Approximate Border: 20
+    },
+  },
 
   // Input
   {
@@ -289,6 +316,73 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       anchor: { width: 220, height: 32 },
       background: { color: "#1a1a2a", border: "16" },
       padding: { left: 8, right: 8 },
+    },
+  },
+  {
+    type: "ContentSeparator",
+    label: "Content Separator",
+    icon: "Minus",
+    category: "Display",
+    defaultProps: {
+      name: "Separator",
+      alias: "$C.@ContentSeparator",
+      anchor: { left: 0, right: 0, height: 1 },
+      background: { color: "#2b3542" },
+    },
+  },
+  {
+    type: "VerticalSeparator",
+    label: "Vertical Separator",
+    icon: "MoreVertical",
+    category: "Display",
+    defaultProps: {
+      name: "VerticalSeparator",
+      alias: "$C.@VerticalSeparator",
+      anchor: { top: 0, bottom: 0, width: 6, height: "100%" },
+      background: { color: "#393426" },
+    },
+  },
+  {
+    type: "PanelSeparatorFancy",
+    label: "Fancy Separator",
+    icon: "GitCommitHorizontal",
+    category: "Display",
+    defaultProps: {
+      name: "FancySeparator",
+      alias: "$C.@PanelSeparatorFancy",
+      anchor: { left: 0, right: 0, height: 8 },
+      layoutMode: "Left",
+      children: [
+        {
+          id: generateId(),
+          type: "Group",
+          name: "LineLeft",
+          flexWeight: 1,
+          background: {
+            texture: "Common/ContainerPanelSeparatorFancyLine.png",
+          },
+          anchor: { height: 2 },
+        },
+        {
+          id: generateId(),
+          type: "Group",
+          name: "Decoration",
+          anchor: { width: 8, height: 8 },
+          background: {
+            texture: "Common/ContainerPanelSeparatorFancyDecoration.png",
+          },
+        },
+        {
+          id: generateId(),
+          type: "Group",
+          name: "LineRight",
+          flexWeight: 1,
+          background: {
+            texture: "Common/ContainerPanelSeparatorFancyLine.png",
+          },
+          anchor: { height: 2 },
+        },
+      ],
     },
   },
 

@@ -41,6 +41,7 @@ export interface TextStyle {
 
 export interface BackgroundStyle {
   color?: string;
+  texture?: string;
   border?: string;
   opacity?: number;
 }
@@ -54,6 +55,11 @@ export interface ComponentState {
 }
 
 export type ComponentType =
+  | "DecoratedContainer"
+  | "Panel"
+  | "ContentSeparator"
+  | "VerticalSeparator"
+  | "PanelSeparatorFancy"
   | "Group"
   | "TextField"
   | "NumberField"

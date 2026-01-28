@@ -83,7 +83,7 @@ export const RenderedComponent = memo(function RenderedComponent({
       "Row",
       "Card",
       "Panel",
-      "Panel",
+      "DecoratedContainer",
       "Group",
       "ScrollArea",
     ].includes(component.type);
@@ -177,9 +177,54 @@ export const RenderedComponent = memo(function RenderedComponent({
       }
       if (component.anchor.full) {
         style.width = "100%";
-        // Use flex-grow to fill available space instead of height: 100% which collapses in auto-height containers
         style.flexGrow = 1;
-        style.minHeight = "100%"; // Ensure it tries to fill parent if parent has height
+        style.minHeight = "100%";
+      }
+
+      // Explicit positioning
+      if (component.anchor.top !== undefined)
+        style.top =
+          typeof component.anchor.top === "string"
+            ? component.anchor.top
+            : `${component.anchor.top}px`;
+      if (component.anchor.bottom !== undefined)
+        style.bottom =
+          typeof component.anchor.bottom === "string"
+            ? component.anchor.bottom
+            : `${component.anchor.bottom}px`;
+      if (component.anchor.left !== undefined)
+        style.left =
+          typeof component.anchor.left === "string"
+            ? component.anchor.left
+            : `${component.anchor.left}px`;
+      if (component.anchor.right !== undefined)
+        style.right =
+          typeof component.anchor.right === "string"
+            ? component.anchor.right
+            : `${component.anchor.right}px`;
+
+      // Emulate Hytale stretch behavior in Layouts (Flex)
+      // If Left and Right are set, we stretch horizontally
+      if (
+        component.anchor.left !== undefined &&
+        component.anchor.right !== undefined
+      ) {
+        style.alignSelf = "stretch";
+        // If in absolute context, left/right handles it. If flex, alignSelf handles it.
+        // We can remove width to allow stretch
+        if (!component.anchor.width) style.width = "auto";
+      }
+      // If Top and Bottom are set, stretch vertically
+      if (
+        component.anchor.top !== undefined &&
+        component.anchor.bottom !== undefined
+      ) {
+        style.alignSelf = "stretch";
+        style.height = "100%"; // Explicitly force 100% height for absolute or relative positioning behavior
+        if (component.anchor.height) {
+          // If explicit height is set, it overrides 'auto' or '100%'?
+          // Usually top+bottom overrides height. But in CSS Flex, height is disregarded if flex-basis.
+        }
       }
     }
 
@@ -215,8 +260,18 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     if (component.background && !isBlueprint) {
       style.backgroundColor = component.background.color;
+      if (component.background.texture) {
+        // Handle texture path, assuming relative to public or needing / prefix
+        const texture = component.background.texture.startsWith("/")
+          ? component.background.texture
+          : `/${component.background.texture}`;
+        style.backgroundImage = `url(${texture})`;
+        style.backgroundSize = "100% 100%"; // Stretch texture usually
+        style.backgroundRepeat = "no-repeat";
+      }
       if (component.background.border) {
-        // Hytale "Border" is often used as Border Radius
+        // Hytale "Border" is often used as Border Radius or 9-slice?
+        // For simple visualization, radius is okay, but texture usually handles border visually.
         style.borderRadius = `${component.background.border}px`;
       }
       if (component.background.opacity !== undefined) {
@@ -607,6 +662,8 @@ export const RenderedComponent = memo(function RenderedComponent({
       );
 
     case "Group":
+    case "Panel":
+    case "DecoratedContainer":
       return renderWithIndicators(
         <>
           {component.children?.map((child, i) => (
