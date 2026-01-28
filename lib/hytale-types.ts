@@ -101,6 +101,7 @@ export interface HytaleComponent {
   maxWidth?: number;
   maxHeight?: number;
   showScrollbar?: boolean;
+  scrollbarStyle?: string;
   max?: number;
   min?: number;
   step?: number;

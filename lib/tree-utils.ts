@@ -178,6 +178,11 @@ export function componentsToCode(
       code += `${spaces}  Visible: ${comp.isVisible};\n`;
     }
 
+    // ScrollbarStyle
+    if (comp.scrollbarStyle) {
+      code += `${spaces}  ScrollbarStyle: ${comp.scrollbarStyle};\n`;
+    }
+
     // Text (quoted)
     if (comp.text) {
       // For TextField, we usually skip exporting Text if it's handled by a child Label,
