@@ -86,6 +86,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   code: "",
   history: [[]],
   historyIndex: 0,
+  imports: [],
 
   setSelectedId: (id) => set({ selectedId: id }),
 
@@ -127,15 +128,26 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       isExpanded: true,
     };
 
-    set((state) => ({
-      components: addComponentToParent(
-        state.components,
-        parentId,
-        newComponent,
-        index,
-      ),
-      selectedId: id,
-    }));
+    set((state) => {
+      let imports = state.imports;
+      if (newComponent.alias && newComponent.alias.startsWith("$C")) {
+        const hasImport = imports.some((i) => i.trim().startsWith("$C"));
+        if (!hasImport) {
+          imports = [`$C = "../Common.ui";`, ...imports];
+        }
+      }
+
+      return {
+        components: addComponentToParent(
+          state.components,
+          parentId,
+          newComponent,
+          index,
+        ),
+        selectedId: id,
+        imports,
+      };
+    });
 
     get().saveToHistory();
     get().syncCodeFromComponents();
@@ -264,20 +276,20 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   syncCodeFromComponents: () => {
     const state = get();
-    const code = componentsToCode(state.components);
+    const code = componentsToCode(state.components, 0, state.imports);
     set({ code });
   },
 
   exportToUI: () => {
     const state = get();
-    return componentsToCode(state.components);
+    return componentsToCode(state.components, 0, state.imports);
   },
 
   importFromUI: (code) => {
     try {
-      const components = parseComponentsFromCode(code);
+      const { components, imports } = parseAndMapCode(code);
       if (components.length > 0) {
-        set({ components, code });
+        set({ components, code, imports });
         get().saveToHistory();
       }
     } catch (e) {
@@ -291,8 +303,3 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     get().syncCodeFromComponents();
   },
 }));
-
-// Helper/Wrapper to match existing signature if needed, or simply use parseAndMapCode
-function parseComponentsFromCode(code: string): HytaleComponent[] {
-  return parseAndMapCode(code);
-}
