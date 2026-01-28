@@ -33,7 +33,11 @@ export const RenderedComponent = memo(function RenderedComponent({
   const isVisible = component.isVisible ?? true;
 
   // Lock dragging if parent is a Button (so the button itself is dragged)
-  const isLockedInParent = parentType === "Button";
+  const isLockedInParent =
+    parentType === "Button" ||
+    parentType === "SecondaryButton" ||
+    parentType === "TertiaryButton" ||
+    parentType === "CancelButton";
 
   const [dragState, setDragState] = useState<{
     position: "before" | "after" | "inside";
