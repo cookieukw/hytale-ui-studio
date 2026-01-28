@@ -66,8 +66,15 @@ export type ComponentType =
   | "Dropdown"
   | "Slider"
   | "ScrollArea"
-  | "Spinner"
+  | "Sprite" // Was "Spinner", typically Hytale uses Sprite for everything including spinners
   | "ProgressBar";
+
+export interface SpriteFrame {
+  width: number;
+  height: number;
+  perRow: number;
+  count: number;
+}
 
 export interface HytaleComponent {
   id: string;
@@ -99,6 +106,10 @@ export interface HytaleComponent {
   checked?: boolean;
   options?: string[]; // For Dropdown
   showLabel?: boolean;
+  // Sprite specific
+  texturePath?: string;
+  frame?: SpriteFrame;
+  framesPerSecond?: number;
   // States
   states?: ComponentState;
   // Hierarchy
