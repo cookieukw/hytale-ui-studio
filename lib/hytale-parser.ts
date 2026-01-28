@@ -7,6 +7,7 @@ interface ASTNode {
   id: string | null;
   props: Record<string, any>;
   children: ASTNode[];
+  alias?: string;
 }
 
 export class ParserError extends Error {
@@ -125,6 +126,8 @@ export class HytaleParser {
   pos: number;
   variables: any;
 
+  imports: string[] = [];
+
   constructor(tokens: any[], globalScope = {}) {
     this.tokens = tokens;
     this.pos = 0;
@@ -190,13 +193,13 @@ export class HytaleParser {
     return this.pos >= this.tokens.length;
   }
 
-  parse(): ASTNode[] {
+  parse(): { nodes: ASTNode[]; imports: string[] } {
     const nodes: ASTNode[] = [];
     while (!this.isAtEnd()) {
       const node = this.parseStatement();
       if (node) nodes.push(node as ASTNode);
     }
-    return nodes;
+    return { nodes, imports: this.imports };
   }
 
   parseStatement() {
@@ -239,9 +242,31 @@ export class HytaleParser {
     }
 
     if (token.value.startsWith("$")) {
-      while (!this.isAtEnd() && this.peek().value !== ";") this.consume();
-      this.consume(";");
-      return null;
+      // Check for assignment: $Var = "..."
+      if (this.tokens[this.pos + 1]?.value === "=") {
+        const varNameToken = this.consume();
+        this.consume("=");
+        const valToken = this.consume(); // Assuming string or value
+
+        // Capture the full import line roughly for regeneration
+        // Or store structured data. For simplicity, we reconstruct the string or just store the line.
+        // The requirement is mostly to preserve it.
+        // Let's store: `$C = "path/to/file"`
+        let val = valToken.value;
+        if (valToken.type === "STRING") {
+          val = `"${val}"`;
+        }
+
+        this.imports.push(`${varNameToken.value} = ${val};`);
+
+        if (!this.isAtEnd() && this.peek().value === ";") this.consume();
+        return null;
+      }
+
+      // If it's not an assignment, it might be a component usage like $C.@Title { ... }
+      // Fall through to parseElement if it looks like start of element?
+      // Actually, parseElement starts with consume(), so we can just let it handle it
+      // providing we don't consume it here.
     }
 
     return this.parseElement();
@@ -249,14 +274,29 @@ export class HytaleParser {
 
   parseElement(): ASTNode {
     const typeToken = this.consume();
-    let type = typeToken.value.split(".").pop()!.replace("@", "");
+    const rawType = typeToken.value;
+
+    // Check if it's an alias/variable usage
+    let alias: string | null = null;
+    let type = rawType.split(".").pop()!.replace("@", "");
+
+    if (rawType.includes(".") || rawType.startsWith("$")) {
+      alias = rawType;
+      // Logic to determine fallback type?
+      // If the alias resolves to a known type (e.g. via internal defaults), we could use that.
+      // For now, default unknown aliases to "Group" or "Label" based on name?
+      // Safest is "Group" if unknown, but we want to display it properly.
+      // If the alias ends in "Title", maybe it's a Label?
+      // But for editor safety, "Group" is the most flexible container.
+    }
+
     let id = null;
 
     if (!this.isAtEnd() && this.peek().value.startsWith("#"))
       id = this.consume().value.substring(1);
 
     if (this.isAtEnd() || this.peek().value !== "{") {
-      return { type, id, props: {}, children: [] };
+      return { type, id, props: {}, children: [], alias: alias || undefined };
     }
 
     this.consume("{");
@@ -331,7 +371,7 @@ export class HytaleParser {
     }
 
     this.consume("}");
-    return { type, id, props, children };
+    return { type, id, props, children, alias: alias || undefined };
   }
 
   parseExpression() {
@@ -487,14 +527,20 @@ function generateId(): string {
   return `comp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
-export function parseAndMapCode(code: string): HytaleComponent[] {
+export function parseAndMapCode(code: string): {
+  components: HytaleComponent[];
+  imports: string[];
+} {
   try {
     const lexer = new HytaleLexer(code);
     const tokens = lexer.tokenize();
     const parser = new HytaleParser(tokens);
-    const nodes = parser.parse();
+    const result = parser.parse();
 
-    return nodes.map((node) => mapNodeToComponent(node));
+    return {
+      components: result.nodes.map((node) => mapNodeToComponent(node)),
+      imports: result.imports,
+    };
   } catch (e) {
     console.error("Parser Error:", e);
     throw e;
@@ -512,6 +558,7 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     isVisible: true,
     isLocked: false,
     isExpanded: true,
+    alias: node.alias,
   };
 
   // Helper to safely set nested properties
