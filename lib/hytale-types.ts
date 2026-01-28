@@ -66,7 +66,8 @@ export type ComponentType =
   | "Dropdown"
   | "Slider"
   | "ScrollArea"
-  | "Sprite" // Was "Spinner", typically Hytale uses Sprite for everything including spinners
+  | "Sprite"
+  | "Spinner"
   | "ProgressBar";
 
 export interface SpriteFrame {
@@ -118,6 +119,8 @@ export interface HytaleComponent {
   isVisible?: boolean;
   isLocked?: boolean;
   isExpanded?: boolean;
+  inheritance?: string;
+  alias?: string;
 }
 
 export type PresetType =
@@ -171,4 +174,5 @@ export interface EditorState {
   code: string;
   history: HytaleComponent[][];
   historyIndex: number;
+  imports: string[];
 }
