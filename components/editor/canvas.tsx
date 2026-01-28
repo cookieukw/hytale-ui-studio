@@ -28,6 +28,7 @@ const RenderedComponent = memo(function RenderedComponent({
   // Use store directly for actions to avoid prop drilling
   const moveComponent = useEditorStore((state) => state.moveComponent);
   const addComponent = useEditorStore((state) => state.addComponent);
+  const setDraggingId = useEditorStore((state) => state.setDraggingId);
 
   const isSelected = selectedId === component.id;
   const isVisible = component.isVisible ?? true;
@@ -50,6 +51,7 @@ const RenderedComponent = memo(function RenderedComponent({
     if (isLockedInParent) return; // Should be handled by draggable=false but for safety
 
     e.stopPropagation();
+    setDraggingId(component.id);
     e.dataTransfer.setData("componentId", component.id);
     e.dataTransfer.setData("componentType", component.type);
     e.dataTransfer.setData("text/plain", component.id); // Fallback
@@ -57,6 +59,9 @@ const RenderedComponent = memo(function RenderedComponent({
     e.dataTransfer.setDragImage(e.currentTarget as Element, 0, 0);
   };
 
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggingId(null);
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -83,8 +88,8 @@ const RenderedComponent = memo(function RenderedComponent({
     let position: "before" | "after" | "inside" = "inside";
 
     const edgeThreshold = 10; // pixels, or percentage? using percentage is safer for small items
-    // Using 25% zone for before/after
-    const zone = height * 0.25;
+    // Using 25% zone for before/after, but if container is large, limit to max 20px
+    const zone = Math.min(height * 0.25, 20);
 
     if (isContainer) {
       if (y < zone) position = "before";
@@ -112,7 +117,8 @@ const RenderedComponent = memo(function RenderedComponent({
     e.stopPropagation();
     setDragState(null);
 
-    const droppedId = e.dataTransfer.getData("componentId");
+    const storeDraggingId = useEditorStore.getState().draggingId;
+    const droppedId = storeDraggingId || e.dataTransfer.getData("componentId");
     const droppedType = e.dataTransfer.getData(
       "componentType",
     ) as ComponentType;
@@ -340,6 +346,7 @@ const RenderedComponent = memo(function RenderedComponent({
     // Disable dragging if inside a button, so the button handles the drag
     draggable: !isLockedInParent,
     onDragStart: handleDragStart,
+    onDragEnd: handleDragEnd,
     onDragOver: handleDragOver,
     onDragLeave: handleDragLeave,
     onDrop: handleDrop,
@@ -359,15 +366,15 @@ const RenderedComponent = memo(function RenderedComponent({
           baseProps.className,
           extraClass,
           dragState?.position === "inside" &&
-            "ring-2 ring-blue-500 ring-offset-2",
+            "ring-2 ring-cyan-400 ring-offset-2",
         )}
       >
         {dragState?.position === "before" && (
-          <div className="absolute top-0 left-0 right-0 h-1 -mt-1 bg-blue-500 z-50 pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 z-50 pointer-events-none shadow-[0_0_4px_rgba(34,211,238,0.8)]" />
         )}
         {content}
         {dragState?.position === "after" && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 -mb-1 bg-blue-500 z-50 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-400 z-50 pointer-events-none shadow-[0_0_4px_rgba(34,211,238,0.8)]" />
         )}
       </div>
     </>
@@ -658,6 +665,8 @@ export function EditorCanvas() {
   const fitToScreen = useEditorStore((state) => state.fitToScreen);
   const setZoom = useEditorStore((state) => state.setZoom);
   const setCalculatedZoom = useEditorStore((state) => state.setCalculatedZoom);
+  const draggingId = useEditorStore((state) => state.draggingId);
+  const setDraggingId = useEditorStore((state) => state.setDraggingId);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -754,9 +763,15 @@ export function EditorCanvas() {
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
+      e.stopPropagation();
       setIsDragOver(false);
 
-      const componentId = e.dataTransfer.getData("componentId");
+      const storeDraggingId = useEditorStore.getState().draggingId;
+      const componentId =
+        storeDraggingId || e.dataTransfer.getData("componentId");
+
+      setDraggingId(null); // Clear dragging state
+
       if (componentId) {
         moveComponent(componentId, null, components.length);
         return;
@@ -817,9 +832,17 @@ export function EditorCanvas() {
   const isBlueprint = viewMode === "Blueprint";
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-canvas">
+    <div
+      className="flex h-full flex-col overflow-hidden bg-canvas relative"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div
+        ref={containerRef}
         className="relative flex flex-1 items-center justify-center overflow-auto p-4"
+        onClick={handleCanvasClick}
         style={{
           backgroundImage: showGrid
             ? `linear-gradient(to right, var(--canvas-grid) 1px, transparent 1px),
