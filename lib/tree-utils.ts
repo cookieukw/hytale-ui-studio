@@ -1,0 +1,362 @@
+import type { HytaleComponent } from "./hytale-types";
+
+// Helper to find parent and index (0-based)
+export function findComponentLocation(
+  components: HytaleComponent[],
+  targetId: string,
+  parentId: string | null = null,
+): { parentId: string | null; index: number } | null {
+  for (let i = 0; i < components.length; i++) {
+    if (components[i].id === targetId) {
+      return { parentId, index: i };
+    }
+    if (components[i].children) {
+      const result = findComponentLocation(
+        components[i].children!,
+        targetId,
+        components[i].id,
+      );
+      if (result) return result;
+    }
+  }
+  return null;
+}
+
+export function generateId(): string {
+  return `comp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+export function findComponentById(
+  components: HytaleComponent[],
+  id: string,
+): HytaleComponent | null {
+  for (const comp of components) {
+    if (comp.id === id) return comp;
+    if (comp.children) {
+      const found = findComponentById(comp.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+export function updateComponentInTree(
+  components: HytaleComponent[],
+  id: string,
+  updates: Partial<HytaleComponent>,
+): HytaleComponent[] {
+  return components.map((comp) => {
+    if (comp.id === id) {
+      return { ...comp, ...updates };
+    }
+    if (comp.children) {
+      return {
+        ...comp,
+        children: updateComponentInTree(comp.children, id, updates),
+      };
+    }
+    return comp;
+  });
+}
+
+export function removeComponentFromTree(
+  components: HytaleComponent[],
+  id: string,
+): HytaleComponent[] {
+  return components
+    .filter((comp) => comp.id !== id)
+    .map((comp) => {
+      if (comp.children) {
+        return {
+          ...comp,
+          children: removeComponentFromTree(comp.children, id),
+        };
+      }
+      return comp;
+    });
+}
+
+export function addComponentToParent(
+  components: HytaleComponent[],
+  parentId: string | null,
+  newComponent: HytaleComponent,
+  index?: number,
+): HytaleComponent[] {
+  if (!parentId) {
+    if (index !== undefined) {
+      const newComps = [...components];
+      newComps.splice(index, 0, newComponent);
+      return newComps;
+    }
+    return [...components, newComponent];
+  }
+
+  return components.map((comp) => {
+    if (comp.id === parentId) {
+      const children = comp.children || [];
+      if (index !== undefined) {
+        const newChildren = [...children];
+        newChildren.splice(index, 0, newComponent);
+        return { ...comp, children: newChildren };
+      }
+      return { ...comp, children: [...children, newComponent] };
+    }
+    if (comp.children) {
+      return {
+        ...comp,
+        children: addComponentToParent(
+          comp.children,
+          parentId,
+          newComponent,
+          index,
+        ),
+      };
+    }
+    return comp;
+  });
+}
+
+export function duplicateComponent(
+  component: HytaleComponent,
+): HytaleComponent {
+  const newId = generateId();
+  return {
+    ...component,
+    id: newId,
+    name: `${component.name} (copy)`,
+    children: component.children?.map(duplicateComponent),
+  };
+}
+
+// Helper to format Hytale colors: #RRGGBB or #RRGGBB(Alpha) checks if hex is 3 or 6 digits
+export const formatHytaleColor = (hex?: string, opacity?: number): string => {
+  if (!hex) return "";
+
+  // Normalize hex to 6 digits
+  let cleanHex = hex.replace("#", "");
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex
+      .split("")
+      .map((c) => c + c)
+      .join("");
+  }
+
+  if (opacity !== undefined && opacity < 1) {
+    return `#${cleanHex}(${opacity})`;
+  }
+
+  return `#${cleanHex}`;
+};
+
+export function componentsToCode(
+  components: HytaleComponent[],
+  depth = 0,
+): string {
+  let code = "";
+  const spaces = "  ".repeat(depth);
+
+  components.forEach((comp) => {
+    // Header: Type #ID or Type
+    let typeToExport = comp.type;
+    if (typeToExport === "ScrollArea") {
+      typeToExport = "Group";
+    }
+    // Sprite is exported as Sprite, which is default behavior
+
+    const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
+    code += `${spaces}${typeToExport}${idPart} {\n`;
+
+    // Visible
+    if (typeof comp.isVisible === "boolean") {
+      code += `${spaces}  Visible: ${comp.isVisible};\n`;
+    }
+
+    // Text (quoted)
+    if (comp.text) {
+      // For TextField, we usually skip exporting Text if it's handled by a child Label,
+      // but if the component HAS text property set, we export it.
+      // Ideally we check component type.
+      // But adhering to the previous logic:
+      code += `${spaces}  Text: "${comp.text}";\n`;
+    }
+    if (comp.placeholderText) {
+      code += `${spaces}  Text: "${comp.placeholderText}";\n`;
+    }
+
+    // Value
+    if (comp.value !== undefined) {
+      code += `${spaces}  Value: ${comp.value};\n`;
+    }
+    if (comp.max !== undefined) {
+      code += `${spaces}  Max: ${comp.max};\n`;
+    }
+
+    // Anchor: (Key: Val, ...) syntax
+    if (comp.anchor) {
+      if (comp.anchor.full) {
+        code += `${spaces}  Anchor: (Full: true);\n`;
+      } else {
+        const parts: string[] = [];
+        if (comp.anchor.width !== undefined)
+          parts.push(`Width: ${comp.anchor.width}`);
+        if (comp.anchor.height !== undefined)
+          parts.push(`Height: ${comp.anchor.height}`);
+        if (comp.anchor.top !== undefined)
+          parts.push(`Top: ${comp.anchor.top}`);
+        if (comp.anchor.bottom !== undefined)
+          parts.push(`Bottom: ${comp.anchor.bottom}`);
+        if (comp.anchor.left !== undefined)
+          parts.push(`Left: ${comp.anchor.left}`);
+        if (comp.anchor.right !== undefined)
+          parts.push(`Right: ${comp.anchor.right}`);
+
+        if (comp.anchor.centerX !== undefined)
+          parts.push(`CenterX: ${comp.anchor.centerX}`);
+        if (comp.anchor.centerY !== undefined)
+          parts.push(`CenterY: ${comp.anchor.centerY}`);
+
+        if (parts.length > 0) {
+          code += `${spaces}  Anchor: (${parts.join(", ")});\n`;
+        }
+      }
+    }
+
+    // Padding: (Key: Val, ...)
+    if (comp.padding) {
+      const parts: string[] = [];
+      if (comp.padding.top !== undefined)
+        parts.push(`Top: ${comp.padding.top}`);
+      if (comp.padding.bottom !== undefined)
+        parts.push(`Bottom: ${comp.padding.bottom}`);
+      if (comp.padding.left !== undefined)
+        parts.push(`Left: ${comp.padding.left}`);
+      if (comp.padding.right !== undefined)
+        parts.push(`Right: ${comp.padding.right}`);
+      if (parts.length > 0) {
+        code += `${spaces}  Padding: (${parts.join(", ")});\n`;
+      }
+    }
+
+    // LayoutMode
+    if (comp.layoutMode) {
+      code += `${spaces}  LayoutMode: ${comp.layoutMode};\n`;
+    }
+    if (comp.direction) {
+      code += `${spaces}  Direction: ${comp.direction};\n`;
+    }
+    if (comp.flexWeight !== undefined) {
+      code += `${spaces}  FlexWeight: ${comp.flexWeight};\n`;
+    }
+
+    // Background: (Key: Val, ...)
+    if (comp.background) {
+      const parts: string[] = [];
+
+      // Color: #RRGGBB(Opacity) format, no quotes
+      const colorString = formatHytaleColor(
+        comp.background.color,
+        comp.background.opacity,
+      );
+      if (colorString) parts.push(`Color: ${colorString}`);
+
+      // Border: Value (Radius)
+      if (comp.background.border) {
+        parts.push(`Border: ${comp.background.border}`);
+      }
+
+      // Opacity is now merged into Color, so we don't list it separately for Background
+      // unless user wants standalone Opacity property? Request said: "opacidade nao é um atributo. ele vai sempre do lado da cor"
+
+      if (parts.length > 0) {
+        code += `${spaces}  Background: (${parts.join(", ")});\n`;
+      }
+    }
+
+    // TimerLabel Seconds
+    if (comp.type === "TimerLabel" && comp.seconds !== undefined) {
+      code += `${spaces}  Seconds: ${comp.seconds};\n`;
+    }
+
+    // CheckBox
+    if (comp.type === "CheckBox" && comp.checked !== undefined) {
+      code += `${spaces}  Checked: ${comp.checked};\n`;
+    }
+
+    // Slider
+    if (comp.type === "Slider") {
+      if (comp.min !== undefined) code += `${spaces}  Min: ${comp.min};\n`;
+      if (comp.max !== undefined) code += `${spaces}  Max: ${comp.max};\n`;
+      if (comp.step !== undefined) code += `${spaces}  Step: ${comp.step};\n`;
+    }
+
+    // Dropdown
+    if (comp.type === "Dropdown" && comp.options) {
+      // Assuming Hytale uses a string list? Or children?
+      // Standard Hytale Dropdown often renders options via Code or Children.
+      // For now, we export as parameter if exists.
+      // NOTE: Hytale UI format usually doesn't have inline lists like ["A","B"].
+      // It might use child items. But preserving data:
+      // code += `${spaces}  Options: [${comp.options.map(o => `"${o}"`).join(", ")}];\n`;
+      // User Reference shows DropdownBox using `EntriesInViewport` etc, but not options list directly in UI script typically.
+      // We will skip exporting options to code for now to avoid syntax errors, holding it in internal state.
+    }
+
+    // Sprite Properties
+    if (comp.type === "Sprite") {
+      if (comp.texturePath) {
+        code += `${spaces}  TexturePath: "${comp.texturePath}";\n`;
+      }
+      if (comp.frame) {
+        const { width, height, perRow, count } = comp.frame;
+        code += `${spaces}  Frame: (Width: ${width}, Height: ${height}, PerRow: ${perRow}, Count: ${count});\n`;
+      }
+      if (comp.framesPerSecond !== undefined) {
+        code += `${spaces}  FramesPerSecond: ${comp.framesPerSecond};\n`;
+      }
+    }
+
+    // TextStyle
+    // TimerLabel uses Style: (...) syntax
+    if (comp.textStyle) {
+      if (comp.type === "TimerLabel") {
+        const parts: string[] = [];
+        if (comp.textStyle.fontSize)
+          parts.push(`FontSize: ${comp.textStyle.fontSize}`);
+        if (comp.textStyle.alignment)
+          parts.push(`Alignment: ${comp.textStyle.alignment}`);
+        if (comp.textStyle.textColor)
+          parts.push(`Color: ${formatHytaleColor(comp.textStyle.textColor)}`);
+        if (comp.textStyle.renderBold) parts.push(`RenderBold: true`);
+
+        if (parts.length > 0) {
+          code += `${spaces}  Style: (${parts.join(", ")});\n`;
+        }
+      } else {
+        // Standard Element export
+        if (comp.textStyle.fontSize)
+          code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
+
+        // Color: #RRGGBB(Opacity), no quotes
+        if (comp.textStyle.textColor) {
+          const textColor = formatHytaleColor(comp.textStyle.textColor);
+          code += `${spaces}  Color: ${textColor};\n`;
+        }
+
+        if (comp.textStyle.renderBold) code += `${spaces}  RenderBold: true;\n`;
+        if (comp.textStyle.renderUppercase)
+          code += `${spaces}  RenderUppercase: true;\n`;
+        if (comp.textStyle.alignment)
+          code += `${spaces}  Alignment: ${comp.textStyle.alignment};\n`;
+      }
+    }
+
+    // Recursively process children
+    if (comp.children && comp.children.length > 0) {
+      code += componentsToCode(comp.children, depth + 1);
+    }
+
+    code += `${spaces}}\n`;
+  });
+
+  return code;
+}
