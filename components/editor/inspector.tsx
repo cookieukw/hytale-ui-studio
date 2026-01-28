@@ -32,6 +32,10 @@ import type {
   Direction,
 } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
+import {
+  COMMON_UI_KEYS,
+  COMMON_UI_DEFINITIONS,
+} from "@/lib/common-definitions";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -341,11 +345,21 @@ export function Inspector() {
   const directions: Direction[] = ["Vertical", "Horizontal"];
   const alignments: TextAlignment[] = ["Left", "Center", "Right"];
 
-  const hasTextStyle = ["Label", "Button", "TextButton", "TextField", "TimerLabel", "Dropdown", "CheckBox", "ProgressBar", "Slider"].includes(
+  const hasTextStyle = [
+    "Label",
+    "Button",
+    "TextButton",
+    "TextField",
+    "TimerLabel",
+    "Dropdown",
+    "CheckBox",
+    "ProgressBar",
+    "Slider",
+  ].includes(component.type);
+  const hasPlaceholder = ["TextField", "NumberField"].includes(component.type);
+  const hasValue = ["ProgressBar", "NumberField", "Slider"].includes(
     component.type,
   );
-  const hasPlaceholder = ["TextField", "NumberField"].includes(component.type);
-  const hasValue = ["ProgressBar", "NumberField", "Slider"].includes(component.type);
   const hasStates = [
     "Button",
     "TextButton",
@@ -391,6 +405,41 @@ export function Inspector() {
             <Settings2 className="h-3 w-3" />
           </TabsTrigger>
         </TabsList>
+
+        <div className="px-3 py-2 border-b border-border bg-secondary/20">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-muted-foreground w-16">
+              Inherits:
+            </span>
+            <Select
+              value={component.inheritance || "None"}
+              onValueChange={(val) => {
+                if (val === "None") {
+                  handleUpdate({ inheritance: undefined });
+                } else {
+                  // Apply inheritance and props
+                  const def = COMMON_UI_DEFINITIONS[val];
+                  handleUpdate({
+                    inheritance: val,
+                    ...def, // Merge properties
+                  });
+                }
+              }}
+            >
+              <SelectTrigger className="h-6 text-xs flex-1">
+                <SelectValue placeholder="None" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="None">None</SelectItem>
+                {COMMON_UI_KEYS.map((k) => (
+                  <SelectItem key={k} value={k}>
+                    {k}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         <ScrollArea className="flex-1">
           {/* Layout Tab */}
