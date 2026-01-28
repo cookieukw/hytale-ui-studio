@@ -58,6 +58,7 @@ const componentIcons: Record<
   Dropdown: List,
   Slider: SlidersHorizontal,
   Spinner: Loader2,
+  Sprite: ImageIcon,
 };
 
 interface TreeNodeProps {
