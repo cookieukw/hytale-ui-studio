@@ -80,16 +80,16 @@ const RenderedComponent = memo(function RenderedComponent({
       "Row",
       "Card",
       "Panel",
+      "Panel",
       "Group",
-      "Button",
       "ScrollArea",
     ].includes(component.type);
 
     let position: "before" | "after" | "inside" = "inside";
 
     const edgeThreshold = 10; // pixels, or percentage? using percentage is safer for small items
-    // Using 25% zone for before/after, but if container is large, limit to max 20px
-    const zone = Math.min(height * 0.25, 20);
+    // Using 25% zone for before/after, but if container is large, limit to max 30px
+    const zone = Math.min(height * 0.25, 30);
 
     if (isContainer) {
       if (y < zone) position = "before";
@@ -540,32 +540,20 @@ const RenderedComponent = memo(function RenderedComponent({
         undefined,
       );
 
-    case "Spinner":
-      return renderWithIndicators(
-        <div className="flex h-full w-full items-center justify-center">
-          <svg
-            className="h-full w-full animate-spin text-muted-foreground"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-        </div>,
-        undefined,
+    case "Sprite": {
+      // Logic for Sprite Sheet Animation
+      const texturePath = component.texturePath;
+      const isSpinner = texturePath === "Common/Spinner.png";
+      const src = isSpinner ? "/Spinner@2x.png" : "/placeholder.svg";
+
+      return (
+        <SpriteRenderer
+          component={component}
+          src={src}
+          renderWithIndicators={renderWithIndicators}
+        />
       );
+    }
 
     case "ProgressBar":
       const val = Number(component.value) || 0;
@@ -648,6 +636,93 @@ const RenderedComponent = memo(function RenderedComponent({
       );
   }
 });
+
+const SpriteRenderer = ({
+  component,
+  src,
+  renderWithIndicators,
+}: {
+  component: HytaleComponent;
+  src: string;
+  renderWithIndicators: (
+    content: React.ReactNode,
+    extraClass?: string,
+    extraStyle?: React.CSSProperties,
+  ) => React.ReactNode;
+}) => {
+  const [frameIndex, setFrameIndex] = useState(0);
+
+  useEffect(() => {
+    if (!component.frame || !component.framesPerSecond) return;
+
+    const interval = 1000 / component.framesPerSecond;
+    const timer = setInterval(() => {
+      setFrameIndex((prev) => {
+        const count = component.frame?.count || 1;
+        return (prev + 1) % count;
+      });
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [component.frame, component.framesPerSecond]);
+
+  if (!component.frame) {
+    // Fallback static image
+    return renderWithIndicators(
+      <div className="flex h-full w-full items-center justify-center overflow-hidden">
+        <img
+          src={src}
+          alt="Sprite"
+          className="object-contain max-w-full max-h-full"
+        />
+      </div>,
+    );
+  }
+
+  const { width, height, perRow } = component.frame;
+
+  // Calculate background position
+  // The logic implies the image 'src' is the spritesheet.
+  const col = frameIndex % perRow;
+  const row = Math.floor(frameIndex / perRow);
+
+  const bgPosX = -(col * width);
+  const bgPosY = -(row * height);
+
+  // Calculate total sheet size to support scaling (e.g. @2x images mapped to 1x logical pixels)
+  // We want the whole background image to be scaled such that each frame is 'width'.
+  // Total Sheet Width = perRow * width
+  // Total Sheet Height = ceil(count / perRow) * height
+  // We need to calculate rowCount, defaulting count to 1 if missing.
+  const count = component.frame?.count || 1;
+  const sheetWidth = perRow * width;
+  const rowCount = Math.ceil(count / perRow);
+  const sheetHeight = rowCount * height;
+
+  return renderWithIndicators(
+    <div
+      className="overflow-hidden"
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          width: `${width}px`,
+          height: `${height}px`,
+          backgroundImage: `url(${src})`,
+          backgroundPosition: `${bgPosX}px ${bgPosY}px`,
+          backgroundSize: `${sheetWidth}px ${sheetHeight}px`,
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+    </div>,
+  );
+};
 
 export function EditorCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
