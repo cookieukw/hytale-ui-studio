@@ -130,7 +130,23 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
     set((state) => {
       let imports = state.imports;
+      let needsImport = false;
+
+      // Check alias
       if (newComponent.alias && newComponent.alias.startsWith("$C")) {
+        needsImport = true;
+      }
+
+      // Check properties (like ScrollbarStyle)
+      if (
+        !needsImport &&
+        newComponent.scrollbarStyle &&
+        newComponent.scrollbarStyle.startsWith("$C")
+      ) {
+        needsImport = true;
+      }
+
+      if (needsImport) {
         const hasImport = imports.some((i) => i.trim().startsWith("$C"));
         if (!hasImport) {
           imports = [`$C = "../Common.ui";`, ...imports];
