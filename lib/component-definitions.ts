@@ -17,7 +17,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Layout",
     defaultProps: {
       name: "Group",
-      alias: "$C.@Group",
+      alias: "$C.@Container",
       anchor: { width: 200, height: 100 },
       layoutMode: "Top",
       background: { color: "#2a2a3a", opacity: 1 },
@@ -30,10 +30,10 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Layout",
     defaultProps: {
       name: "ScrollArea",
-      alias: "$C.@ScrollArea",
+      scrollbarStyle: "$C.@DefaultScrollbarStyle",
+      showScrollbar: true,
       anchor: { width: 200, height: 300 },
       layoutMode: "Top",
-      showScrollbar: true,
       background: { color: "#1a1a2a", opacity: 1 },
     },
   },
@@ -46,7 +46,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Input",
     defaultProps: {
       name: "TextField",
-      alias: "$C.@TextField",
       placeholderText: "Enter text...",
       anchor: { width: 200, height: 40 },
       padding: { left: 12, right: 12, top: 8, bottom: 8 },
@@ -60,7 +59,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Input",
     defaultProps: {
       name: "NumberField",
-      alias: "$C.@NumberField",
       value: 0,
       anchor: { width: 120, height: 40 },
       padding: { left: 12, right: 12, top: 8, bottom: 8 },
@@ -74,7 +72,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Input",
     defaultProps: {
       name: "Button",
-      alias: "$C.@Button",
       anchor: { width: 120, height: 40 },
       background: { color: "#4a9eff", opacity: 1 },
       layoutMode: "Middle",
@@ -88,7 +85,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           id: generateId(),
           type: "Label",
           name: "ButtonLabel",
-          alias: "$C.@Label",
           text: "Button",
           textStyle: {
             fontSize: 14,
@@ -106,7 +102,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Input",
     defaultProps: {
       name: "TextButton",
-      alias: "$C.@TextButton",
       text: "Click me",
       textStyle: {
         fontSize: 14,
@@ -126,13 +121,13 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Input",
     defaultProps: {
       name: "CheckBox",
-      alias: "$C.@CheckBox",
       checked: false,
       anchor: { width: 22, height: 22 },
       background: { color: "#000000", opacity: 0, border: "7" },
       padding: { top: 4, bottom: 4, left: 4, right: 4 },
     },
   },
+  /*
   {
     type: "Slider",
     label: "Slider",
@@ -140,7 +135,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Input",
     defaultProps: {
       name: "Slider",
-      alias: "$C.@Slider",
       value: 50,
       min: 0,
       max: 100,
@@ -149,6 +143,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       background: { color: "#1a1a2a", border: "2" },
     },
   },
+  */
   {
     type: "Dropdown",
     label: "Dropdown",
@@ -156,7 +151,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Input",
     defaultProps: {
       name: "Dropdown",
-      alias: "$C.@Dropdown",
+      alias: "$C.@DropdownBox",
       text: "Select Option", // Used as current selection label
       options: ["Option 1", "Option 2", "Option 3"],
       anchor: { width: 220, height: 32 },
@@ -173,7 +168,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Display",
     defaultProps: {
       name: "Label",
-      alias: "$C.@Label",
       text: "Label Text",
       textStyle: {
         fontSize: 14,
@@ -189,8 +183,21 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Display",
     defaultProps: {
       name: "Spinner",
-      alias: "$C.@DefaultSpinner",
+      // User says it's a sheet animation 8x9, likely 8 columns, 9 rows? Or count?
+      // "uma sheet animation de 8x9" implies grid.
+      // Usually "Spinner@2x.png" found in public/Common
+      // Let's use generic Sprite type but allow Spinner name
+      // But user requested "o spinner tem que carregar a spinner png que ta na pasta public"
+      type: "Sprite",
+      texturePath: "Common/Spinner.png", // Or Spinner@2x.png? User code often uses relative or mapped paths
+      // Assuming asset loader handles "Common/Spinner.png" maps to public/Common/Spinner.png or similar.
+      // Let's use the explicit filename found: "Common/Spinner@2x.png" if possible, or usually just "Common/Spinner"
+      // Looking at `rendered-component.tsx`, it had special logic for `Common/Spinner.png`.
+      frame: { width: 32, height: 32, perRow: 8, count: 72 },
+      // User said 8x9... 8 columns, 9 rows = 72 frames
       anchor: { width: 32, height: 32 },
+      framesPerSecond: 24,
+      alias: "$C.@DefaultSpinner",
     },
   },
   {
@@ -200,7 +207,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Display",
     defaultProps: {
       name: "TimerLabel",
-      alias: "$C.@TimerLabel",
       seconds: 60,
       textStyle: {
         fontSize: 32,
@@ -217,12 +223,14 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Display",
     defaultProps: {
       name: "Image",
-      alias: "$C.@Image",
+      // User wants AssetImage
+      alias: "AssetImage",
       source: "",
       fit: "Fit",
       anchor: { width: 100, height: 100 },
     },
   },
+  /*
   {
     type: "ProgressBar",
     label: "Progress Bar",
@@ -230,7 +238,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Display",
     defaultProps: {
       name: "ProgressBar",
-      alias: "$C.@ProgressBar",
       value: 50,
       max: 100,
       showLabel: true,
@@ -238,6 +245,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       background: { color: "#1a1a2a" },
     },
   },
+  */
 ];
 
 export const PRESET_DEFINITIONS: PresetDefinition[] = [
