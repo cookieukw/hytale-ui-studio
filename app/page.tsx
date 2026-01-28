@@ -48,6 +48,25 @@ export default function HytaleUIStudio() {
           removeComponent(selectedId);
         }
       }
+
+      // Undo / Redo
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        !e.shiftKey &&
+        e.key.toLowerCase() === "z"
+      ) {
+        e.preventDefault();
+        useEditorStore.getState().undo();
+      }
+
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        ((e.shiftKey && e.key.toLowerCase() === "z") ||
+          e.key.toLowerCase() === "y")
+      ) {
+        e.preventDefault();
+        useEditorStore.getState().redo();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
