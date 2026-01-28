@@ -366,6 +366,9 @@ interface EditorStore extends EditorState {
   fitToScreen: boolean;
   setFitToScreen: (fit: boolean) => void;
 
+  draggingId: string | null;
+  setDraggingId: (id: string | null) => void;
+
   // Components
   addComponent: (
     component: Omit<HytaleComponent, "id">,
@@ -435,6 +438,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   setActiveMobileTab: (tab) => set({ activeMobileTab: tab }),
 
   setFitToScreen: (fit) => set({ fitToScreen: fit }),
+
+  draggingId: null,
+  setDraggingId: (id: string | null) => set({ draggingId: id }),
 
   addComponent: (component, parentId = null, index) => {
     const id = generateId();
