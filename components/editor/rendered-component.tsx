@@ -424,6 +424,9 @@ export const RenderedComponent = memo(function RenderedComponent({
       );
 
     case "Button":
+    case "SecondaryButton":
+    case "TertiaryButton":
+    case "CancelButton":
       return renderWithIndicators(
         <>
           {component.children?.map((child, i) => (
@@ -443,6 +446,9 @@ export const RenderedComponent = memo(function RenderedComponent({
       );
 
     case "TextButton":
+    case "SecondaryTextButton":
+    case "TertiaryTextButton":
+    case "CancelTextButton":
       return renderWithIndicators(
         component.text || "Text Button",
         undefined,

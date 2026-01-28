@@ -113,7 +113,139 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       },
     },
   },
-
+  {
+    type: "SecondaryButton",
+    label: "Secondary Button",
+    icon: "MousePointerClick",
+    category: "Input",
+    defaultProps: {
+      name: "SecondaryButton",
+      alias: "$C.@SecondaryButton",
+      anchor: { width: 120, height: 44 }, // Override default square size
+      // Visual only for editor preview, actual style comes from Hytale runtime via alias
+      background: { color: "#4a9eff", opacity: 0.5 },
+      layoutMode: "Middle",
+      states: {
+        hovered: { background: { color: "#5aafff", opacity: 0.6 } },
+        pressed: { background: { color: "#3a8eef", opacity: 0.7 } },
+        disabled: { background: { opacity: 0.3 } },
+      },
+      children: [
+        {
+          id: generateId(),
+          type: "Label",
+          name: "ButtonLabel",
+          text: "Secondary",
+          textStyle: {
+            fontSize: 14,
+            textColor: "#ffffff",
+            alignment: "Center",
+          },
+        },
+      ],
+    },
+  },
+  {
+    type: "SecondaryTextButton",
+    label: "Secondary Text Button",
+    icon: "Type",
+    category: "Input",
+    defaultProps: {
+      name: "SecondaryTextButton",
+      alias: "$C.@SecondaryTextButton",
+      text: "Secondary",
+      textStyle: { fontSize: 14, textColor: "#bdcbd3" }, // Matches @SecondaryButtonLabelStyle
+      anchor: { width: 120, height: 44 },
+    },
+  },
+  {
+    type: "TertiaryButton",
+    label: "Tertiary Button",
+    icon: "MousePointerClick",
+    category: "Input",
+    defaultProps: {
+      name: "TertiaryButton",
+      alias: "$C.@TertiaryButton",
+      anchor: { width: 120, height: 44 },
+      background: { color: "#4a9eff", opacity: 0.3 },
+      layoutMode: "Middle",
+      states: {
+        hovered: { background: { color: "#5aafff", opacity: 0.4 } },
+        pressed: { background: { color: "#3a8eef", opacity: 0.5 } },
+        disabled: { background: { opacity: 0.1 } },
+      },
+      children: [
+        {
+          id: generateId(),
+          type: "Label",
+          name: "ButtonLabel",
+          text: "Tertiary",
+          textStyle: {
+            fontSize: 14,
+            textColor: "#ffffff",
+            alignment: "Center",
+          },
+        },
+      ],
+    },
+  },
+  {
+    type: "TertiaryTextButton",
+    label: "Tertiary Text Button",
+    icon: "Type",
+    category: "Input",
+    defaultProps: {
+      name: "TertiaryTextButton",
+      alias: "$C.@TertiaryTextButton",
+      text: "Tertiary",
+      textStyle: { fontSize: 14, textColor: "#bdcbd3" },
+      anchor: { width: 120, height: 44 },
+    },
+  },
+  {
+    type: "CancelButton",
+    label: "Cancel Button",
+    icon: "MousePointerClick",
+    category: "Input",
+    defaultProps: {
+      name: "CancelButton",
+      alias: "$C.@CancelButton",
+      anchor: { width: 120, height: 44 },
+      background: { color: "#ff4a4a", opacity: 0.8 },
+      layoutMode: "Middle",
+      states: {
+        hovered: { background: { color: "#ff6a6a", opacity: 0.9 } },
+        pressed: { background: { color: "#ee3a3a", opacity: 1 } },
+        disabled: { background: { opacity: 0.4 } },
+      },
+      children: [
+        {
+          id: generateId(),
+          type: "Label",
+          name: "ButtonLabel",
+          text: "Cancel",
+          textStyle: {
+            fontSize: 14,
+            textColor: "#ffffff",
+            alignment: "Center",
+          },
+        },
+      ],
+    },
+  },
+  {
+    type: "CancelTextButton",
+    label: "Cancel Text Button",
+    icon: "Type",
+    category: "Input",
+    defaultProps: {
+      name: "CancelTextButton",
+      alias: "$C.@CancelTextButton",
+      text: "Cancel",
+      textStyle: { fontSize: 14, textColor: "#bfcdd5" },
+      anchor: { width: 120, height: 44 },
+    },
+  },
   {
     type: "CheckBox",
     label: "Check Box",
