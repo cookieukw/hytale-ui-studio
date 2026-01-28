@@ -151,14 +151,21 @@ export const formatHytaleColor = (hex?: string, opacity?: number): string => {
 export function componentsToCode(
   components: HytaleComponent[],
   depth = 0,
+  imports?: string[],
 ): string {
   let code = "";
+
+  // Only add imports at the root level (depth 0)
+  if (depth === 0 && imports && imports.length > 0) {
+    code += imports.join("\n") + "\n\n";
+  }
+
   const spaces = "  ".repeat(depth);
 
   components.forEach((comp) => {
-    // Header: Type #ID or Type
-    let typeToExport = comp.type;
-    if (typeToExport === "ScrollArea") {
+    // Header: Alias or Type #ID or Type
+    let typeToExport = comp.alias || comp.type;
+    if (!comp.alias && typeToExport === "ScrollArea") {
       typeToExport = "Group";
     }
     // Sprite is exported as Sprite, which is default behavior
