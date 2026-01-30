@@ -144,7 +144,7 @@ export class HytaleParser {
           "@PageOverlay": {
             props: {
               LayoutMode: "Middle",
-              Anchor: { Width: "100%", Height: "100%" },
+              Anchor: { Top: 0, Bottom: 0, Left: 0, Right: 0 },
             },
           },
         },
@@ -648,6 +648,27 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     if (key === "RenderBold") {
       if (!component.textStyle) component.textStyle = {};
       component.textStyle.renderBold = value === true || value === "true";
+      continue;
+    }
+
+    if (key === "Style" && typeof value === "object") {
+      if (!component.textStyle) component.textStyle = {};
+      if (value.FontSize) component.textStyle.fontSize = Number(value.FontSize);
+      if (value.Color) component.textStyle.textColor = String(value.Color);
+      if (value.RenderBold)
+        component.textStyle.renderBold =
+          value.RenderBold === true || value.RenderBold === "true";
+      if (value.RenderUppercase)
+        component.textStyle.renderUppercase =
+          value.RenderUppercase === true || value.RenderUppercase === "true";
+      if (value.Alignment)
+        component.textStyle.alignment = String(value.Alignment) as any;
+      if (value.HorizontalAlignment)
+        component.textStyle.horizontalAlignment = String(
+          value.HorizontalAlignment,
+        );
+      if (value.VerticalAlignment)
+        component.textStyle.verticalAlignment = String(value.VerticalAlignment);
       continue;
     }
 
