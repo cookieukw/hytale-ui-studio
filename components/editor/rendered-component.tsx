@@ -162,14 +162,32 @@ export const RenderedComponent = memo(function RenderedComponent({
   const getComponentStyle = (): React.CSSProperties => {
     const style: React.CSSProperties = {};
 
+    // 1. Root Element Special Behavior
+    if (!parentId) {
+      style.position = "absolute";
+      style.top = 0;
+      style.left = 0;
+      style.right = 0;
+      style.bottom = 0;
+      style.width = "100%";
+      style.height = "100%";
+      // Default to center if not specified otherwise (mimicking the user's "Middle" layout)
+      // We'll let layoutMode logic below handle the flex props, but we enforce size/pos here.
+    }
+
+    // 2. zIndex Support
+    if (component.zIndex !== undefined) {
+      style.zIndex = component.zIndex;
+    }
+
     if (component.anchor) {
-      if (component.anchor.width) {
+      if (component.anchor.width && parentId) {
         style.width =
           typeof component.anchor.width === "string"
             ? component.anchor.width
             : `${component.anchor.width}px`;
       }
-      if (component.anchor.height) {
+      if (component.anchor.height && parentId) {
         style.height =
           typeof component.anchor.height === "string"
             ? component.anchor.height
@@ -181,7 +199,23 @@ export const RenderedComponent = memo(function RenderedComponent({
         style.minHeight = "100%";
       }
 
-      // Explicit positioning
+      // 3. Absolute Positioning Logic (Overlay)
+      // If any specific anchor position is set, we treat it as absolute (unless it's Root).
+      const hasPositioning =
+        component.anchor.top !== undefined ||
+        component.anchor.bottom !== undefined ||
+        component.anchor.left !== undefined ||
+        component.anchor.right !== undefined;
+
+      if (parentId) {
+        if (hasPositioning) {
+          style.position = "absolute";
+        } else {
+          style.position = "relative"; // Standard flow
+        }
+      }
+
+      // Explicit positioning application
       if (component.anchor.top !== undefined)
         style.top =
           typeof component.anchor.top === "string"
@@ -347,6 +381,12 @@ export const RenderedComponent = memo(function RenderedComponent({
         style.flexDirection = "column";
       }
 
+      // Root Element Default Alignment (if not specified by LayoutMode)
+      if (!parentId && !component.layoutMode) {
+        style.justifyContent = "center";
+        style.alignItems = "center";
+      }
+
       if (component.type === "ScrollArea") {
         style.overflowY = "auto";
         style.overflowX = "hidden";
@@ -355,7 +395,9 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     // Default to Full Width for all components if not explicitly set
     // This matches Hytale's behavior where components often fill available space
-    if (!style.width) {
+    if (!style.width && !parentId) {
+      style.width = "100%"; // Redundant with Root block but safe
+    } else if (!style.width) {
       style.width = "100%";
     }
 

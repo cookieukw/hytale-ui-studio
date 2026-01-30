@@ -101,6 +101,7 @@ export interface HytaleComponent {
   padding?: Padding;
   margin?: Margin;
   flexWeight?: number;
+  zIndex?: number;
   // Style
   background?: BackgroundStyle;
   textStyle?: TextStyle;
