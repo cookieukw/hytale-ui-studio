@@ -195,6 +195,14 @@ export const useEditorStore = create<EditorStore>()(
       },
 
       removeComponent: (id) => {
+        const state = get();
+        const component = findComponentById(state.components, id);
+
+        // Prevent deletion if explicitly forbidden (e.g. internal parts of composites)
+        if (component && component.isDeletable === false) {
+          return;
+        }
+
         set((state) => ({
           components: removeComponentFromTree(state.components, id),
           selectedId: state.selectedId === id ? null : state.selectedId,

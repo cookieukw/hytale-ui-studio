@@ -117,6 +117,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
             textColor: "#ffffff",
             alignment: "Center",
           },
+          isDeletable: false, // Prevent deletion of this internal label
         },
       ],
     },

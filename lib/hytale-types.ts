@@ -146,6 +146,7 @@ export interface HytaleComponent {
   isVisible?: boolean;
   isLocked?: boolean;
   isExpanded?: boolean;
+  isDeletable?: boolean;
   inheritance?: string;
   alias?: string;
 }

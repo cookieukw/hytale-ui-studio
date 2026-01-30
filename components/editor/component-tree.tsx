@@ -194,8 +194,17 @@ const TreeNode = memo(function TreeNode({
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => onRemove(component.id)}
+                className={cn(
+                  "text-destructive focus:text-destructive",
+                  component.isDeletable === false &&
+                    "cursor-not-allowed opacity-50",
+                )}
+                disabled={component.isDeletable === false}
+                onClick={
+                  component.isDeletable === false
+                    ? (e) => e.preventDefault()
+                    : () => onRemove(component.id)
+                }
               >
                 <Trash2 className="mr-2 h-3.5 w-3.5" />
                 Delete
