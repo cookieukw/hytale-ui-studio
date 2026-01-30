@@ -24,8 +24,9 @@ import {
 
 import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/editor/mobile-nav";
+import { LoadingScreen } from "@/components/loading-screen";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function HytaleUIStudio() {
   const viewMode = useEditorStore((state) => state.viewMode);
@@ -33,6 +34,7 @@ export default function HytaleUIStudio() {
   const activeMobileTab = useEditorStore((state) => state.activeMobileTab);
   const selectedId = useEditorStore((state) => state.selectedId);
   const removeComponent = useEditorStore((state) => state.removeComponent);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,6 +74,20 @@ export default function HytaleUIStudio() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedId, removeComponent]);
+
+  // Sync code on initial load / rehydration
+  useEffect(() => {
+    // 1.5s delay to ensure hydration AND give visual feedback (user requested "better loading")
+    setTimeout(() => {
+      // Refresh definitions (aliases) from code to fix stale cache
+      useEditorStore.getState().refreshDefinitions();
+      setIsLoaded(true);
+    }, 1500);
+  }, []);
+
+  if (!isLoaded) {
+    return <LoadingScreen />;
+  }
 
   /* Main Content - Desktop Layout */
   /* Hidden on mobile, visible on desktop */
