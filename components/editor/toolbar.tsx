@@ -118,6 +118,9 @@ export function EditorToolbar() {
             <span className="hidden sm:inline text-sm font-semibold text-foreground">
               Hytale UI Studio
             </span>
+            <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+              Beta
+            </span>
           </div>
 
           <Separator orientation="vertical" className="mx-2 h-6" />

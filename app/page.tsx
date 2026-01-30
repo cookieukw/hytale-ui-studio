@@ -166,7 +166,10 @@ export default function HytaleUIStudio() {
               alt="Logo"
               className="h-8 w-8 rounded bg-primary"
             />
-            <span className="text-sm font-semibold">Studio</span>
+            <span className="text-sm font-semibold mb-0.5">Studio</span>
+            <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+              Beta
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <button
