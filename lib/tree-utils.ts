@@ -192,7 +192,7 @@ export function componentsToCode(
       code += `${spaces}  Text: "${comp.text}";\n`;
     }
     if (comp.placeholderText) {
-      code += `${spaces}  Text: "${comp.placeholderText}";\n`;
+      code += `${spaces}  PlaceholderText: "${comp.placeholderText}";\n`;
     }
 
     // Value
@@ -206,7 +206,7 @@ export function componentsToCode(
     // Anchor: (Key: Val, ...) syntax
     if (comp.anchor) {
       if (comp.anchor.full) {
-        code += `${spaces}  Anchor: (Full: true);\n`;
+        code += `${spaces}  Anchor: (Full: 1);\n`;
       } else {
         const parts: string[] = [];
         if (comp.anchor.width !== undefined)
@@ -235,22 +235,28 @@ export function componentsToCode(
 
     // Padding: (Key: Val, ...)
     if (comp.padding) {
-      const parts: string[] = [];
-      if (comp.padding.top !== undefined)
-        parts.push(`Top: ${comp.padding.top}`);
-      if (comp.padding.bottom !== undefined)
-        parts.push(`Bottom: ${comp.padding.bottom}`);
-      if (comp.padding.left !== undefined)
-        parts.push(`Left: ${comp.padding.left}`);
-      if (comp.padding.right !== undefined)
-        parts.push(`Right: ${comp.padding.right}`);
-      if (parts.length > 0) {
-        code += `${spaces}  Padding: (${parts.join(", ")});\n`;
+      const { top, bottom, left, right } = comp.padding;
+      if (
+        top !== undefined &&
+        top === bottom &&
+        top === left &&
+        top === right
+      ) {
+        code += `${spaces}  Padding: (Full: ${top});\n`;
+      } else {
+        const parts: string[] = [];
+        if (top !== undefined) parts.push(`Top: ${top}`);
+        if (bottom !== undefined) parts.push(`Bottom: ${bottom}`);
+        if (left !== undefined) parts.push(`Left: ${left}`);
+        if (right !== undefined) parts.push(`Right: ${right}`);
+        if (parts.length > 0) {
+          code += `${spaces}  Padding: (${parts.join(", ")});\n`;
+        }
       }
     }
 
     // LayoutMode
-    if (comp.layoutMode) {
+    if (comp.layoutMode && comp.type !== "Label") {
       code += `${spaces}  LayoutMode: ${comp.layoutMode};\n`;
     }
     if (comp.direction) {
@@ -337,7 +343,9 @@ export function componentsToCode(
         if (comp.textStyle.alignment)
           parts.push(`Alignment: ${comp.textStyle.alignment}`);
         if (comp.textStyle.textColor)
-          parts.push(`Color: ${formatHytaleColor(comp.textStyle.textColor)}`);
+          parts.push(
+            `TextColor: ${formatHytaleColor(comp.textStyle.textColor)}`,
+          );
         if (comp.textStyle.renderBold) parts.push(`RenderBold: true`);
 
         if (parts.length > 0) {
@@ -345,20 +353,57 @@ export function componentsToCode(
         }
       } else {
         // Standard Element export
-        if (comp.textStyle.fontSize)
-          code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
+        // Label also uses Style: (...) syntax now per user request
+        if (comp.type === "Label") {
+          const parts: string[] = [];
+          if (comp.textStyle.fontSize)
+            parts.push(`FontSize: ${comp.textStyle.fontSize}`);
+          if (comp.textStyle.textColor)
+            parts.push(
+              `TextColor: ${formatHytaleColor(comp.textStyle.textColor)}`,
+            );
+          if (comp.textStyle.renderBold) parts.push(`RenderBold: true`);
+          if (comp.textStyle.renderUppercase)
+            parts.push(`RenderUppercase: true`);
+          if (comp.textStyle.alignment)
+            parts.push(`Alignment: ${comp.textStyle.alignment}`);
+          if (comp.textStyle.horizontalAlignment)
+            parts.push(
+              `HorizontalAlignment: ${comp.textStyle.horizontalAlignment}`,
+            );
+          if (comp.textStyle.verticalAlignment)
+            parts.push(
+              `VerticalAlignment: ${comp.textStyle.verticalAlignment}`,
+            );
 
-        // Color: #RRGGBB(Opacity), no quotes
-        if (comp.textStyle.textColor) {
-          const textColor = formatHytaleColor(comp.textStyle.textColor);
-          code += `${spaces}  Color: ${textColor};\n`;
+          if (parts.length > 0) {
+            code += `${spaces}  Style: (${parts.join(", ")});\n`;
+          }
+        } else if (
+          comp.type !== "TextButton" &&
+          comp.type !== "SecondaryTextButton" &&
+          comp.type !== "TertiaryTextButton" &&
+          comp.type !== "CancelTextButton"
+        ) {
+          // Standard Element export
+          // Label also uses Style: (...) syntax now per user request
+          // SKIP TextButton and variants as they do not support text style properties directly per user feedback.
+
+          if (comp.textStyle.fontSize)
+            code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
+
+          if (comp.textStyle.textColor) {
+            const textColor = formatHytaleColor(comp.textStyle.textColor);
+            code += `${spaces}  Color: ${textColor};\n`;
+          }
+
+          if (comp.textStyle.renderBold)
+            code += `${spaces}  RenderBold: true;\n`;
+          if (comp.textStyle.renderUppercase)
+            code += `${spaces}  RenderUppercase: true;\n`;
+          if (comp.textStyle.alignment)
+            code += `${spaces}  Alignment: ${comp.textStyle.alignment};\n`;
         }
-
-        if (comp.textStyle.renderBold) code += `${spaces}  RenderBold: true;\n`;
-        if (comp.textStyle.renderUppercase)
-          code += `${spaces}  RenderUppercase: true;\n`;
-        if (comp.textStyle.alignment)
-          code += `${spaces}  Alignment: ${comp.textStyle.alignment};\n`;
       }
     }
 
