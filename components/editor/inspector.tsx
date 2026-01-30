@@ -291,6 +291,8 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
   );
 }
 
+import { DebouncedColorPicker } from "./debounced-color-picker";
+
 export function Inspector() {
   const selectedId = useEditorStore((state) => state.selectedId);
   const components = useEditorStore((state) => state.components);
@@ -683,18 +685,17 @@ export function Inspector() {
 
                 <FieldRow label="Color">
                   <div className="flex gap-2">
-                    <Input
-                      type="color"
+                    <DebouncedColorPicker
                       value={component.textStyle?.textColor || "#ffffff"}
-                      onChange={(e) =>
+                      onChange={(val) =>
                         handleUpdate({
                           textStyle: {
                             ...component.textStyle,
-                            textColor: e.target.value,
+                            textColor: val,
                           },
                         })
                       }
-                      className="h-7 w-10 cursor-pointer p-1"
+                      className="h-7 w-10"
                     />
                     <Input
                       type="text"
@@ -770,18 +771,17 @@ export function Inspector() {
             <CollapsibleSection title="Background">
               <FieldRow label="Color">
                 <div className="flex gap-2">
-                  <Input
-                    type="color"
+                  <DebouncedColorPicker
                     value={component.background?.color || "#2a2a3a"}
-                    onChange={(e) =>
+                    onChange={(val) =>
                       handleUpdate({
                         background: {
                           ...component.background,
-                          color: e.target.value,
+                          color: val,
                         },
                       })
                     }
-                    className="h-7 w-10 cursor-pointer p-1"
+                    className="h-7 w-10"
                   />
                   <Input
                     type="text"
