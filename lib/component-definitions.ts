@@ -45,7 +45,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "DecoratedContainer",
       alias: "$C.@DecoratedContainer",
-      anchor: { width: "100%", height: 300 },
+      anchor: { top: 0, bottom: 0, left: 0, right: 0 },
       layoutMode: "Top",
       background: { color: "#2a2a3a", opacity: 1 },
       padding: { top: 40, left: 17, right: 17, bottom: 17 }, // Approximate Frame padding + Title height
@@ -59,7 +59,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "Panel",
       alias: "$C.@Panel",
-      anchor: { width: "100%", height: "100%" },
+      anchor: { top: 0, bottom: 0, left: 0, right: 0 },
       background: { color: "#2E2A20", opacity: 1 },
       padding: { top: 20, left: 20, right: 20, bottom: 20 }, // Approximate Border: 20
     },
@@ -76,7 +76,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       placeholderText: "Enter text...",
       anchor: { width: 200, height: 40 },
       padding: { left: 12, right: 12, top: 8, bottom: 8 },
-      background: { color: "#1a1a2a", border: "#3a3a4a" },
+      background: { color: "#1a1a2a" },
     },
   },
   {
@@ -89,7 +89,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       value: 0,
       anchor: { width: 120, height: 40 },
       padding: { left: 12, right: 12, top: 8, bottom: 8 },
-      background: { color: "#1a1a2a", border: "#3a3a4a" },
+      background: { color: "#1a1a2a" },
     },
   },
   {
@@ -282,7 +282,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       name: "CheckBox",
       checked: false,
       anchor: { width: 22, height: 22 },
-      background: { color: "#000000", opacity: 0, border: "7" },
+      background: { color: "#000000", opacity: 0, border: 7 },
       padding: { top: 4, bottom: 4, left: 4, right: 4 },
     },
   },
@@ -314,7 +314,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       text: "Select Option", // Used as current selection label
       options: ["Option 1", "Option 2", "Option 3"],
       anchor: { width: 220, height: 32 },
-      background: { color: "#1a1a2a", border: "16" },
+      background: { color: "#1a1a2a", border: 16 },
       padding: { left: 8, right: 8 },
     },
   },
@@ -338,7 +338,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "VerticalSeparator",
       alias: "$C.@VerticalSeparator",
-      anchor: { top: 0, bottom: 0, width: 6, height: "100%" },
+      anchor: { top: 0, bottom: 0, width: 6 },
       background: { color: "#393426" },
     },
   },
@@ -521,7 +521,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           id: generateId(),
           type: "Group",
           name: "DialogHeader",
-          anchor: { width: "100%", height: 50 },
+          anchor: { left: 0, right: 0, height: 50 },
           layoutMode: "Middle",
           padding: { left: 16, right: 16 },
           background: { color: "#1a1a2a" },
@@ -543,7 +543,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           id: generateId(),
           type: "Group",
           name: "DialogBody",
-          anchor: { width: "100%" },
+          anchor: { left: 0, right: 0 },
           flexWeight: 1,
           padding: { top: 16, bottom: 16, left: 16, right: 16 },
           children: [
@@ -563,7 +563,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           id: generateId(),
           type: "Group",
           name: "DialogFooter",
-          anchor: { width: "100%", height: 60 },
+          anchor: { left: 0, right: 0, height: 60 },
           layoutMode: "Right",
           padding: { left: 16, right: 16 },
           background: { color: "#1a1a2a" },
@@ -633,7 +633,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           type: "TextField",
           name: "InputField",
           placeholderText: "Enter value...",
-          anchor: { width: "100%", height: 40 },
+          anchor: { left: 0, right: 0, height: 40 },
           margin: { top: 8 },
           padding: { left: 12, right: 12 },
           background: { color: "#1a1a2a", border: "#3a3a4a" },
@@ -670,7 +670,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           value: 65,
           max: 100,
           showLabel: true,
-          anchor: { width: "100%", height: 20 },
+          anchor: { left: 0, right: 0, height: 20 },
           margin: { top: 8 },
         },
       ],
