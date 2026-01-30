@@ -174,8 +174,8 @@ export function componentsToCode(
     code += `${spaces}${typeToExport}${idPart} {\n`;
 
     // Visible
-    if (typeof comp.isVisible === "boolean") {
-      code += `${spaces}  Visible: ${comp.isVisible};\n`;
+    if (typeof comp.isVisible === "boolean" && comp.isVisible === false) {
+      code += `${spaces}  Visible: false;\n`;
     }
 
     // ScrollbarStyle

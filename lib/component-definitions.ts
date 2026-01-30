@@ -17,7 +17,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Layout",
     defaultProps: {
       name: "Group",
-      alias: "$C.@Container",
+      alias: "Group",
       anchor: { width: 200, height: 100 },
       layoutMode: "Top",
       background: { color: "#2a2a3a", opacity: 1 },
