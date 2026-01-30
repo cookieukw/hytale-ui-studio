@@ -21,6 +21,8 @@ import {
   generateId,
   removeComponentFromTree,
   updateComponentInTree,
+  regenerateIds,
+  collectAllNames,
 } from "./tree-utils";
 import { parseAndMapCode } from "./hytale-parser";
 import { COMPONENT_DEFINITIONS } from "./component-definitions";
@@ -125,14 +127,22 @@ export const useEditorStore = create<EditorStore>()(
       setDraggingId: (id: string | null) => set({ draggingId: id }),
 
       addComponent: (component, parentId = null, index) => {
-        const id = generateId();
-        const newComponent: HytaleComponent = {
+        // Regenerate IDs for the component and all children to ensure uniqueness
+        // This is crucial when adding from presets which have static IDs in definitions
+        // cast to HytaleComponent since we represent the complete object now
+        const tempComponent = {
           ...component,
-          id,
+          id: generateId(),
           isVisible: true,
           isLocked: false,
           isExpanded: true,
-        };
+        } as HytaleComponent;
+
+        // Collect existing names to ensure unique names
+        const existingNames = collectAllNames(get().components);
+        const newComponent = regenerateIds(tempComponent, existingNames);
+
+        const id = newComponent.id;
 
         set((state) => {
           let imports = state.imports;
@@ -198,7 +208,8 @@ export const useEditorStore = create<EditorStore>()(
         const comp = findComponentById(state.components, id);
         if (!comp) return;
 
-        const duplicate = duplicateComponentUtil(comp);
+        const existingNames = collectAllNames(state.components);
+        const duplicate = duplicateComponentUtil(comp, existingNames);
         const location = findComponentLocation(state.components, id);
 
         if (location) {

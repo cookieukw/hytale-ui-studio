@@ -118,13 +118,46 @@ export function addComponentToParent(
 
 export function duplicateComponent(
   component: HytaleComponent,
+  existingNames: Set<string> = new Set(),
 ): HytaleComponent {
+  // If we are duplicating, we typically want to keep the name similar but unique?
+  // User previously asked to REMOVE "(copy)".
+  // But now they say "labels cannot have duplicate IDs".
+  // So if I allow duplicate names, it causes error.
+  // The user said "remove (copy)" previously because it caused error.
+  // Actually, they said "duplicate elements should not have (copy) in the name. this causes error".
+  // BUT now they say "labels cannot have same ID".
+  // These are conflicting requirements if interpreted literally:
+  // 1. "Don't add (copy)" -> Name stays same.
+  // 2. "Don't have same ID" -> Name MUST be different.
+  // Interpretation: The user wants valid Hytale IDs. Hytale IDs must be unique.
+  // So if I duplicate "Button", it should probably be "Button 1".
+  // The "(copy)" suffix was likely invalid because of the parenthesis or format.
+  // So I will use generateUniqueName here too.
+
+  // Wait, if I change duplicateComponent signature, I valid existing calls.
+  // But I can't easily pass existingNames from everywhere unless I traverse.
+  // Actually, duplicating usually happens in store where we have state.
+
   const newId = generateId();
+  // We won't enforce unique name HERE if we don't have the set.
+  // But ideally we should.
+  // Let's modify the signature to OPTIONALLY take existingNames.
+  // If provided, we uniquify.
+
+  let name = component.name;
+  if (existingNames.size > 0) {
+    name = generateUniqueName(component.name, existingNames);
+    existingNames.add(name);
+  }
+
   return {
     ...component,
     id: newId,
-    name: component.name,
-    children: component.children?.map(duplicateComponent),
+    name: name,
+    children: component.children?.map((c) =>
+      duplicateComponent(c, existingNames),
+    ),
   };
 }
 
@@ -147,6 +180,57 @@ export const formatHytaleColor = (hex?: string, opacity?: number): string => {
 
   return `#${cleanHex}`;
 };
+
+// Helper to collectAllNames
+export function collectAllNames(components: HytaleComponent[]): Set<string> {
+  const names = new Set<string>();
+  const traverse = (comps: HytaleComponent[]) => {
+    comps.forEach((c) => {
+      if (c.name) names.add(c.name);
+      if (c.children) traverse(c.children);
+    });
+  };
+  traverse(components);
+  return names;
+}
+
+export function generateUniqueName(
+  baseName: string,
+  existingNames: Set<string>,
+): string {
+  // Sanitize baseName: remove spaces and underscores, ensure alphanumeric (mostly)
+  // Hytale IDs are typically PascalCase or camelCase without special chars
+  let sanitized = baseName.replace(/[\s_]/g, "");
+
+  // If sanitization made it empty (e.g. input was " _ "), fallback to "Component"
+  if (!sanitized) sanitized = "Component";
+
+  let name = sanitized;
+  let counter = 1;
+  while (existingNames.has(name)) {
+    name = `${sanitized}${counter}`;
+    counter++;
+  }
+  return name;
+}
+
+export function regenerateIds(
+  component: HytaleComponent,
+  existingNames: Set<string> = new Set(),
+): HytaleComponent {
+  // Generate unique name
+  const uniqueName = generateUniqueName(component.name, existingNames);
+  existingNames.add(uniqueName);
+
+  return {
+    ...component,
+    id: generateId(),
+    name: uniqueName,
+    children: component.children?.map((child) =>
+      regenerateIds(child, existingNames),
+    ),
+  };
+}
 
 export function componentsToCode(
   components: HytaleComponent[],
