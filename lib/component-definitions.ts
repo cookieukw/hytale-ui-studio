@@ -19,7 +19,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       name: "Group",
       alias: "Group",
       anchor: {},
-      layoutMode: "Top",
       background: { color: "#2a2a3a", opacity: 1 },
     },
   },

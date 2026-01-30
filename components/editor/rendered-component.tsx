@@ -405,9 +405,9 @@ export const RenderedComponent = memo(function RenderedComponent({
     // Force Linear Layout for Group and ScrollArea
     if (component.type === "Group" || component.type === "ScrollArea") {
       style.display = "flex";
-      // Default to column if not specified, mimicking standard Linear Layout
+      // Default to row (Horizontal) for Group, column for others if not specified
       if (!style.flexDirection) {
-        style.flexDirection = "column";
+        style.flexDirection = component.type === "Group" ? "row" : "column";
       }
 
       // Root Element Default Alignment (if not specified by LayoutMode)

@@ -260,7 +260,7 @@ export function componentsToCode(
     if (comp.layoutMode && comp.type !== "Label") {
       code += `${spaces}  LayoutMode: ${comp.layoutMode};\n`;
     }
-    if (comp.direction) {
+    if (comp.direction && comp.direction === "Vertical") {
       code += `${spaces}  Direction: ${comp.direction};\n`;
     }
     if (comp.flexWeight !== undefined) {
