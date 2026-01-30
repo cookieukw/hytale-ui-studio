@@ -204,7 +204,8 @@ export function componentsToCode(
     }
 
     // Anchor: (Key: Val, ...) syntax
-    if (comp.anchor) {
+    // Omit for Root Element (depth 0) as it is always full screen
+    if (comp.anchor && depth > 0) {
       if (comp.anchor.full) {
         code += `${spaces}  Anchor: (Full: 1);\n`;
       } else {

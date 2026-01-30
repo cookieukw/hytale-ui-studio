@@ -180,14 +180,14 @@ export const RenderedComponent = memo(function RenderedComponent({
       style.zIndex = component.zIndex;
     }
 
-    if (component.anchor) {
-      if (component.anchor.width && parentId) {
+    if (component.anchor && parentId) {
+      if (component.anchor.width) {
         style.width =
           typeof component.anchor.width === "string"
             ? component.anchor.width
             : `${component.anchor.width}px`;
       }
-      if (component.anchor.height && parentId) {
+      if (component.anchor.height) {
         style.height =
           typeof component.anchor.height === "string"
             ? component.anchor.height
@@ -327,6 +327,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         case "Bottom":
           style.flexDirection = "column";
           style.justifyContent = "flex-end";
+          style.alignItems = "flex-start";
           break;
         case "Left":
           style.flexDirection = "row";
@@ -338,6 +339,34 @@ export const RenderedComponent = memo(function RenderedComponent({
           style.alignItems = "center";
           break;
         case "Middle":
+          // "Vertical Middle" usually implies Vertical direction, centered vertically
+          style.flexDirection = "column";
+          style.justifyContent = "center";
+          break;
+        case "Center":
+          // "Simple Center" usually implies Vertical direction, centered horizontally
+          style.flexDirection = "column";
+          style.alignItems = "center";
+          break;
+        case "CenterMiddle":
+        case "MiddleCenter":
+          style.flexDirection = "column";
+          style.justifyContent = "center";
+          style.alignItems = "center";
+          break;
+        case "Full":
+          style.width = "100%";
+          style.height = "100%";
+          break;
+        case "TopScrolling":
+          style.flexDirection = "column";
+          style.alignItems = "flex-start";
+          style.overflowY = "auto";
+          style.overflowX = "hidden";
+          break;
+        case "LeftCenterWrap":
+          style.flexDirection = "row";
+          style.flexWrap = "wrap";
           style.justifyContent = "center";
           style.alignItems = "center";
           break;

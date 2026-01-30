@@ -1,6 +1,17 @@
 // Hytale UI Component Types
 
-export type LayoutMode = "Top" | "Left" | "Middle" | "Bottom" | "Right";
+export type LayoutMode =
+  | "Top"
+  | "Left"
+  | "Middle"
+  | "Bottom"
+  | "Right"
+  | "Center"
+  | "Full"
+  | "TopScrolling"
+  | "CenterMiddle"
+  | "MiddleCenter"
+  | "LeftCenterWrap";
 export type Direction = "Vertical" | "Horizontal";
 export type TextAlignment = "Left" | "Center" | "Right";
 export type ImageFit = "Fill" | "Fit" | "Stretch";

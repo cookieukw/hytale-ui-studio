@@ -88,9 +88,10 @@ function FieldRow({ label, children }: FieldRowProps) {
 interface AnchorFieldsProps {
   component: HytaleComponent;
   onUpdate: (updates: Partial<HytaleComponent>) => void;
+  disabled?: boolean;
 }
 
-function AnchorFields({ component, onUpdate }: AnchorFieldsProps) {
+function AnchorFields({ component, onUpdate, disabled }: AnchorFieldsProps) {
   const anchor = component.anchor || {};
 
   const updateAnchor = (
@@ -120,6 +121,7 @@ function AnchorFields({ component, onUpdate }: AnchorFieldsProps) {
           }}
           className="h-7 text-xs"
           placeholder="auto"
+          disabled={disabled}
         />
       </FieldRow>
       <FieldRow label="Height">
@@ -135,6 +137,7 @@ function AnchorFields({ component, onUpdate }: AnchorFieldsProps) {
           }}
           className="h-7 text-xs"
           placeholder="auto"
+          disabled={disabled}
         />
       </FieldRow>
       <FieldRow label="Full">
@@ -143,8 +146,14 @@ function AnchorFields({ component, onUpdate }: AnchorFieldsProps) {
           onCheckedChange={(checked) =>
             updateAnchor("full", checked || undefined)
           }
+          disabled={disabled}
         />
       </FieldRow>
+      {disabled && (
+        <div className="mt-2 text-[10px] text-muted-foreground/70 text-center">
+          Root element always fills the screen.
+        </div>
+      )}
     </>
   );
 }
@@ -343,6 +352,12 @@ export function Inspector() {
     "Left",
     "Right",
     "Middle",
+    "Center",
+    "Full",
+    "TopScrolling",
+    "CenterMiddle",
+    "MiddleCenter",
+    "LeftCenterWrap",
   ];
   const directions: Direction[] = ["Vertical", "Horizontal"];
   const alignments: TextAlignment[] = ["Left", "Center", "Right"];
@@ -372,6 +387,9 @@ export function Inspector() {
   const hasChecked = ["CheckBox"].includes(component.type);
   const hasOptions = ["Dropdown"].includes(component.type);
 
+  // Check if component is a root component (top-level)
+  const isRoot = components.some((c) => c.id === component.id);
+
   return (
     <div className="flex h-full flex-col border-l border-border bg-panel">
       {/* Header */}
@@ -381,6 +399,11 @@ export function Inspector() {
           <span className="text-sm font-medium text-foreground">
             {component.type}
           </span>
+          {isRoot && (
+            <span className="ml-auto text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+              ROOT
+            </span>
+          )}
         </div>
       </div>
 
@@ -447,7 +470,11 @@ export function Inspector() {
           {/* Layout Tab */}
           <TabsContent value="layout" className="m-0 mt-2">
             <CollapsibleSection title="Anchor">
-              <AnchorFields component={component} onUpdate={handleUpdate} />
+              <AnchorFields
+                component={component}
+                onUpdate={handleUpdate}
+                disabled={isRoot}
+              />
             </CollapsibleSection>
 
             <CollapsibleSection title="Padding">
@@ -461,15 +488,19 @@ export function Inspector() {
             <CollapsibleSection title="Layout">
               <FieldRow label="Mode">
                 <Select
-                  value={component.layoutMode || "Top"}
+                  value={component.layoutMode || "None"}
                   onValueChange={(value) =>
-                    handleUpdate({ layoutMode: value as LayoutMode })
+                    handleUpdate({
+                      layoutMode:
+                        value === "None" ? undefined : (value as LayoutMode),
+                    })
                   }
                 >
                   <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
+                    <SelectValue placeholder="None" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="None">None</SelectItem>
                     {layoutModes.map((mode) => (
                       <SelectItem key={mode} value={mode}>
                         {mode}
