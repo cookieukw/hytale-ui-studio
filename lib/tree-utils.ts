@@ -123,7 +123,7 @@ export function duplicateComponent(
   return {
     ...component,
     id: newId,
-    name: `${component.name} (copy)`,
+    name: component.name,
     children: component.children?.map(duplicateComponent),
   };
 }
