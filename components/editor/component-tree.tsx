@@ -46,10 +46,21 @@ const componentIcons: Record<
 > = {
   Group: Square,
   ScrollArea: ScrollText,
+  DecoratedContainer: Square,
+  Panel: Square,
+  ContentSeparator: MoreVertical,
+  VerticalSeparator: MoreVertical,
+  PanelSeparatorFancy: MoreVertical,
   TextField: TextCursor,
   NumberField: Hash,
   Button: MousePointerClick,
   TextButton: Type,
+  SecondaryButton: MousePointerClick,
+  SecondaryTextButton: Type,
+  TertiaryButton: MousePointerClick,
+  TertiaryTextButton: Type,
+  CancelButton: MousePointerClick,
+  CancelTextButton: Type,
   Label: Text,
   Image: ImageIcon,
   ProgressBar: Gauge,
@@ -69,6 +80,7 @@ interface TreeNodeProps {
   onUpdate: (id: string, updates: Partial<HytaleComponent>) => void;
   onRemove: (id: string) => void;
   onDuplicate: (id: string) => void;
+  parentVisible?: boolean;
 }
 
 const TreeNode = memo(function TreeNode({
@@ -79,11 +91,17 @@ const TreeNode = memo(function TreeNode({
   onUpdate,
   onRemove,
   onDuplicate,
+  parentVisible = true,
 }: TreeNodeProps) {
   const isSelected = selectedId === component.id;
   const hasChildren = component.children && component.children.length > 0;
   const isExpanded = component.isExpanded ?? true;
-  const isVisible = component.isVisible ?? true;
+
+  // Explicit visibility
+  const isSelfVisible = component.isVisible ?? true;
+  // Effective visibility (considering parent)
+  const isVisible = isSelfVisible && parentVisible;
+
   const isLocked = component.isLocked ?? false;
 
   const Icon = componentIcons[component.type] || Square;
@@ -95,7 +113,8 @@ const TreeNode = memo(function TreeNode({
 
   const handleToggleVisibility = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onUpdate(component.id, { isVisible: !isVisible });
+    // Toggle the component's OWN visibility setting, not the effective one
+    onUpdate(component.id, { isVisible: !isSelfVisible });
   };
 
   const handleToggleLock = (e: React.MouseEvent) => {
@@ -138,6 +157,7 @@ const TreeNode = memo(function TreeNode({
             type="button"
             className="flex h-5 w-5 items-center justify-center rounded hover:bg-secondary"
             onClick={handleToggleVisibility}
+            title={isVisible ? "Hide" : "Show"}
           >
             {isVisible ? (
               <Eye className="h-3 w-3 text-muted-foreground" />
@@ -197,6 +217,7 @@ const TreeNode = memo(function TreeNode({
               onUpdate={onUpdate}
               onRemove={onRemove}
               onDuplicate={onDuplicate}
+              parentVisible={isVisible} // Pass effective visibility to children
             />
           ))}
         </div>

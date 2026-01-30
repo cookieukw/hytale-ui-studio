@@ -244,7 +244,8 @@ export function EditorCanvas() {
               height: `${100 / (zoom / 100)}%`,
             }}
           >
-            {components.length === 0 ? (
+            {components.length === 0 ||
+            components.every((c) => c.isVisible === false) ? (
               <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
                 <div className="mb-4 rounded-full bg-secondary/50 p-6">
                   <svg
