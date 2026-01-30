@@ -400,6 +400,41 @@ export const RenderedComponent = memo(function RenderedComponent({
               ? "flex-end"
               : "flex-start";
       }
+
+      // Explicit Hytale Alignment for Labels
+      if (component.type === "Label") {
+        style.display = "flex";
+        style.flexDirection = "column"; // Usually labels wrap text if needed, but centering relies on flex
+        // Hytal Alignment: Start, Center, End
+
+        // Horizontal
+        if (component.textStyle.horizontalAlignment) {
+          const hAlign = component.textStyle.horizontalAlignment;
+          style.alignItems =
+            hAlign === "Center"
+              ? "center"
+              : hAlign === "End"
+                ? "flex-end"
+                : "flex-start";
+          style.textAlign =
+            hAlign === "Center"
+              ? "center"
+              : hAlign === "End"
+                ? "right"
+                : "left";
+        }
+
+        // Vertical
+        if (component.textStyle.verticalAlignment) {
+          const vAlign = component.textStyle.verticalAlignment;
+          style.justifyContent =
+            vAlign === "Center"
+              ? "center"
+              : vAlign === "End"
+                ? "flex-end"
+                : "flex-start";
+        }
+      }
     }
 
     // Force Linear Layout for Group and ScrollArea

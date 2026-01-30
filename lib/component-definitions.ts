@@ -115,7 +115,8 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           textStyle: {
             fontSize: 14,
             textColor: "#ffffff",
-            alignment: "Center",
+            horizontalAlignment: "Center",
+            verticalAlignment: "Center",
           },
           isDeletable: false, // Prevent deletion of this internal label
         },
@@ -166,7 +167,8 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           textStyle: {
             fontSize: 14,
             textColor: "#ffffff",
-            alignment: "Center",
+            horizontalAlignment: "Center",
+            verticalAlignment: "Center",
           },
         },
       ],
@@ -210,7 +212,8 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           textStyle: {
             fontSize: 14,
             textColor: "#ffffff",
-            alignment: "Center",
+            horizontalAlignment: "Center",
+            verticalAlignment: "Center",
           },
         },
       ],
@@ -254,7 +257,8 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           textStyle: {
             fontSize: 14,
             textColor: "#ffffff",
-            alignment: "Center",
+            horizontalAlignment: "Center",
+            verticalAlignment: "Center",
           },
         },
       ],
@@ -394,11 +398,12 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Display",
     defaultProps: {
       name: "Label",
-      text: "Label Text",
+      text: "Label",
       textStyle: {
         fontSize: 14,
         textColor: "#ffffff",
-        alignment: "Left",
+        horizontalAlignment: "Start",
+        verticalAlignment: "Start",
       },
     },
   },

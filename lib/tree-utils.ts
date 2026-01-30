@@ -450,8 +450,10 @@ export function componentsToCode(
           if (comp.textStyle.renderBold) parts.push(`RenderBold: true`);
           if (comp.textStyle.renderUppercase)
             parts.push(`RenderUppercase: true`);
-          if (comp.textStyle.alignment)
-            parts.push(`Alignment: ${comp.textStyle.alignment}`);
+          // Label does NOT have generic Alignment option per user request
+          // if (comp.textStyle.alignment)
+          //   parts.push(`Alignment: ${comp.textStyle.alignment}`);
+
           if (comp.textStyle.horizontalAlignment)
             parts.push(
               `HorizontalAlignment: ${comp.textStyle.horizontalAlignment}`,

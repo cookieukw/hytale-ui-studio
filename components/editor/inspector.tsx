@@ -744,30 +744,87 @@ export function Inspector() {
                   </div>
                 </FieldRow>
 
-                <FieldRow label="Align">
-                  <Select
-                    value={component.textStyle?.alignment || "Left"}
-                    onValueChange={(value) =>
-                      handleUpdate({
-                        textStyle: {
-                          ...component.textStyle,
-                          alignment: value as TextAlignment,
-                        },
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {alignments.map((align) => (
-                        <SelectItem key={align} value={align}>
-                          {align}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldRow>
+                {component.type === "Label" ? (
+                  <>
+                    <FieldRow label="H. Align">
+                      <Select
+                        value={
+                          component.textStyle?.horizontalAlignment || "Start"
+                        }
+                        onValueChange={(value) =>
+                          handleUpdate({
+                            textStyle: {
+                              ...component.textStyle,
+                              horizontalAlignment: value,
+                            },
+                          })
+                        }
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["Start", "Center", "End"].map((align) => (
+                            <SelectItem key={align} value={align}>
+                              {align}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FieldRow>
+                    <FieldRow label="V. Align">
+                      <Select
+                        value={
+                          component.textStyle?.verticalAlignment || "Start"
+                        }
+                        onValueChange={(value) =>
+                          handleUpdate({
+                            textStyle: {
+                              ...component.textStyle,
+                              verticalAlignment: value,
+                            },
+                          })
+                        }
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["Start", "Center", "End"].map((align) => (
+                            <SelectItem key={align} value={align}>
+                              {align}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FieldRow>
+                  </>
+                ) : (
+                  <FieldRow label="Align">
+                    <Select
+                      value={component.textStyle?.alignment || "Left"}
+                      onValueChange={(value) =>
+                        handleUpdate({
+                          textStyle: {
+                            ...component.textStyle,
+                            alignment: value as TextAlignment,
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {alignments.map((align) => (
+                          <SelectItem key={align} value={align}>
+                            {align}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldRow>
+                )}
 
                 <FieldRow label="Bold">
                   <Switch
