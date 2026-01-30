@@ -100,7 +100,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       name: "Button",
       anchor: { width: 120, height: 40 },
       background: { color: "#4a9eff", opacity: 1 },
-      layoutMode: "Middle",
       states: {
         hovered: { background: { color: "#5aafff" } },
         pressed: { background: { color: "#3a8eef" } },

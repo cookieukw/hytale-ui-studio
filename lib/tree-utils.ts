@@ -341,7 +341,13 @@ export function componentsToCode(
     }
 
     // LayoutMode
-    if (comp.layoutMode && comp.type !== "Label") {
+    const isButton = [
+      "Button",
+      "SecondaryButton",
+      "TertiaryButton",
+      "CancelButton",
+    ].includes(comp.type);
+    if (comp.layoutMode && comp.type !== "Label" && !isButton) {
       code += `${spaces}  LayoutMode: ${comp.layoutMode};\n`;
     }
     if (comp.direction && comp.direction === "Vertical") {

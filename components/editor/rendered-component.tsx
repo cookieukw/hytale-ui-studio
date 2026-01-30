@@ -457,6 +457,17 @@ export const RenderedComponent = memo(function RenderedComponent({
       }
     }
 
+    // Explicitly Center Content for Buttons (as LayoutMode was removed)
+    if (
+      ["Button", "SecondaryButton", "TertiaryButton", "CancelButton"].includes(
+        component.type,
+      )
+    ) {
+      style.display = "flex";
+      style.justifyContent = "center";
+      style.alignItems = "center";
+    }
+
     // Default to Full Width for all components if not explicitly set
     if (!style.width && !parentId) {
       style.width = "100%";

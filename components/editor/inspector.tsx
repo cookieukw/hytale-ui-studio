@@ -364,7 +364,7 @@ export function Inspector() {
 
   const hasTextStyle = [
     "Label",
-    "Button",
+    // "Button", // Removed as requested - text style is on child Label
     "TextButton",
     "TextField",
     "TimerLabel",
@@ -372,6 +372,9 @@ export function Inspector() {
     "CheckBox",
     "ProgressBar",
     "Slider",
+    "SecondaryTextButton",
+    "TertiaryTextButton",
+    "CancelTextButton",
   ].includes(component.type);
   const hasPlaceholder = ["TextField", "NumberField"].includes(component.type);
   const hasValue = ["ProgressBar", "NumberField", "Slider"].includes(
@@ -486,49 +489,61 @@ export function Inspector() {
             </CollapsibleSection>
 
             <CollapsibleSection title="Layout">
-              <FieldRow label="Mode">
-                <Select
-                  value={component.layoutMode || "None"}
-                  onValueChange={(value) =>
-                    handleUpdate({
-                      layoutMode:
-                        value === "None" ? undefined : (value as LayoutMode),
-                    })
-                  }
-                >
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue placeholder="None" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="None">None</SelectItem>
-                    {layoutModes.map((mode) => (
-                      <SelectItem key={mode} value={mode}>
-                        {mode}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
+              {/* Hide LayoutMode and Direction for Buttons as requested */}
+              {![
+                "Button",
+                "SecondaryButton",
+                "TertiaryButton",
+                "CancelButton",
+              ].includes(component.type) && (
+                <>
+                  <FieldRow label="Mode">
+                    <Select
+                      value={component.layoutMode || "None"}
+                      onValueChange={(value) =>
+                        handleUpdate({
+                          layoutMode:
+                            value === "None"
+                              ? undefined
+                              : (value as LayoutMode),
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue placeholder="None" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="None">None</SelectItem>
+                        {layoutModes.map((mode) => (
+                          <SelectItem key={mode} value={mode}>
+                            {mode}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldRow>
 
-              <FieldRow label="Direction">
-                <Select
-                  value={component.direction || "Vertical"}
-                  onValueChange={(value) =>
-                    handleUpdate({ direction: value as Direction })
-                  }
-                >
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {directions.map((dir) => (
-                      <SelectItem key={dir} value={dir}>
-                        {dir}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
+                  <FieldRow label="Direction">
+                    <Select
+                      value={component.direction || "Vertical"}
+                      onValueChange={(value) =>
+                        handleUpdate({ direction: value as Direction })
+                      }
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {directions.map((dir) => (
+                          <SelectItem key={dir} value={dir}>
+                            {dir}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldRow>
+                </>
+              )}
 
               <FieldRow label="FlexWeight">
                 <Input
@@ -698,21 +713,28 @@ export function Inspector() {
 
             {hasTextStyle && (
               <CollapsibleSection title="Typography">
-                <FieldRow label="Font Size">
-                  <Input
-                    type="number"
-                    value={component.textStyle?.fontSize || 14}
-                    onChange={(e) =>
-                      handleUpdate({
-                        textStyle: {
-                          ...component.textStyle,
-                          fontSize: Number(e.target.value),
-                        },
-                      })
-                    }
-                    className="h-7 text-xs"
-                  />
-                </FieldRow>
+                {![
+                  "Button",
+                  "SecondaryButton",
+                  "TertiaryButton",
+                  "CancelButton",
+                ].includes(component.type) && (
+                  <FieldRow label="Font Size">
+                    <Input
+                      type="number"
+                      value={component.textStyle?.fontSize || 14}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textStyle: {
+                            ...component.textStyle,
+                            fontSize: Number(e.target.value),
+                          },
+                        })
+                      }
+                      className="h-7 text-xs"
+                    />
+                  </FieldRow>
+                )}
 
                 <FieldRow label="Color">
                   <div className="flex gap-2">
