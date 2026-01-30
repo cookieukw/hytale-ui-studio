@@ -37,12 +37,14 @@ export interface TextStyle {
   renderUppercase?: boolean;
   textColor?: string;
   alignment?: TextAlignment;
+  horizontalAlignment?: string;
+  verticalAlignment?: string;
 }
 
 export interface BackgroundStyle {
   color?: string;
   texture?: string;
-  border?: string;
+  border?: number | string;
   opacity?: number;
 }
 
