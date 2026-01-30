@@ -394,11 +394,34 @@ export const RenderedComponent = memo(function RenderedComponent({
     }
 
     // Default to Full Width for all components if not explicitly set
-    // This matches Hytale's behavior where components often fill available space
     if (!style.width && !parentId) {
-      style.width = "100%"; // Redundant with Root block but safe
+      style.width = "100%";
     } else if (!style.width) {
       style.width = "100%";
+    }
+
+    // Default "Fill Space" behavior for Container types if no explicit height/flex is set
+    // This matches the "occupy everything" requirement for parent elements
+    const isContainerType = [
+      "Group",
+      "Panel",
+      "DecoratedContainer",
+      "ScrollArea",
+    ].includes(component.type);
+
+    if (
+      isContainerType &&
+      parentId &&
+      !style.height &&
+      !style.flex &&
+      !style.flexGrow &&
+      !style.position // If absolute, it behaves differently
+    ) {
+      style.flexGrow = 1;
+      // Some layouts might need explicit height 100% to fill match-parent if flex-grow doesn't kick in (e.g. standard block)
+      // But typically flex-grow is safer for mixing with other items.
+      // However, if the parent is NOT a flex container (unlikely in this system), it might collapse.
+      // But our system forces display:flex on almost everything.
     }
 
     return style;

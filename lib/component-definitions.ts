@@ -18,7 +18,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "Group",
       alias: "Group",
-      anchor: { width: 200, height: 100 },
+      anchor: {},
       layoutMode: "Top",
       background: { color: "#2a2a3a", opacity: 1 },
     },
@@ -32,7 +32,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       name: "ScrollArea",
       scrollbarStyle: "$C.@DefaultScrollbarStyle",
       showScrollbar: true,
-      anchor: { width: 200, height: 300 },
+      anchor: {},
       layoutMode: "Top",
       background: { color: "#1a1a2a", opacity: 1 },
     },
@@ -45,7 +45,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "DecoratedContainer",
       alias: "$C.@DecoratedContainer",
-      anchor: { top: 0, bottom: 0, left: 0, right: 0 },
+      anchor: {},
       layoutMode: "Top",
       background: { color: "#2a2a3a", opacity: 1 },
       padding: { top: 40, left: 17, right: 17, bottom: 17 }, // Approximate Frame padding + Title height
@@ -59,7 +59,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "Panel",
       alias: "$C.@Panel",
-      anchor: { top: 0, bottom: 0, left: 0, right: 0 },
+      anchor: {},
       background: { color: "#2E2A20", opacity: 1 },
       padding: { top: 20, left: 20, right: 20, bottom: 20 }, // Approximate Border: 20
     },
