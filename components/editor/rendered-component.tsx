@@ -34,10 +34,7 @@ export const RenderedComponent = memo(function RenderedComponent({
 
   // Lock dragging if parent is a Button (so the button itself is dragged)
   const isLockedInParent =
-    parentType === "Button" ||
-    parentType === "SecondaryButton" ||
-    parentType === "TertiaryButton" ||
-    parentType === "CancelButton";
+    parentType === "Button" || parentType === "CancelButton";
 
   const [dragState, setDragState] = useState<{
     position: "before" | "after" | "inside";
@@ -453,14 +450,13 @@ export const RenderedComponent = memo(function RenderedComponent({
     }
 
     // Explicitly Center Content for Buttons (as LayoutMode was removed)
-    if (
-      ["Button", "SecondaryButton", "TertiaryButton", "CancelButton"].includes(
-        component.type,
-      )
-    ) {
+    // Explicitly Center Content for Buttons (simulating Hytale native behavior)
+    if (["Button", "CancelButton"].includes(component.type)) {
       style.display = "flex";
+      style.flexDirection = "column";
       style.justifyContent = "center";
       style.alignItems = "center";
+      style.textAlign = "center";
     }
 
     // Default to Full Width for all components if not explicitly set
@@ -485,13 +481,20 @@ export const RenderedComponent = memo(function RenderedComponent({
       !style.height &&
       !style.flex &&
       !style.flexGrow &&
-      !style.position // If absolute, it behaves differently
+      !style.position
     ) {
       style.flexGrow = 1;
-      // Some layouts might need explicit height 100% to fill match-parent if flex-grow doesn't kick in (e.g. standard block)
-      // But typically flex-grow is safer for mixing with other items.
-      // However, if the parent is NOT a flex container (unlikely in this system), it might collapse.
-      // But our system forces display:flex on almost everything.
+    }
+
+    // Special Case: Labels inside Buttons should fill the button to ensure centering works
+    if (
+      component.type === "Label" &&
+      ["Button", "CancelButton"].includes(parentType || "")
+    ) {
+      style.width = "100%";
+      style.height = "10%";
+      style.flexGrow = 1;
+      style.backgroundColor = "red";
     }
 
     return style;
