@@ -100,6 +100,7 @@ export function EditorToolbar() {
 
   const deviceOptions: { value: DevicePreview; icon: React.ReactNode }[] = [
     { value: "Desktop", icon: <Monitor className="h-4 w-4" /> },
+    { value: "Hytale", icon: <Maximize2 className="h-4 w-4" /> },
     { value: "Tablet", icon: <Tablet className="h-4 w-4" /> },
     { value: "Mobile", icon: <Smartphone className="h-4 w-4" /> },
   ];

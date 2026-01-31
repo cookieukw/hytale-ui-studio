@@ -102,6 +102,7 @@ export const useEditorStore = create<EditorStore>()(
       setDevicePreview: (preview) => {
         let newZoom = 80; // Default Desktop
         if (preview === "Desktop") newZoom = 80;
+        if (preview === "Hytale") newZoom = 50; // Auto-zoom out slightly due to large size
         if (preview === "Tablet") newZoom = 70;
         if (preview === "Mobile") newZoom = 100;
         set({ devicePreview: preview, zoom: newZoom, fitToScreen: false });

@@ -66,6 +66,8 @@ export function EditorCanvas() {
         return { width: 375, height: 667 };
       case "Tablet":
         return { width: 768, height: 1024 };
+      case "Hytale":
+        return { width: 2106, height: 1080 };
       case "Desktop":
       default:
         return { width: 1280, height: 720 };

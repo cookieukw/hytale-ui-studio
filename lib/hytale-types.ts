@@ -185,7 +185,7 @@ export interface PresetDefinition {
 }
 
 export type ViewMode = "Design" | "Blueprint" | "Split";
-export type DevicePreview = "Desktop" | "Tablet" | "Mobile";
+export type DevicePreview = "Desktop" | "Tablet" | "Mobile" | "Hytale";
 
 export interface EditorState {
   components: HytaleComponent[];
