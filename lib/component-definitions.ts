@@ -36,20 +36,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       background: { color: "#1a1a2a", opacity: 1 },
     },
   },
-  {
-    type: "DecoratedContainer",
-    label: "Decorated Container",
-    icon: "Layout",
-    category: "Layout",
-    defaultProps: {
-      name: "DecoratedContainer",
-      alias: "$C.@DecoratedContainer",
-      anchor: {},
-      layoutMode: "Top",
-      background: { color: "#2a2a3a", opacity: 1 },
-      padding: { top: 40, left: 17, right: 17, bottom: 17 }, // Approximate Frame padding + Title height
-    },
-  },
+
   {
     type: "Panel",
     label: "Panel",

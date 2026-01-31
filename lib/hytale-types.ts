@@ -68,7 +68,6 @@ export interface ComponentState {
 }
 
 export type ComponentType =
-  | "DecoratedContainer"
   | "Panel"
   | "ContentSeparator"
   | "VerticalSeparator"

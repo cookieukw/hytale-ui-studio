@@ -83,7 +83,7 @@ export const RenderedComponent = memo(function RenderedComponent({
       "Row",
       "Card",
       "Panel",
-      "DecoratedContainer",
+
       "Group",
       "ScrollArea",
     ].includes(component.type);
@@ -803,7 +803,6 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     case "Group":
     case "Panel":
-    case "DecoratedContainer":
       return renderWithIndicators(
         <>
           {component.children?.map((child, i) => (

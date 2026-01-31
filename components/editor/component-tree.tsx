@@ -46,7 +46,7 @@ const componentIcons: Record<
 > = {
   Group: Square,
   ScrollArea: ScrollText,
-  DecoratedContainer: Square,
+
   Panel: Square,
   ContentSeparator: MoreVertical,
   VerticalSeparator: MoreVertical,
