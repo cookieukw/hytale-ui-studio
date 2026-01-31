@@ -363,7 +363,7 @@ export const RenderedComponent = memo(function RenderedComponent({
           style.flexWrap = "wrap";
           style.justifyContent = "center"; // Center pages horizontally
           style.alignContent = "flex-start"; // Stack lines from top
-          style.alignItems = "center";
+          style.alignItems = "flex-start"; // Items align to top
           break;
         case "CenterMiddle":
           style.flexDirection = "column";
