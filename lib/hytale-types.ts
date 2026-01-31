@@ -76,7 +76,6 @@ export type ComponentType =
   | "TextField"
   | "NumberField"
   | "Button"
-  | "TextButton"
   | "SecondaryButton"
   | "SecondaryTextButton"
   | "TertiaryButton"

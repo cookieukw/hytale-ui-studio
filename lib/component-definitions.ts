@@ -109,24 +109,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       ],
     },
   },
-  {
-    type: "TextButton",
-    label: "Text Button",
-    icon: "Type",
-    category: "Input",
-    defaultProps: {
-      name: "TextButton",
-      text: "Click me",
-      textStyle: {
-        fontSize: 14,
-        textColor: "#4a9eff",
-      },
-      states: {
-        hovered: { textStyle: { textColor: "#5aafff" } },
-        pressed: { textStyle: { textColor: "#3a8eef" } },
-      },
-    },
-  },
+
   {
     type: "SecondaryButton",
     label: "Secondary Button",
@@ -826,7 +809,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
         },
         {
           id: generateId(),
-          type: "TextButton",
+          type: "SecondaryTextButton",
           name: "DismissButton",
           text: "Dismiss",
           textStyle: {

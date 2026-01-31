@@ -644,7 +644,6 @@ export const RenderedComponent = memo(function RenderedComponent({
         "rounded",
       );
 
-    case "TextButton":
     case "SecondaryTextButton":
     case "TertiaryTextButton":
     case "CancelTextButton":

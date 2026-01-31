@@ -46,7 +46,6 @@ const componentIcons: Record<
 > = {
   Group: Square,
   ScrollArea: ScrollText,
-
   Panel: Square,
   ContentSeparator: MoreVertical,
   VerticalSeparator: MoreVertical,
@@ -54,7 +53,6 @@ const componentIcons: Record<
   TextField: TextCursor,
   NumberField: Hash,
   Button: MousePointerClick,
-  TextButton: Type,
   SecondaryButton: MousePointerClick,
   SecondaryTextButton: Type,
   TertiaryButton: MousePointerClick,
