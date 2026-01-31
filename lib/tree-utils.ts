@@ -486,20 +486,6 @@ export function componentsToCode(
           if (parts.length > 0) {
             code += `${spaces}  Style: (${parts.join(", ")});\n`;
           }
-          if (comp.textStyle.fontSize)
-            code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
-
-          if (comp.textStyle.textColor) {
-            const textColor = formatHytaleColor(comp.textStyle.textColor);
-            code += `${spaces}  Color: ${textColor};\n`;
-          }
-
-          if (comp.textStyle.renderBold)
-            code += `${spaces}  RenderBold: true;\n`;
-          if (comp.textStyle.renderUppercase)
-            code += `${spaces}  RenderUppercase: true;\n`;
-          if (comp.textStyle.alignment)
-            code += `${spaces}  Alignment: ${comp.textStyle.alignment};\n`;
         }
       }
     }
