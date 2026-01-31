@@ -550,7 +550,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           type: "Group",
           name: "DialogFooter",
           anchor: { left: 0, right: 0, height: 60 },
-          layoutMode: "Right",
+          layoutMode: "Left",
           padding: { left: 16, right: 16 },
           background: { color: "#1a1a2a" },
           children: [
@@ -672,7 +672,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
       type: "Group",
       name: "ButtonRow",
       anchor: { width: 220, height: 40 },
-      layoutMode: "Right",
+      layoutMode: "Left",
       direction: "Horizontal",
       children: [
         {

@@ -323,65 +323,54 @@ export const RenderedComponent = memo(function RenderedComponent({
       style.flex = component.flexWeight;
     }
 
+    if (component.direction) {
+      style.flexDirection =
+        component.direction === "Vertical" ? "column" : "row";
+    }
+
     if (component.layoutMode) {
       style.display = "flex";
       switch (component.layoutMode) {
         case "Top":
           style.flexDirection = "column";
-          style.alignItems = "flex-start";
-          break;
-        case "Bottom":
-          style.flexDirection = "column";
-          style.justifyContent = "flex-end";
-          style.alignItems = "flex-start";
+          style.alignItems = "center"; // "Centro topo" -> Horizontal Center
+          style.justifyContent = "flex-start"; // Vertical Top
           break;
         case "Left":
           style.flexDirection = "row";
-          style.alignItems = "center";
-          break;
-        case "Right":
-          style.flexDirection = "row";
-          style.justifyContent = "flex-end";
-          style.alignItems = "center";
-          break;
-        case "Middle":
-          // "Vertical Middle" usually implies Vertical direction, centered vertically
-          style.flexDirection = "column";
-          style.justifyContent = "center";
+          style.alignItems = "center"; // "Centro esquerda" -> Vertical Center
+          style.justifyContent = "flex-start"; // Horizontal Left
           break;
         case "Center":
-          // "Simple Center" usually implies Vertical direction, centered horizontally
           style.flexDirection = "column";
           style.alignItems = "center";
-          break;
-        case "CenterMiddle":
-        case "MiddleCenter":
-          style.flexDirection = "column";
           style.justifyContent = "center";
-          style.alignItems = "center";
           break;
-        case "Full":
-          style.width = "100%";
-          style.height = "100%";
+        case "Middle":
+          style.flexDirection = "column";
+          style.alignItems = "center";
+          style.justifyContent = "center";
           break;
         case "TopScrolling":
           style.flexDirection = "column";
-          style.alignItems = "flex-start";
+          style.alignItems = "center"; // "Centro topo"
+          style.justifyContent = "flex-start";
           style.overflowY = "auto";
           style.overflowX = "hidden";
           break;
         case "LeftCenterWrap":
           style.flexDirection = "row";
           style.flexWrap = "wrap";
-          style.justifyContent = "center";
+          style.justifyContent = "center"; // Center pages horizontally
+          style.alignContent = "flex-start"; // Stack lines from top
           style.alignItems = "center";
           break;
+        case "CenterMiddle":
+          style.flexDirection = "column";
+          style.alignItems = "center";
+          style.justifyContent = "center";
+          break;
       }
-    }
-
-    if (component.direction) {
-      style.flexDirection =
-        component.direction === "Vertical" ? "column" : "row";
     }
 
     if (component.textStyle) {

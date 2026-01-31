@@ -3,15 +3,11 @@
 export type LayoutMode =
   | "Top"
   | "Left"
-  | "Middle"
-  | "Bottom"
-  | "Right"
   | "Center"
-  | "Full"
+  | "Middle"
   | "TopScrolling"
-  | "CenterMiddle"
-  | "MiddleCenter"
-  | "LeftCenterWrap";
+  | "LeftCenterWrap"
+  | "CenterMiddle";
 export type Direction = "Vertical" | "Horizontal";
 export type TextAlignment = "Left" | "Center" | "Right";
 export type ImageFit = "Fill" | "Fit" | "Stretch";

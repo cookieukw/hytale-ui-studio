@@ -333,16 +333,12 @@ export function Inspector() {
 
   const layoutModes: LayoutMode[] = [
     "Top",
-    "Bottom",
     "Left",
-    "Right",
-    "Middle",
     "Center",
-    "Full",
+    "Middle",
     "TopScrolling",
-    "CenterMiddle",
-    "MiddleCenter",
     "LeftCenterWrap",
+    "CenterMiddle",
   ];
   const directions: Direction[] = ["Vertical", "Horizontal"];
   const alignments: TextAlignment[] = ["Left", "Center", "Right"];
