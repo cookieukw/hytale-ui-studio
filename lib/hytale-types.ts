@@ -176,7 +176,8 @@ export interface ComponentDefinition {
   label: string;
   icon: string;
   category: "Layout" | "Input" | "Display";
-  defaultProps: Partial<HytaleComponent>;
+  defaultProps?: Partial<HytaleComponent>;
+  create?: () => HytaleComponent;
 }
 
 export interface PresetDefinition {

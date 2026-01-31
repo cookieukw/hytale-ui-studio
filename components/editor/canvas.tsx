@@ -169,14 +169,18 @@ export function EditorCanvas() {
 
       const def = COMPONENT_DEFINITIONS.find((d) => d.type === componentType);
       if (def) {
-        addComponent(
-          {
-            type: def.type,
-            name: def.label,
-            ...def.defaultProps,
-          },
-          null,
-        );
+        if (def.create) {
+          addComponent(def.create(), null);
+        } else {
+          addComponent(
+            {
+              type: def.type,
+              name: def.label,
+              ...(def.defaultProps || {}),
+            },
+            null,
+          );
+        }
       }
     },
     [addComponent],

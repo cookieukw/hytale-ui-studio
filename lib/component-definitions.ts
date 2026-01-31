@@ -70,15 +70,25 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     label: "Number Field",
     icon: "Hash",
     category: "Input",
-    defaultProps: {
-      name: "NumberField",
-      value: 0,
-      step: 1,
-      maxDecimalPlaces: 0,
+    create: () => ({
+      id: generateId(),
+      type: "Group",
+      name: "NumberFieldContainer",
       anchor: { width: 120, height: 40 },
-      padding: { left: 12, right: 12, top: 8, bottom: 8 },
-      background: { color: "#1a1a2a" },
-    },
+      children: [
+        {
+          id: generateId(),
+          type: "NumberField",
+          name: "NumberField",
+          value: 0,
+          step: 1,
+          maxDecimalPlaces: 0,
+          anchor: { top: 0, bottom: 0, left: 0, right: 0 },
+          padding: { left: 12, right: 12, top: 8, bottom: 8 },
+          background: { color: "#1a1a2a" },
+        },
+      ],
+    }),
   },
   {
     type: "Button",

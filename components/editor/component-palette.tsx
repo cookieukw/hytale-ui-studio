@@ -79,14 +79,18 @@ const CategorySection = memo(function CategorySection({
   };
 
   const handleClick = (item: ComponentDefinition) => {
-    addComponent(
-      {
-        type: item.type,
-        name: item.label,
-        ...item.defaultProps,
-      },
-      selectedId,
-    );
+    if (item.create) {
+      addComponent(item.create(), selectedId);
+    } else {
+      addComponent(
+        {
+          type: item.type,
+          name: item.label,
+          ...(item.defaultProps || {}),
+        },
+        selectedId,
+      );
+    }
     setActiveMobileTab("View");
   };
 

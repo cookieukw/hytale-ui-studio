@@ -142,11 +142,17 @@ export const RenderedComponent = memo(function RenderedComponent({
     else if (droppedType) {
       const def = COMPONENT_DEFINITIONS.find((d) => d.type === droppedType);
       if (def) {
-        const newComp = {
-          type: def.type,
-          name: def.label,
-          ...def.defaultProps,
-        };
+        let newComp: any;
+
+        if (def.create) {
+          newComp = def.create();
+        } else {
+          newComp = {
+            type: def.type,
+            name: def.label,
+            ...def.defaultProps,
+          };
+        }
 
         if (dragState?.position === "inside") {
           addComponent(newComp, component.id);
