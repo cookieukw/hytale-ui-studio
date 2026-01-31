@@ -711,12 +711,7 @@ export function Inspector() {
 
             {hasTextStyle && (
               <CollapsibleSection title="Typography">
-                {![
-                  "Button",
-                  "SecondaryButton",
-                  "TertiaryButton",
-                  "CancelButton",
-                ].includes(component.type) && (
+                {!["Button", "CancelButton"].includes(component.type) && (
                   <FieldRow label="Font Size">
                     <Input
                       type="number"
