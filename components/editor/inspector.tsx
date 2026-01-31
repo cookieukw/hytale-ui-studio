@@ -109,14 +109,14 @@ function AnchorFields({ component, onUpdate, disabled }: AnchorFieldsProps) {
   return (
     <>
       <FieldRow label="Width">
-        <Input
+        <DebouncedInput
           type="text"
           value={anchor.width || ""}
-          onChange={(e) => {
-            const val = e.target.value;
+          onChange={(val) => {
+            const valStr = String(val);
             updateAnchor(
               "width",
-              val.includes("%") ? val : Number(val) || undefined,
+              valStr.includes("%") ? valStr : Number(valStr) || undefined,
             );
           }}
           className="h-7 text-xs"
@@ -125,14 +125,14 @@ function AnchorFields({ component, onUpdate, disabled }: AnchorFieldsProps) {
         />
       </FieldRow>
       <FieldRow label="Height">
-        <Input
+        <DebouncedInput
           type="text"
           value={anchor.height || ""}
-          onChange={(e) => {
-            const val = e.target.value;
+          onChange={(val) => {
+            const valStr = String(val);
             updateAnchor(
               "height",
-              val.includes("%") ? val : Number(val) || undefined,
+              valStr.includes("%") ? valStr : Number(valStr) || undefined,
             );
           }}
           className="h-7 text-xs"
@@ -179,48 +179,40 @@ function PaddingFields({ component, onUpdate }: PaddingFieldsProps) {
     <div className="grid grid-cols-2 gap-2">
       <div>
         <Label className="text-[10px] text-muted-foreground">Top</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={padding.top || ""}
-          onChange={(e) =>
-            updatePadding("top", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updatePadding("top", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
       <div>
         <Label className="text-[10px] text-muted-foreground">Bottom</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={padding.bottom || ""}
-          onChange={(e) =>
-            updatePadding("bottom", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updatePadding("bottom", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
       <div>
         <Label className="text-[10px] text-muted-foreground">Left</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={padding.left || ""}
-          onChange={(e) =>
-            updatePadding("left", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updatePadding("left", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
       <div>
         <Label className="text-[10px] text-muted-foreground">Right</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={padding.right || ""}
-          onChange={(e) =>
-            updatePadding("right", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updatePadding("right", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -250,48 +242,40 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
     <div className="grid grid-cols-2 gap-2">
       <div>
         <Label className="text-[10px] text-muted-foreground">Top</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={margin.top || ""}
-          onChange={(e) =>
-            updateMargin("top", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updateMargin("top", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
       <div>
         <Label className="text-[10px] text-muted-foreground">Bottom</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={margin.bottom || ""}
-          onChange={(e) =>
-            updateMargin("bottom", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updateMargin("bottom", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
       <div>
         <Label className="text-[10px] text-muted-foreground">Left</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={margin.left || ""}
-          onChange={(e) =>
-            updateMargin("left", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updateMargin("left", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
       </div>
       <div>
         <Label className="text-[10px] text-muted-foreground">Right</Label>
-        <Input
+        <DebouncedInput
           type="number"
           value={margin.right || ""}
-          onChange={(e) =>
-            updateMargin("right", Number(e.target.value) || undefined)
-          }
+          onChange={(val) => updateMargin("right", Number(val) || undefined)}
           className="h-7 text-xs"
           placeholder="0"
         />
@@ -301,6 +285,7 @@ function MarginFields({ component, onUpdate }: MarginFieldsProps) {
 }
 
 import { DebouncedColorPicker } from "./debounced-color-picker";
+import { DebouncedInput } from "./debounced-input";
 
 export function Inspector() {
   const selectedId = useEditorStore((state) => state.selectedId);
@@ -546,12 +531,12 @@ export function Inspector() {
               )}
 
               <FieldRow label="FlexWeight">
-                <Input
+                <DebouncedInput
                   type="number"
                   value={component.flexWeight || ""}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     handleUpdate({
-                      flexWeight: Number(e.target.value) || undefined,
+                      flexWeight: Number(val) || undefined,
                     })
                   }
                   className="h-7 text-xs"
@@ -566,10 +551,10 @@ export function Inspector() {
             {hasText && (
               <CollapsibleSection title="Text">
                 <FieldRow label="Content">
-                  <Input
+                  <DebouncedInput
                     type="text"
                     value={component.text || ""}
-                    onChange={(e) => handleUpdate({ text: e.target.value })}
+                    onChange={(val) => handleUpdate({ text: String(val) })}
                     className="h-7 text-xs"
                     placeholder="Enter text..."
                   />
@@ -580,11 +565,11 @@ export function Inspector() {
             {hasPlaceholder && (
               <CollapsibleSection title="Placeholder">
                 <FieldRow label="Text">
-                  <Input
+                  <DebouncedInput
                     type="text"
                     value={component.placeholderText || ""}
-                    onChange={(e) =>
-                      handleUpdate({ placeholderText: e.target.value })
+                    onChange={(val) =>
+                      handleUpdate({ placeholderText: String(val) })
                     }
                     className="h-7 text-xs"
                     placeholder="Enter placeholder..."
@@ -596,24 +581,20 @@ export function Inspector() {
             {hasValue && (
               <CollapsibleSection title="Value">
                 <FieldRow label="Value">
-                  <Input
+                  <DebouncedInput
                     type="number"
                     value={component.value ?? 0}
-                    onChange={(e) =>
-                      handleUpdate({ value: Number(e.target.value) })
-                    }
+                    onChange={(val) => handleUpdate({ value: Number(val) })}
                     className="h-7 text-xs"
                   />
                 </FieldRow>
                 {component.type === "ProgressBar" && (
                   <>
                     <FieldRow label="Max">
-                      <Input
+                      <DebouncedInput
                         type="number"
                         value={component.max ?? 100}
-                        onChange={(e) =>
-                          handleUpdate({ max: Number(e.target.value) })
-                        }
+                        onChange={(val) => handleUpdate({ max: Number(val) })}
                         className="h-7 text-xs"
                       />
                     </FieldRow>
@@ -633,12 +614,10 @@ export function Inspector() {
             {component.type === "TimerLabel" && (
               <CollapsibleSection title="Timer">
                 <FieldRow label="Seconds">
-                  <Input
+                  <DebouncedInput
                     type="number"
                     value={component.seconds ?? 0}
-                    onChange={(e) =>
-                      handleUpdate({ seconds: Number(e.target.value) })
-                    }
+                    onChange={(val) => handleUpdate({ seconds: Number(val) })}
                     className="h-7 text-xs"
                   />
                 </FieldRow>
@@ -656,35 +635,54 @@ export function Inspector() {
               </CollapsibleSection>
             )}
 
+            {component.type === "NumberField" && (
+              <CollapsibleSection title="Format">
+                <FieldRow label="Step">
+                  <DebouncedInput
+                    type="number"
+                    value={component.step ?? 1}
+                    onChange={(val) => handleUpdate({ step: Number(val) })}
+                    className="h-7 text-xs"
+                  />
+                </FieldRow>
+                <FieldRow label="Max Decimals">
+                  <DebouncedInput
+                    type="number"
+                    value={component.maxDecimalPlaces ?? 0}
+                    onChange={(val) =>
+                      handleUpdate({
+                        maxDecimalPlaces: Number(val),
+                      })
+                    }
+                    className="h-7 text-xs"
+                  />
+                </FieldRow>
+              </CollapsibleSection>
+            )}
+
             {component.type === "Slider" && (
               <CollapsibleSection title="Range">
                 <FieldRow label="Min">
-                  <Input
+                  <DebouncedInput
                     type="number"
                     value={component.min ?? 0}
-                    onChange={(e) =>
-                      handleUpdate({ min: Number(e.target.value) })
-                    }
+                    onChange={(val) => handleUpdate({ min: Number(val) })}
                     className="h-7 text-xs"
                   />
                 </FieldRow>
                 <FieldRow label="Max">
-                  <Input
+                  <DebouncedInput
                     type="number"
                     value={component.max ?? 100}
-                    onChange={(e) =>
-                      handleUpdate({ max: Number(e.target.value) })
-                    }
+                    onChange={(val) => handleUpdate({ max: Number(val) })}
                     className="h-7 text-xs"
                   />
                 </FieldRow>
                 <FieldRow label="Step">
-                  <Input
+                  <DebouncedInput
                     type="number"
                     value={component.step ?? 1}
-                    onChange={(e) =>
-                      handleUpdate({ step: Number(e.target.value) })
-                    }
+                    onChange={(val) => handleUpdate({ step: Number(val) })}
                     className="h-7 text-xs"
                   />
                 </FieldRow>
@@ -697,12 +695,14 @@ export function Inspector() {
                   <span className="text-xs text-muted-foreground">
                     Comma separated
                   </span>
-                  <Input
+                  <DebouncedInput
                     type="text"
                     value={component.options?.join(", ") || ""}
-                    onChange={(e) =>
+                    onChange={(val) =>
                       handleUpdate({
-                        options: e.target.value.split(",").map((s) => s.trim()),
+                        options: String(val)
+                          .split(",")
+                          .map((s) => s.trim()),
                       })
                     }
                     className="h-7 text-xs"
@@ -750,14 +750,14 @@ export function Inspector() {
                       }
                       className="h-7 w-10"
                     />
-                    <Input
+                    <DebouncedInput
                       type="text"
                       value={component.textStyle?.textColor || "#ffffff"}
-                      onChange={(e) =>
+                      onChange={(val) =>
                         handleUpdate({
                           textStyle: {
                             ...component.textStyle,
-                            textColor: e.target.value,
+                            textColor: String(val),
                           },
                         })
                       }

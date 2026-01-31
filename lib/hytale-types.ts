@@ -129,6 +129,7 @@ export interface HytaleComponent {
   max?: number;
   min?: number;
   step?: number;
+  maxDecimalPlaces?: number;
   checked?: boolean;
   options?: string[]; // For Dropdown
   showLabel?: boolean;
