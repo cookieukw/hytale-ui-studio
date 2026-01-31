@@ -386,6 +386,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
         horizontalAlignment: "Start",
         verticalAlignment: "Start",
       },
+      anchor: { width: 100, height: 20 },
     },
   },
   {
