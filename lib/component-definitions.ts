@@ -73,6 +73,8 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "NumberField",
       value: 0,
+      step: 1,
+      maxDecimalPlaces: 0,
       anchor: { width: 120, height: 40 },
       padding: { left: 12, right: 12, top: 8, bottom: 8 },
       background: { color: "#1a1a2a" },

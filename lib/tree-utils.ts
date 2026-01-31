@@ -398,6 +398,20 @@ export function componentsToCode(
       if (comp.step !== undefined) code += `${spaces}  Step: ${comp.step};\n`;
     }
 
+    // NumberField Format
+    if (comp.type === "NumberField") {
+      const parts: string[] = [];
+      if (comp.maxDecimalPlaces !== undefined)
+        parts.push(`MaxDecimalPlaces: ${comp.maxDecimalPlaces}`);
+      if (comp.step !== undefined) parts.push(`Step: ${comp.step}`);
+      if (comp.min !== undefined) parts.push(`MinValue: ${comp.min}`);
+      if (comp.max !== undefined) parts.push(`MaxValue: ${comp.max}`);
+
+      if (parts.length > 0) {
+        code += `${spaces}  Format: (${parts.join(", ")});\n`;
+      }
+    }
+
     // Dropdown
     if (comp.type === "Dropdown" && comp.options) {
       // Assuming Hytale uses a string list? Or children?
@@ -472,16 +486,6 @@ export function componentsToCode(
           if (parts.length > 0) {
             code += `${spaces}  Style: (${parts.join(", ")});\n`;
           }
-        } else if (
-          comp.type !== "TextButton" &&
-          comp.type !== "SecondaryTextButton" &&
-          comp.type !== "TertiaryTextButton" &&
-          comp.type !== "CancelTextButton"
-        ) {
-          // Standard Element export
-          // Label also uses Style: (...) syntax now per user request
-          // SKIP TextButton and variants as they do not support text style properties directly per user feedback.
-
           if (comp.textStyle.fontSize)
             code += `${spaces}  FontSize: ${comp.textStyle.fontSize};\n`;
 

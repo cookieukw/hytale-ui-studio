@@ -607,6 +607,15 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     }
 
     // 2. Standard Properties
+    if (key === "Format" && typeof value === "object") {
+      if (value.MaxDecimalPlaces !== undefined)
+        component.maxDecimalPlaces = Number(value.MaxDecimalPlaces);
+      if (value.Step !== undefined) component.step = Number(value.Step);
+      if (value.MinValue !== undefined) component.min = Number(value.MinValue);
+      if (value.MaxValue !== undefined) component.max = Number(value.MaxValue);
+      continue;
+    }
+
     if (key === "Visible") {
       component.isVisible = value !== "false" && value !== false;
       continue;
