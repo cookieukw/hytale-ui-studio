@@ -339,7 +339,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       anchor: { width: 100, height: 100 },
     },
   },
-  /*
   {
     type: "ProgressBar",
     label: "Progress Bar",
@@ -347,14 +346,18 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     category: "Display",
     defaultProps: {
       name: "ProgressBar",
+      alias: "$C.@ProgressBar",
       value: 50,
-      max: 100,
-      showLabel: true,
+      showLabel: false,
       anchor: { width: 200, height: 24 },
-      background: { color: "#1a1a2a" },
+      barTexturePath: "ProgressBarFill@2x.png",
+      effectTexturePath: "ProgressBarEffect@2x.png",
+      background: { texture: "ProgressBar@2x.png" },
+      effectWidth: 102,
+      effectHeight: 58,
+      effectOffset: 74,
     },
   },
-  */
 ];
 
 export const PRESET_DEFINITIONS: PresetDefinition[] = [
@@ -525,36 +528,31 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
     }),
   },
   {
-    type: "ProgressDisplay",
-    label: "Progress Display",
+    type: "ProgressBar",
+    label: "Progress Bar (Correct)",
     icon: "Loader",
-    description: "Label with progress bar",
+    description: "Standard Hytale Progress Bar with container",
     create: () => ({
       id: generateId(),
       type: "Group",
-      name: "ProgressDisplay",
-      anchor: { width: 250, height: 50 },
-      layoutMode: "Top",
+      name: "ProgressBarContainer",
+      alias: "$C.@ProgressBarContainer",
+      anchor: { width: 300, height: 12 },
+      background: { texture: "ProgressBar@2x.png" }, // Track background
       children: [
         {
           id: generateId(),
-          type: "Label",
-          name: "ProgressLabel",
-          text: "Progress",
-          textStyle: {
-            fontSize: 12,
-            textColor: "#888888",
-          },
-        },
-        {
-          id: generateId(),
           type: "ProgressBar",
-          name: "ProgressValue",
+          name: "ProgressBar",
           value: 65,
-          max: 100,
-          showLabel: true,
-          anchor: { left: 0, right: 0, height: 20 },
-          margin: { top: 8 },
+          // max: 100, // Removed as per request
+          showLabel: false,
+          barTexturePath: "ProgressBarFill@2x.png",
+          effectTexturePath: "ProgressBarEffect@2x.png",
+          effectWidth: 102,
+          effectHeight: 58,
+          effectOffset: 74,
+          anchor: { top: 0, bottom: 0, left: 0, right: 0 }, // Fill container
         },
       ],
     }),

@@ -133,6 +133,12 @@ export interface HytaleComponent {
   texturePath?: string;
   frame?: SpriteFrame;
   framesPerSecond?: number;
+  // ProgressBar specific
+  barTexturePath?: string;
+  effectTexturePath?: string;
+  effectWidth?: number;
+  effectHeight?: number;
+  effectOffset?: number;
   // States
   states?: ComponentState;
   // Hierarchy
@@ -150,7 +156,8 @@ export type PresetType =
   | "BasicHUD"
   | "DialogBox"
   | "InputForm"
-  | "ProgressDisplay"
+  | "ProgressDisplay" // Deprecated/Legacy
+  | "ProgressBar" // New standard preset
   | "ScrollableList"
   | "PanelCard"
   | "ToolbarRow"

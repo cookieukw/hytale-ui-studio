@@ -588,14 +588,6 @@ export function Inspector() {
                 </FieldRow>
                 {component.type === "ProgressBar" && (
                   <>
-                    <FieldRow label="Max">
-                      <DebouncedInput
-                        type="number"
-                        value={component.max ?? 100}
-                        onChange={(val) => handleUpdate({ max: Number(val) })}
-                        className="h-7 text-xs"
-                      />
-                    </FieldRow>
                     <FieldRow label="Show Label">
                       <Switch
                         checked={component.showLabel ?? true}
@@ -866,6 +858,65 @@ export function Inspector() {
                         },
                       })
                     }
+                  />
+                </FieldRow>
+              </CollapsibleSection>
+            )}
+
+            {component.type === "ProgressBar" && (
+              <CollapsibleSection title="Progress Textures">
+                <FieldRow label="Bar Texture">
+                  <DebouncedInput
+                    type="text"
+                    value={component.barTexturePath || ""}
+                    onChange={(val) =>
+                      handleUpdate({ barTexturePath: String(val) })
+                    }
+                    className="h-7 text-xs"
+                    placeholder="Path to texture..."
+                  />
+                </FieldRow>
+                <FieldRow label="Effect Tex">
+                  <DebouncedInput
+                    type="text"
+                    value={component.effectTexturePath || ""}
+                    onChange={(val) =>
+                      handleUpdate({ effectTexturePath: String(val) })
+                    }
+                    className="h-7 text-xs"
+                    placeholder="Path to texture..."
+                  />
+                </FieldRow>
+                <div className="grid grid-cols-2 gap-2">
+                  <FieldRow label="Ef. Width">
+                    <DebouncedInput
+                      type="number"
+                      value={component.effectWidth || 0}
+                      onChange={(val) =>
+                        handleUpdate({ effectWidth: Number(val) })
+                      }
+                      className="h-7 text-xs"
+                    />
+                  </FieldRow>
+                  <FieldRow label="Ef. Height">
+                    <DebouncedInput
+                      type="number"
+                      value={component.effectHeight || 0}
+                      onChange={(val) =>
+                        handleUpdate({ effectHeight: Number(val) })
+                      }
+                      className="h-7 text-xs"
+                    />
+                  </FieldRow>
+                </div>
+                <FieldRow label="Ef. Offset">
+                  <DebouncedInput
+                    type="number"
+                    value={component.effectOffset || 0}
+                    onChange={(val) =>
+                      handleUpdate({ effectOffset: Number(val) })
+                    }
+                    className="h-7 text-xs"
                   />
                 </FieldRow>
               </CollapsibleSection>

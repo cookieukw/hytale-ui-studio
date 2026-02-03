@@ -758,25 +758,58 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     case "ProgressBar":
       const val = Number(component.value) || 0;
-      const max = Number(component.max) || 100;
+      const max = 100; // Implicit max for preview
       const percentage = Math.min(100, Math.max(0, (val / max) * 100));
+
+      const barPath = component.barTexturePath
+        ? component.barTexturePath.startsWith("/")
+          ? component.barTexturePath
+          : `/${component.barTexturePath}`
+        : undefined;
+      const effectPath = component.effectTexturePath
+        ? component.effectTexturePath.startsWith("/")
+          ? component.effectTexturePath
+          : `/${component.effectTexturePath}`
+        : undefined;
 
       return renderWithIndicators(
         <>
           <div
             className={cn(
-              "h-full transition-all duration-300 ease-in-out",
-              isBlueprint ? "bg-primary/30" : "bg-primary",
+              "h-full relative",
+              !barPath && (isBlueprint ? "bg-primary/30" : "bg-primary"),
             )}
-            style={{ width: `${percentage}%` }}
+            style={{
+              width: `${percentage}%`,
+              backgroundImage: barPath ? `url(${barPath})` : undefined,
+              backgroundSize: "100% 100%",
+              backgroundRepeat: "no-repeat",
+            }}
           />
-          {component.showLabel !== false && (
-            <span className="absolute inset-0 flex items-center justify-center text-xs text-foreground">
+          {effectPath && (
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: `${percentage}%`,
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: component.effectWidth,
+                height: component.effectHeight,
+                marginLeft: -(component.effectOffset || 0),
+                backgroundImage: `url(${effectPath})`,
+                backgroundSize: "100% 100%",
+                backgroundRepeat: "no-repeat",
+                zIndex: 10,
+              }}
+            />
+          )}
+          {component.showLabel && (
+            <span className="absolute inset-0 flex items-center justify-center text-xs text-foreground z-20">
               {val}/{max}
             </span>
           )}
         </>,
-        "relative overflow-hidden rounded",
+        "relative rounded-sm",
       );
 
     case "ScrollArea":
