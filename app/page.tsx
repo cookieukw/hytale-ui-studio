@@ -108,15 +108,35 @@ export default function HytaleUIStudio() {
             collapsedSize={0}
           >
             <ResizablePanelGroup direction="vertical" className="h-full">
-              <ResizablePanel defaultSize={45} minSize={25}>
+              <ResizablePanel
+                defaultSize={45}
+                minSize={25}
+          
+                collapsible={true}
+                collapsedSize={2}
+              >
                 <ComponentPalette />
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={30} minSize={20}>
+              <ResizablePanel
+                style={{
+                  transition: "transform 0.2s ease-in-out",
+                  transform: "translateX(0)",
+                }}
+                defaultSize={30}
+                minSize={20}
+                collapsible={true}
+                collapsedSize={2}
+              >
                 <ComponentTree />
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={25} minSize={15}>
+              <ResizablePanel
+                defaultSize={25}
+                minSize={15}
+                collapsible={true}
+                collapsedSize={1}
+              >
                 <CodeEditor />
               </ResizablePanel>
             </ResizablePanelGroup>
@@ -125,14 +145,29 @@ export default function HytaleUIStudio() {
           <ResizableHandle withHandle />
 
           {/* Center - Canvas */}
-          <ResizablePanel defaultSize={62} minSize={40}>
+          <ResizablePanel
+            defaultSize={62}
+            minSize={40}
+            collapsible={true}
+            collapsedSize={0}
+          >
             {viewMode === "Split" ? (
               <ResizablePanelGroup direction="vertical">
-                <ResizablePanel defaultSize={65} minSize={30}>
+                <ResizablePanel
+                  defaultSize={65}
+                  minSize={30}
+                  collapsible={true}
+                  collapsedSize={0}
+                >
                   <EditorCanvas />
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={35} minSize={20}>
+                <ResizablePanel
+                  defaultSize={35}
+                  minSize={20}
+                  collapsible={true}
+                  collapsedSize={0}
+                >
                   <CodeEditor />
                 </ResizablePanel>
               </ResizablePanelGroup>
