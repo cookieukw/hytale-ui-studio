@@ -727,6 +727,7 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
       continue;
     }
     if (key === "Text") {
+      // Note: Text is not a valid property for DropdownBox, but is valid for Label, Button, etc.
       component.text = String(value);
       continue;
     }
@@ -767,6 +768,23 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     }
 
     if (key === "Style" && typeof value === "object") {
+      // Special handling for DropdownBox Style
+      if (
+        component.type === "Dropdown" ||
+        component.type === "DropdownBox" ||
+        // Check for DropdownBox specific style props if type is unknown/generic
+        value.Background ||
+        value.MaskTexturePath ||
+        value.OutlineColor
+      ) {
+        // This is likely a DropdownBoxStyle
+        // But wait, Label also uses Style for TextStyle.
+        // If component type is Dropdown, we map Style to dropdownStyle.
+        // DropdownBoxStyle seems to contain visual props, different from TextStyle
+        component.dropdownStyle = value;
+        continue;
+      }
+
       if (!component.textStyle) component.textStyle = {};
       if (value.FontSize) component.textStyle.fontSize = Number(value.FontSize);
       if (value.Color) component.textStyle.textColor = String(value.Color);
@@ -784,6 +802,123 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         );
       if (value.VerticalAlignment)
         component.textStyle.verticalAlignment = String(value.VerticalAlignment);
+      continue;
+    }
+
+    // DropdownBox and other properties
+    if (key === "Entries") {
+      component.entries = Array.isArray(value) ? value : [];
+      continue;
+    }
+    if (key === "SelectedValues") {
+      component.selectedValues = Array.isArray(value) ? value : [];
+      continue;
+    }
+    if (key === "HitTestVisible") {
+      component.hitTestVisible = value === true || value === "true";
+      continue;
+    }
+    if (key === "TooltipText") {
+      component.tooltipText = String(value);
+      continue;
+    }
+    if (key === "TooltipTextSpans") {
+      component.tooltipTextSpans = Array.isArray(value) ? value : [];
+      continue;
+    }
+    if (key === "TextTooltipStyle" && typeof value === "object") {
+      if (!component.textTooltipStyle) component.textTooltipStyle = {};
+      // Map text style properties if needed, or just assign
+      // Assuming value is compatible with TextStyle for now or needing similar mapping
+      if (value.FontSize)
+        component.textTooltipStyle.fontSize = Number(value.FontSize);
+      if (value.Color)
+        component.textTooltipStyle.textColor = String(value.Color);
+      continue;
+    }
+    if (key === "TextTooltipShowDelay") {
+      component.textTooltipShowDelay = Number(value);
+      continue;
+    }
+    if (key === "Disabled") {
+      component.disabled = value === true || value === "true";
+      continue;
+    }
+    if (key === "PanelTitleText") {
+      component.panelTitleText = String(value);
+      continue;
+    }
+    if (key === "IsReadOnly") {
+      component.isReadOnly = value === true || value === "true";
+      continue;
+    }
+    if (key === "MaxSelection") {
+      component.maxSelection = Number(value);
+      continue;
+    }
+    if (key === "ShowSearchInput") {
+      component.showSearchInput = value === true || value === "true";
+      continue;
+    }
+    if (key === "ShowLabel") {
+      component.showLabel = value === true || value === "true";
+      continue;
+    }
+    if (key === "ForcedLabel") {
+      component.forcedLabel = String(value);
+      continue;
+    }
+    if (key === "NoItemsText") {
+      component.noItemsText = String(value);
+      continue;
+    }
+    if (key === "DisplayNonExistingValue") {
+      component.displayNonExistingValue = value === true || value === "true";
+      continue;
+    }
+    if (key === "ContentWidth") {
+      component.contentWidth = Number(value);
+      continue;
+    }
+    if (key === "ContentHeight") {
+      component.contentHeight = Number(value);
+      continue;
+    }
+    if (key === "AutoScrollDown") {
+      component.autoScrollDown = value === true || value === "true";
+      continue;
+    }
+    if (key === "KeepScrollPosition") {
+      component.keepScrollPosition = value === true || value === "true";
+      continue;
+    }
+    if (key === "MouseWheelScrollBehaviour") {
+      component.mouseWheelScrollBehaviour = String(value);
+      continue;
+    }
+    if (key === "MaskTexturePath") {
+      component.maskTexturePath = String(value);
+      continue;
+    }
+    if (key === "OutlineColor") {
+      component.outlineColor = String(value);
+      continue;
+    }
+    if (key === "OutlineSize") {
+      component.outlineSize = Number(value);
+      continue;
+    }
+    if (key === "Overscroll") {
+      component.overscroll = value === true || value === "true";
+      continue;
+    }
+
+    if (key === "ValueChanged") {
+      component.valueChanged = String(value);
+      continue;
+    }
+    if (key === "DropdownToggled") {
+      component.dropdownToggled = String(value);
       continue;
     }
 

@@ -192,8 +192,8 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "Dropdown",
       alias: "$C.@DropdownBox",
-      text: "Select Option", // Used as current selection label
-      options: ["Option 1", "Option 2", "Option 3"],
+      noItemsText: "Select Option",
+      entries: ["Option 1", "Option 2", "Option 3"],
       anchor: { width: 220, height: 32 },
       background: { color: "#1a1a2a", border: 16 },
       padding: { left: 8, right: 8 },

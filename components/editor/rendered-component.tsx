@@ -742,30 +742,99 @@ export const RenderedComponent = memo(function RenderedComponent({
       );
 
     case "Dropdown":
-      return renderWithIndicators(
-        <div className="flex h-full w-full items-center justify-between px-2">
+    case "DropdownBox":
+      const items = component.entries || [];
+      const isDisabled = component.disabled;
+      const readOnly = component.isReadOnly;
+
+      // Dropdown Style Implementation
+      const dropdownStyle: React.CSSProperties = {
+        ...getTextStyle(),
+        opacity: isDisabled ? 0.5 : 1,
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        borderColor: component.outlineColor || "border-border",
+        borderWidth: component.outlineSize
+          ? `${component.outlineSize}px`
+          : undefined,
+      };
+
+      if (component.background) {
+        if (component.background.color)
+          dropdownStyle.backgroundColor = component.background.color;
+      }
+
+      const tooltip = component.tooltipText;
+
+      // Text Priority: ForcedLabel -> Value -> SelectedValues -> "Select..."
+      // Note: If ForcedLabel is treated as the button text override:
+      const buttonText =
+        component.forcedLabel ||
+        (component.value ? String(component.value) : null) ||
+        (component.selectedValues && component.selectedValues.length > 0
+          ? component.selectedValues.join(", ")
+          : "Select...");
+
+      const content = (
+        <div
+          className={cn(
+            "flex h-full w-full items-center justify-between rounded border border-border bg-background px-3 py-1",
+            isDisabled && "opacity-50 grayscale",
+          )}
+          style={dropdownStyle}
+          title={tooltip}
+        >
           <span
-            style={getTextStyle()}
             className="truncate text-sm text-foreground"
+            style={{ color: dropdownStyle.color }}
           >
-            {component.text || "Select..."}
+            {buttonText}
           </span>
-          <svg
-            className="h-4 w-4 opacity-50"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <div className="flex items-center gap-1">
+            {component.showSearchInput && (
+              <svg
+                className="h-3 w-3 opacity-50"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            )}
+            <svg
+              className="ml-2 h-4 w-4 shrink-0 opacity-50"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
               strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </div>,
-        undefined,
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+        </div>
       );
+
+      if (component.showLabel) {
+        return renderWithIndicators(
+          <div className="flex flex-col gap-0.5 w-full h-full">
+            <span className="text-xs font-medium text-foreground/70 px-1">
+              {component.panelTitleText || component.name}
+            </span>
+            <div className="flex-1 h-full min-h-0">{content}</div>
+          </div>,
+          undefined,
+        );
+      }
+
+      return renderWithIndicators(content, undefined);
 
     case "Sprite": {
       // Logic for Sprite Sheet Animation

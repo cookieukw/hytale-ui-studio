@@ -273,7 +273,9 @@ export function componentsToCode(
       // but if the component HAS text property set, we export it.
       // Ideally we check component type.
       // But adhering to the previous logic:
-      code += `${spaces}  Text: "${comp.text}";\n`;
+      if (comp.type !== "Dropdown" && comp.type !== "DropdownBox") {
+        code += `${spaces}  Text: "${comp.text}";\n`;
+      }
     }
     if (comp.placeholderText) {
       code += `${spaces}  PlaceholderText: "${comp.placeholderText}";\n`;
@@ -413,15 +415,92 @@ export function componentsToCode(
     }
 
     // Dropdown
-    if (comp.type === "Dropdown" && comp.options) {
-      // Assuming Hytale uses a string list? Or children?
-      // Standard Hytale Dropdown often renders options via Code or Children.
-      // For now, we export as parameter if exists.
-      // NOTE: Hytale UI format usually doesn't have inline lists like ["A","B"].
-      // It might use child items. But preserving data:
-      // code += `${spaces}  Options: [${comp.options.map(o => `"${o}"`).join(", ")}];\n`;
-      // User Reference shows DropdownBox using `EntriesInViewport` etc, but not options list directly in UI script typically.
-      // We will skip exporting options to code for now to avoid syntax errors, holding it in internal state.
+    if (comp.type === "Dropdown" || comp.type === "DropdownBox") {
+      // Data
+      if (comp.entries && comp.entries.length > 0) {
+        // Assuming comma separated strings in parentheses for IReadOnlyList? Or array syntax?
+        // Hytale arrays usually ( "A", "B" )
+        const entriesStr = comp.entries.map((e) => `"${e}"`).join(", ");
+        code += `${spaces}  Entries: (${entriesStr});\n`;
+      }
+      if (comp.selectedValues && comp.selectedValues.length > 0) {
+        const selStr = comp.selectedValues.map((e) => `"${e}"`).join(", ");
+        code += `${spaces}  SelectedValues: (${selStr});\n`;
+      }
+      if (comp.maxSelection !== undefined)
+        code += `${spaces}  MaxSelection: ${comp.maxSelection};\n`;
+      if (comp.displayNonExistingValue !== undefined)
+        code += `${spaces}  DisplayNonExistingValue: ${comp.displayNonExistingValue};\n`;
+      if (comp.noItemsText)
+        code += `${spaces}  NoItemsText: "${comp.noItemsText}";\n`;
+
+      // Visibility / State
+      if (comp.disabled !== undefined)
+        code += `${spaces}  Disabled: ${comp.disabled};\n`;
+      if (comp.isReadOnly !== undefined)
+        code += `${spaces}  IsReadOnly: ${comp.isReadOnly};\n`;
+      if (comp.showLabel !== undefined)
+        code += `${spaces}  ShowLabel: ${comp.showLabel};\n`;
+      if (comp.forcedLabel)
+        code += `${spaces}  ForcedLabel: "${comp.forcedLabel}";\n`;
+      if (comp.showSearchInput !== undefined)
+        code += `${spaces}  ShowSearchInput: ${comp.showSearchInput};\n`;
+      if (comp.panelTitleText)
+        code += `${spaces}  PanelTitleText: "${comp.panelTitleText}";\n`;
+
+      // Interaction
+      if (comp.hitTestVisible !== undefined)
+        code += `${spaces}  HitTestVisible: ${comp.hitTestVisible};\n`;
+      if (comp.mouseWheelScrollBehaviour)
+        code += `${spaces}  MouseWheelScrollBehaviour: ${comp.mouseWheelScrollBehaviour};\n`;
+
+      // Tooltip
+      if (comp.tooltipText)
+        code += `${spaces}  TooltipText: "${comp.tooltipText}";\n`;
+      if (comp.textTooltipShowDelay !== undefined)
+        code += `${spaces}  TextTooltipShowDelay: ${comp.textTooltipShowDelay};\n`;
+
+      // Layout
+      if (comp.contentWidth !== undefined)
+        code += `${spaces}  ContentWidth: ${comp.contentWidth};\n`;
+      if (comp.contentHeight !== undefined)
+        code += `${spaces}  ContentHeight: ${comp.contentHeight};\n`;
+
+      // Scroll
+      if (comp.autoScrollDown !== undefined)
+        code += `${spaces}  AutoScrollDown: ${comp.autoScrollDown};\n`;
+      if (comp.keepScrollPosition !== undefined)
+        code += `${spaces}  KeepScrollPosition: ${comp.keepScrollPosition};\n`;
+      if (comp.overscroll !== undefined)
+        code += `${spaces}  Overscroll: ${comp.overscroll};\n`;
+
+      // Style / Appearance
+      if (comp.maskTexturePath)
+        code += `${spaces}  MaskTexturePath: "${comp.maskTexturePath}";\n`;
+      if (comp.outlineColor)
+        code += `${spaces}  OutlineColor: ${formatHytaleColor(comp.outlineColor)};\n`;
+      if (comp.outlineSize !== undefined)
+        code += `${spaces}  OutlineSize: ${comp.outlineSize};\n`;
+
+      // DropdownBoxStyle (Style) export
+      // We map dropdownStyle back to "Style: (...)"
+      if (comp.dropdownStyle) {
+        const parts: string[] = [];
+        // Standard TextStyle parts? Or specific DropdownBoxStyle parts?
+        // User said "Style: DropdownBoxStyle". Assuming it has overrides.
+        // For now let's check basic color/font properties if present in dropdownStyle
+        // If dropdownStyle is just the object, we iterate known keys.
+        if (comp.dropdownStyle.fontSize)
+          parts.push(`FontSize: ${comp.dropdownStyle.fontSize}`);
+        if (comp.dropdownStyle.color)
+          parts.push(`Color: ${formatHytaleColor(comp.dropdownStyle.color)}`);
+        if (comp.dropdownStyle.renderBold)
+          parts.push(`RenderBold: ${comp.dropdownStyle.renderBold}`);
+        // Add others as needed
+        if (parts.length > 0) {
+          code += `${spaces}  Style: (${parts.join(", ")});\n`;
+        }
+      }
     }
 
     // Sprite Properties

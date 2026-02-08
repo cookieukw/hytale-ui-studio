@@ -92,7 +92,8 @@ export type ComponentType =
   | "ScrollArea"
   | "Sprite"
   | "Spinner"
-  | "ProgressBar";
+  | "ProgressBar"
+  | "DropdownBox";
 
 export interface SpriteFrame {
   width: number;
@@ -143,7 +144,38 @@ export interface HytaleComponent {
   effectTexturePath?: string;
   effectWidth?: number;
   effectHeight?: number;
+
   effectOffset?: number;
+  // DropdownBox specific
+  entries?: string[];
+  selectedValues?: string[];
+  hitTestVisible?: boolean;
+  tooltipText?: string;
+  tooltipTextSpans?: any[]; // Revisit type later if needed
+  textTooltipStyle?: TextStyle;
+  textTooltipShowDelay?: number;
+  disabled?: boolean;
+  dropdownStyle?: any; // Avoiding collision with react style
+  panelTitleText?: string;
+  isReadOnly?: boolean;
+  maxSelection?: number;
+  showSearchInput?: boolean;
+  forcedLabel?: string;
+  noItemsText?: string;
+  displayNonExistingValue?: boolean;
+  contentWidth?: number;
+  contentHeight?: number;
+  autoScrollDown?: boolean;
+  keepScrollPosition?: boolean;
+  mouseWheelScrollBehaviour?: string;
+  maskTexturePath?: string;
+  outlineColor?: string;
+
+  outlineSize?: number;
+  overscroll?: boolean;
+  // Events
+  valueChanged?: string;
+  dropdownToggled?: string;
   // States
   states?: ComponentState;
   // Hierarchy
