@@ -520,7 +520,7 @@ export const RenderedComponent = memo(function RenderedComponent({
       style.width = "100%";
       style.height = "10%";
       style.flexGrow = 1;
-      style.backgroundColor = "red";
+      style.backgroundColor = "#37a8ca";
     }
 
     return style;
