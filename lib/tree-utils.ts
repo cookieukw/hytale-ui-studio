@@ -283,7 +283,11 @@ export function componentsToCode(
 
     // Value
     if (comp.value !== undefined) {
-      code += `${spaces}  Value: ${comp.value};\n`;
+      if (comp.type === "DropdownEntry") {
+        code += `${spaces}  Value: "${comp.value}";\n`;
+      } else {
+        code += `${spaces}  Value: ${comp.value};\n`;
+      }
     }
     if (comp.max !== undefined) {
       code += `${spaces}  Max: ${comp.max};\n`;
@@ -416,17 +420,6 @@ export function componentsToCode(
 
     // Dropdown
     if (comp.type === "Dropdown" || comp.type === "DropdownBox") {
-      // Data
-      if (comp.entries && comp.entries.length > 0) {
-        // Assuming comma separated strings in parentheses for IReadOnlyList? Or array syntax?
-        // Hytale arrays usually ( "A", "B" )
-        const entriesStr = comp.entries.map((e) => `"${e}"`).join(", ");
-        code += `${spaces}  Entries: (${entriesStr});\n`;
-      }
-      if (comp.selectedValues && comp.selectedValues.length > 0) {
-        const selStr = comp.selectedValues.map((e) => `"${e}"`).join(", ");
-        code += `${spaces}  SelectedValues: (${selStr});\n`;
-      }
       if (comp.maxSelection !== undefined)
         code += `${spaces}  MaxSelection: ${comp.maxSelection};\n`;
       if (comp.displayNonExistingValue !== undefined)

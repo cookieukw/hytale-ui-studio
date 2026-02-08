@@ -93,7 +93,8 @@ export type ComponentType =
   | "Sprite"
   | "Spinner"
   | "ProgressBar"
-  | "DropdownBox";
+  | "DropdownBox"
+  | "DropdownEntry";
 
 export interface SpriteFrame {
   width: number;

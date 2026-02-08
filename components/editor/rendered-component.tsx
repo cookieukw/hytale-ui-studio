@@ -743,7 +743,14 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     case "Dropdown":
     case "DropdownBox":
-      const items = component.entries || [];
+      // Extract options from children if available
+      const childOptions = (component.children || [])
+        .filter((c) => c.type === "DropdownEntry")
+        .map((c) => c.text || c.value || c.name);
+
+      const items =
+        childOptions.length > 0 ? childOptions : component.entries || [];
+
       const isDisabled = component.disabled;
       const readOnly = component.isReadOnly;
 

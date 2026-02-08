@@ -12,6 +12,7 @@ import { FieldRow } from "./field-row";
 import { AnchorFields } from "./anchor-fields";
 import { PaddingFields } from "./padding-fields";
 import { MarginFields } from "./margin-fields";
+import { DropdownOptionsEditor } from "./dropdown-options-editor";
 
 interface LayoutTabProps {
   component: HytaleComponent;
@@ -59,6 +60,10 @@ export function LayoutTab({ component, onUpdate, isRoot }: LayoutTabProps) {
 
   return (
     <div className="space-y-2">
+      {(component.type === "Dropdown" || component.type === "DropdownBox") && (
+        <DropdownOptionsEditor component={component} />
+      )}
+
       <CollapsibleSection title="Anchor">
         <AnchorFields
           component={component}
