@@ -90,65 +90,73 @@ export function DropdownOptionsEditor({
           </div>
         </div>
 
-        {entries.map((entry, index) => (
-          <div
-            key={entry.id}
-            className="flex flex-col gap-2 rounded border border-border bg-secondary/10 p-2 relative group"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground/70">
-                #{index + 1}
-              </span>
-              <div className="flex-1 flex gap-2">
-                <Input
-                  className="h-6 text-xs flex-1 border-dashed focus:border-solid bg-transparent"
-                  value={entry.text || ""}
-                  placeholder="Display Text"
-                  onChange={(e) =>
-                    handleUpdateEntry(entry.id, { text: e.target.value })
-                  }
-                />
+        {entries.map((entry, index) => {
+          const isNone = entry.name === "None";
+          return (
+            <div
+              key={entry.id}
+              className="flex flex-col gap-2 rounded border border-border bg-secondary/10 p-2 relative group"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground/70">
+                  #{index + 1}
+                </span>
+                <div className="flex-1 flex gap-2">
+                  <Input
+                    className="h-6 text-xs flex-1 border-dashed focus:border-solid bg-transparent"
+                    value={entry.text || ""}
+                    placeholder="Display Text"
+                    onChange={(e) =>
+                      handleUpdateEntry(entry.id, { text: e.target.value })
+                    }
+                  />
+                </div>
+                {/* Remove Button - Hide if isNone */}
+                {!isNone && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive opacity-50 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleRemoveEntry(entry.id)}
+                  >
+                    <Trash className="h-3 w-3" />
+                  </Button>
+                )}
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-destructive opacity-50 group-hover:opacity-100 transition-opacity"
-                onClick={() => handleRemoveEntry(entry.id)}
-              >
-                <Trash className="h-3 w-3" />
-              </Button>
-            </div>
 
-            <div className="grid grid-cols-2 gap-2 pl-6">
-              <div className="flex flex-col gap-1">
-                <Label className="text-[9px] text-muted-foreground">
-                  Value (Code)
-                </Label>
-                <Input
-                  className="h-5 text-[10px] px-1"
-                  value={String(entry.value || "")}
-                  onChange={(e) =>
-                    handleUpdateEntry(entry.id, {
-                      value: String(e.target.value),
-                    })
-                  }
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label className="text-[9px] text-muted-foreground">
-                  Name (ID)
-                </Label>
-                <Input
-                  className="h-5 text-[10px] px-1 font-mono"
-                  value={entry.name}
-                  onChange={(e) =>
-                    handleUpdateEntry(entry.id, { name: e.target.value })
-                  }
-                />
+              <div className="grid grid-cols-2 gap-2 pl-6">
+                <div className="flex flex-col gap-1">
+                  <Label className="text-[9px] text-muted-foreground">
+                    Value (Code)
+                  </Label>
+                  <Input
+                    className="h-5 text-[10px] px-1"
+                    value={String(entry.value || "")}
+                    disabled={isNone}
+                    onChange={(e) =>
+                      handleUpdateEntry(entry.id, {
+                        value: String(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Label className="text-[9px] text-muted-foreground">
+                    Name (ID)
+                  </Label>
+                  <Input
+                    className="h-5 text-[10px] px-1 font-mono"
+                    value={entry.name}
+                    disabled={isNone}
+                    onChange={(e) =>
+                      handleUpdateEntry(entry.id, { name: e.target.value })
+                    }
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         <Button
           variant="outline"

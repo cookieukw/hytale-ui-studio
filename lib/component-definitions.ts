@@ -192,12 +192,21 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     defaultProps: {
       name: "Dropdown",
       alias: "$C.@DropdownBox",
+      value: "None",
       noItemsText: "Select Option",
       // entries: ["Option 1", "Option 2", "Option 3"], // Deprecated in favor of children
       anchor: { width: 220, height: 32 },
       background: { color: "#1a1a2a", border: 16 },
       padding: { left: 8, right: 8 },
       children: [
+        {
+          id: generateId(),
+          type: "DropdownEntry",
+          name: "None",
+          text: "None",
+          value: "unselected",
+          isVisible: true,
+        },
         {
           id: generateId(),
           type: "DropdownEntry",

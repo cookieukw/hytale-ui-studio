@@ -283,7 +283,11 @@ export function componentsToCode(
 
     // Value
     if (comp.value !== undefined) {
-      if (comp.type === "DropdownEntry") {
+      if (
+        comp.type === "DropdownEntry" ||
+        comp.type === "Dropdown" ||
+        comp.type === "DropdownBox"
+      ) {
         code += `${spaces}  Value: "${comp.value}";\n`;
       } else {
         code += `${spaces}  Value: ${comp.value};\n`;
