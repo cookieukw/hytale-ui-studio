@@ -78,7 +78,7 @@ export function EditorToolbar() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const text = await file.text();
-        useEditorStore.getState().setCode(text);
+        useEditorStore.getState().importFromUI(text);
       }
     };
     input.click();
