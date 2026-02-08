@@ -441,7 +441,7 @@ export class HytaleParser {
     }
   }
 
-  parseValue() {
+  parseValue(): any {
     if (this.isAtEnd()) throw new ParserError("errorValue", [], 0);
     const token = this.peek();
 
