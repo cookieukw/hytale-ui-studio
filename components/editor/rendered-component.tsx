@@ -40,6 +40,9 @@ export const RenderedComponent = memo(function RenderedComponent({
     position: "before" | "after" | "inside";
   } | null>(null);
 
+  // Dropdown specific state (at top level because hooks cannot be conditional)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   if (!isVisible) return null;
 
   const handleClick = (e: React.MouseEvent) => {
@@ -575,14 +578,17 @@ export const RenderedComponent = memo(function RenderedComponent({
   };
 
   // Helper to wrap content with indicators
+  // Helper to wrap content with indicators
   const renderWithIndicators = (
     content: React.ReactNode,
     extraClass?: string,
     extraStyle?: React.CSSProperties,
+    extraProps?: Record<string, any>,
   ) => (
     <>
       <div
         {...baseProps}
+        {...extraProps}
         style={{ ...baseProps.style, ...extraStyle }}
         className={cn(
           baseProps.className,
@@ -756,21 +762,26 @@ export const RenderedComponent = memo(function RenderedComponent({
 
       // Dropdown Style Implementation
       // Merge base text styles and specific dropdown styles
+      // Dropdown Style Implementation
+      // Dropdown Style Implementation
+      // Merge base text styles and specific dropdown styles
+      // const [isDropdownOpen, setIsDropdownOpen] = React.useState(false); // MOVED TO TOP
+
       const mergedStyle: React.CSSProperties = {
         ...getTextStyle(),
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? "not-allowed" : "pointer",
         backgroundColor: component.background?.color || "#465169",
-        borderColor: "#fbbf24",
-        borderWidth: "1px",
+        borderColor: isDropdownOpen ? "transparent" : "#fbbf24",
+        borderWidth: isDropdownOpen ? "0px" : "1px",
         borderStyle: "solid",
-        borderRadius: "2px", // rounded-sm
+        borderRadius: "2px", // Always rounded completely if menu is to the side
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingLeft: "0.75rem", // px-3
+        paddingLeft: "0.75rem",
         paddingRight: "0.75rem",
-        paddingTop: "0.25rem", // py-1
+        paddingTop: "0.25rem",
         paddingBottom: "0.25rem",
       };
 
@@ -780,8 +791,26 @@ export const RenderedComponent = memo(function RenderedComponent({
 
       const tooltip = component.tooltipText;
 
+      const handleToggleDropdown = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isDisabled) return;
+        if (!isSelected) {
+          onSelect(component.id);
+        }
+        setIsDropdownOpen(!isDropdownOpen);
+      };
+
+      const handleOptionClick = (val: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        useEditorStore.getState().updateComponent(component.id, { value: val });
+        setIsDropdownOpen(false);
+      };
+
       const buttonText =
         component.forcedLabel ||
+        (component.children || []).find(
+          (c) => c.type === "DropdownEntry" && c.value === component.value,
+        )?.text ||
         (component.value ? String(component.value) : null) ||
         (component.selectedValues && component.selectedValues.length > 0
           ? component.selectedValues.join(", ")
@@ -795,7 +824,7 @@ export const RenderedComponent = memo(function RenderedComponent({
           >
             {buttonText}
           </span>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0 ml-2">
             {component.showSearchInput && (
               <svg
                 className="h-3 w-3 opacity-50"
@@ -811,9 +840,12 @@ export const RenderedComponent = memo(function RenderedComponent({
                 />
               </svg>
             )}
-            {/* Chevron Right instead of Down */}
+            {/* Chevron Right (Rotated if open) */}
             <svg
-              className="ml-2 h-4 w-4 shrink-0 opacity-50 text-[#fbbf24]"
+              className={cn(
+                "h-4 w-4 opacity-50 text-[#fbbf24] transition-transform",
+                isDropdownOpen && "rotate-90",
+              )}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -826,20 +858,54 @@ export const RenderedComponent = memo(function RenderedComponent({
               />
             </svg>
           </div>
+
+          {/* Options List - Positioned to the RIGHT */}
+          {isDropdownOpen && (
+            <div
+              className="absolute left-full top-[-3px] ml-1 z-[100] flex flex-col bg-[#111927] border border-[#fbbf24] rounded-sm shadow-xl max-h-60 overflow-y-auto"
+              style={{ minWidth: "120px", whiteSpace: "nowrap" }}
+            >
+              {/* Use children if available, else legacy entries */}
+              {((component.children || []).filter(
+                (c) => c.type === "DropdownEntry",
+              ).length > 0
+                ? (component.children || []).filter(
+                    (c) => c.type === "DropdownEntry",
+                  )
+                : (component.entries || []).map((e) => ({
+                    id: e,
+                    value: e,
+                    text: e,
+                  }))
+              ).map((entry: any) => (
+                <div
+                  key={entry.id || entry.value}
+                  className="cursor-pointer px-3 py-1.5 text-sm text-white hover:bg-[#465169]/50 transition-colors flex items-center"
+                  onClick={(e) => handleOptionClick(String(entry.value), e)}
+                >
+                  {entry.text || entry.value || entry.name}
+                </div>
+              ))}
+            </div>
+          )}
         </>
       );
 
       if (component.showLabel) {
         return renderWithIndicators(
-          <div className="flex flex-col gap-0.5 w-full h-full">
+          <div className="flex flex-col gap-0.5 w-full h-full relative">
             <span className="text-xs font-medium text-foreground/70 px-1">
               {component.panelTitleText || component.name}
             </span>
             {/* Pass generic div props via extraClass/Style to simulate the dropdown box */}
             <div
-              className={cn("w-full flex-1", isDisabled && "grayscale")}
+              className={cn(
+                "w-full flex-1 relative",
+                isDisabled && "grayscale",
+              )}
               style={mergedStyle}
               title={tooltip}
+              onClick={handleToggleDropdown}
             >
               {innerContent}
             </div>
@@ -852,8 +918,9 @@ export const RenderedComponent = memo(function RenderedComponent({
       // Pass styles to renderWithIndicators so they apply to the WRAPPER.
       return renderWithIndicators(
         innerContent,
-        cn(isDisabled && "grayscale"),
+        cn(isDisabled && "grayscale", "relative"),
         mergedStyle,
+        { onClick: handleToggleDropdown },
       );
 
     case "Sprite": {
