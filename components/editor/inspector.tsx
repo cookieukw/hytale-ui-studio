@@ -470,13 +470,8 @@ export function Inspector() {
             </CollapsibleSection>
 
             <CollapsibleSection title="Layout">
-              {/* Hide LayoutMode and Direction for Buttons as requested */}
-              {![
-                "Button",
-                "SecondaryButton",
-                "TertiaryButton",
-                "CancelButton",
-              ].includes(component.type) && (
+              {/* Only show LayoutMode and Direction for containers */}
+              {["Group", "Panel", "ScrollArea"].includes(component.type) && (
                 <>
                   <FieldRow label="Mode">
                     <Select
