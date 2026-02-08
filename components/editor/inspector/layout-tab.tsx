@@ -86,19 +86,17 @@ export function LayoutTab({ component, onUpdate, isRoot }: LayoutTabProps) {
           <>
             <FieldRow label="Mode">
               <Select
-                value={component.layoutMode || "None"}
+                value={component.layoutMode || "Center"}
                 onValueChange={(value) =>
                   onUpdate({
-                    layoutMode:
-                      value === "None" ? undefined : (value as LayoutMode),
+                    layoutMode: value as LayoutMode,
                   })
                 }
               >
                 <SelectTrigger className="h-7 text-xs">
-                  <SelectValue placeholder="None" />
+                  <SelectValue placeholder="Center" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="None">None</SelectItem>
                   {allLayoutModes.map((mode) => (
                     <SelectItem key={mode} value={mode}>
                       {mode}
