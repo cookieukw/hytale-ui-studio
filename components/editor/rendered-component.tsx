@@ -755,25 +755,31 @@ export const RenderedComponent = memo(function RenderedComponent({
       const readOnly = component.isReadOnly;
 
       // Dropdown Style Implementation
-      const dropdownStyle: React.CSSProperties = {
+      // Merge base text styles and specific dropdown styles
+      const mergedStyle: React.CSSProperties = {
         ...getTextStyle(),
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? "not-allowed" : "pointer",
-        borderColor: component.outlineColor || "border-border",
-        borderWidth: component.outlineSize
-          ? `${component.outlineSize}px`
-          : undefined,
+        backgroundColor: component.background?.color || "#465169",
+        borderColor: "#fbbf24",
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderRadius: "2px", // rounded-sm
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingLeft: "0.75rem", // px-3
+        paddingRight: "0.75rem",
+        paddingTop: "0.25rem", // py-1
+        paddingBottom: "0.25rem",
       };
 
-      if (component.background) {
-        if (component.background.color)
-          dropdownStyle.backgroundColor = component.background.color;
+      if (component.outlineColor && component.outlineSize) {
+        mergedStyle.outline = `${component.outlineSize}px solid ${component.outlineColor}`;
       }
 
       const tooltip = component.tooltipText;
 
-      // Text Priority: ForcedLabel -> Value -> SelectedValues -> "Select..."
-      // Note: If ForcedLabel is treated as the button text override:
       const buttonText =
         component.forcedLabel ||
         (component.value ? String(component.value) : null) ||
@@ -781,18 +787,11 @@ export const RenderedComponent = memo(function RenderedComponent({
           ? component.selectedValues.join(", ")
           : "Select...");
 
-      const content = (
-        <div
-          className={cn(
-            "flex h-full w-full items-center justify-between rounded border border-border bg-background px-3 py-1",
-            isDisabled && "opacity-50 grayscale",
-          )}
-          style={dropdownStyle}
-          title={tooltip}
-        >
+      const innerContent = (
+        <>
           <span
-            className="truncate text-sm text-foreground"
-            style={{ color: dropdownStyle.color }}
+            className="truncate text-sm text-white"
+            style={{ color: mergedStyle.color }}
           >
             {buttonText}
           </span>
@@ -812,8 +811,9 @@ export const RenderedComponent = memo(function RenderedComponent({
                 />
               </svg>
             )}
+            {/* Chevron Right instead of Down */}
             <svg
-              className="ml-2 h-4 w-4 shrink-0 opacity-50"
+              className="ml-2 h-4 w-4 shrink-0 opacity-50 text-[#fbbf24]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -822,11 +822,11 @@ export const RenderedComponent = memo(function RenderedComponent({
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M19 9l-7 7-7-7"
+                d="M9 5l7 7-7 7"
               />
             </svg>
           </div>
-        </div>
+        </>
       );
 
       if (component.showLabel) {
@@ -835,13 +835,26 @@ export const RenderedComponent = memo(function RenderedComponent({
             <span className="text-xs font-medium text-foreground/70 px-1">
               {component.panelTitleText || component.name}
             </span>
-            <div className="flex-1 h-full min-h-0">{content}</div>
+            {/* Pass generic div props via extraClass/Style to simulate the dropdown box */}
+            <div
+              className={cn("w-full flex-1", isDisabled && "grayscale")}
+              style={mergedStyle}
+              title={tooltip}
+            >
+              {innerContent}
+            </div>
           </div>,
           undefined,
         );
       }
 
-      return renderWithIndicators(content, undefined);
+      // If no label, the main component IS the dropdown box.
+      // Pass styles to renderWithIndicators so they apply to the WRAPPER.
+      return renderWithIndicators(
+        innerContent,
+        cn(isDisabled && "grayscale"),
+        mergedStyle,
+      );
 
     case "Sprite": {
       // Logic for Sprite Sheet Animation

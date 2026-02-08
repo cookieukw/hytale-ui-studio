@@ -205,7 +205,6 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           name: "None",
           text: "None",
           value: "unselected",
-          isVisible: true,
         },
         {
           id: generateId(),
@@ -213,7 +212,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           name: "Option1",
           text: "Option 1",
           value: "Option 1",
-          isVisible: true,
+         
         },
         {
           id: generateId(),
@@ -221,7 +220,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
           name: "Option2",
           text: "Option 2",
           value: "Option 2",
-          isVisible: true,
+         
         },
       ],
     },
