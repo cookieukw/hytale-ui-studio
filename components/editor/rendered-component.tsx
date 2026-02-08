@@ -338,8 +338,13 @@ export const RenderedComponent = memo(function RenderedComponent({
           style.alignItems = "center"; // "Centro esquerda" -> Vertical Center
           style.justifyContent = "flex-start"; // Horizontal Left
           break;
+        case "Right":
+          style.flexDirection = "row";
+          style.alignItems = "center";
+          style.justifyContent = "flex-end";
+          break;
         case "Center":
-          style.flexDirection = "column";
+          style.flexDirection = "row";
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
@@ -348,12 +353,24 @@ export const RenderedComponent = memo(function RenderedComponent({
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
+        case "Bottom":
+          style.flexDirection = "column";
+          style.alignItems = "center";
+          style.justifyContent = "flex-end";
+          break;
         case "TopScrolling":
           style.flexDirection = "column";
           style.alignItems = "center"; // "Centro topo"
           style.justifyContent = "flex-start";
           style.overflowY = "auto";
           style.overflowX = "hidden";
+          break;
+        case "LeftScrolling":
+          style.flexDirection = "row";
+          style.alignItems = "center";
+          style.justifyContent = "flex-start";
+          style.overflowX = "auto";
+          style.overflowY = "hidden";
           break;
         case "LeftCenterWrap":
           style.flexDirection = "row";
@@ -363,9 +380,18 @@ export const RenderedComponent = memo(function RenderedComponent({
           style.alignItems = "flex-start"; // Items align to top
           break;
         case "CenterMiddle":
+          style.flexDirection = "row";
+          style.alignItems = "center";
+          style.justifyContent = "center";
+          break;
+        case "MiddleCenter":
           style.flexDirection = "column";
           style.alignItems = "center";
           style.justifyContent = "center";
+          break;
+        case "Full":
+          style.display = "block";
+          style.position = "relative";
           break;
       }
     }

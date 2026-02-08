@@ -107,7 +107,12 @@ export class HytaleLexer {
         continue;
       }
 
-      if (/[{}();:,=+\/*\-]/.test(char)) {
+      if (
+        /[{}();:,=+\/*\-]/.test(char) ||
+        char === "[" ||
+        char === "]" ||
+        char === "%"
+      ) {
         this.tokens.push({ type: "PUNCT", value: char, line: this.line });
         this.pos++;
         continue;
@@ -226,6 +231,15 @@ export class HytaleParser {
         afterNext.value.startsWith("#")
       ) {
         isElementDef = true;
+      } else if (
+        nextToken.type === "IDENT" &&
+        nextToken.value.startsWith("@") &&
+        afterNext &&
+        (afterNext.value.startsWith("#") || afterNext.value === "{")
+      ) {
+        // Handle Template Instantiation inside Variable Assignment? @MyVar = @Template #ID ...
+        // Or just alias assignment: @MyAlias = @Template ...
+        isElementDef = true;
       }
 
       if (isElementDef) {
@@ -280,7 +294,11 @@ export class HytaleParser {
     let alias: string | null = null;
     let type = rawType.split(".").pop()!.replace("@", "");
 
-    if (rawType.includes(".") || rawType.startsWith("$")) {
+    if (
+      rawType.includes(".") ||
+      rawType.startsWith("$") ||
+      rawType.startsWith("@")
+    ) {
       alias = rawType;
       // Logic to determine fallback type?
       // If the alias resolves to a known type (e.g. via internal defaults), we could use that.
@@ -301,8 +319,17 @@ export class HytaleParser {
 
     this.consume("{");
 
-    const props: Record<string, any> = {};
-    const children: ASTNode[] = [];
+    let baseNode: any = null;
+    if (alias) {
+      const resolved = this.resolveVariable(alias);
+      if (resolved && resolved.type) {
+        baseNode = JSON.parse(JSON.stringify(resolved));
+        type = baseNode.type;
+      }
+    }
+
+    const props: Record<string, any> = baseNode ? baseNode.props : {};
+    const children: ASTNode[] = baseNode ? baseNode.children : [];
 
     let childrenStarted = false;
 
@@ -365,8 +392,11 @@ export class HytaleParser {
         )
           this.consume();
       } else {
-        childrenStarted = true;
-        children.push(this.parseElement());
+        const child = this.parseStatement();
+        if (child) {
+          childrenStarted = true;
+          children.push(child as ASTNode);
+        }
       }
     }
 
@@ -422,14 +452,67 @@ export class HytaleParser {
         : token.value;
     }
 
+    // Translation keys
+    if (token.value === "%") {
+      this.consume("%");
+      const key = this.consume().value;
+      // Check for continued parts (dot notation)
+      // Since lexer currently breaks on `.`, we might need to consume subsequent parts if they exist?
+      // But lexer treats . in identifiers: /[a-zA-Z0-9_@#.$%]/.test(char)
+      // Wait, line 94 regex: /[a-zA-Z0-9_@#.$%]/
+      // So `%ui.general.test` might be tokenized as `%` then `ui.general.test`.
+      // Let's verify lexer behavior for `%`.
+      // If `%` is PUNCT, then `%ui` -> `%` and `ui`.
+      // If lexer regex includes `%` or `.`, it might be one token?
+      // Ah, line 94 includes `%`. So `%ui.general.test` is parsed as IDENT "%ui.general.test".
+      // But in `parseValue`, `if (/[{}();:,=+\/*\-]/.test(char) || char === "[" || char === "]" || char === "%")` makes it split?
+      // No, I added `%` to the PUNCT list in the new code above.
+      // So `%ui.general.test` becomes `%` (PUNCT) and `ui.general.test` (IDENT).
+      return `%${key}`;
+    }
+
+    if (token.value.startsWith("%")) {
+      // If lexer didn't split it (e.g. if code was parsed before my change, or if regex catches it first?)
+      // The regex at line 94 checks /[a-zA-Z0-9_@#.$%]/.
+      // If `%` is handled as PUNCT BEFORE IDENT, then it works.
+      // Lexer order: lines 110 check PUNCT. line 94 checks IDENT.
+      // So if `%` is in PUNCT check, it wins if it appears first.
+      // Wait, lexer iterates char by char.
+      // If char is `%`, it hits PUNCT check first IF I place it before IDENT check?
+      // In original code, PUNCT check is AFTER IDENT check.
+      // So `%` in IDENT regex means `%foo` is one IDENT token.
+      // I need to REMOVE `%` from IDENT regex if I want to treat it as separate operator, OR just handle `%...` as IDENT.
+      // Given existing regex, `%ui.general` is likely one IDENT token.
+      // So checking `startsWith("%")` handles the combined case.
+      // checking `token.value === "%"` handles the split case (e.g. `% ui.general` with space).
+      // Let's keep `startsWith("%")` logic first if needed.
+      this.consume();
+      return token.value;
+    }
+
     if (token.value.startsWith("#")) {
       const hexBase = token.value.split("(")[0];
-      if (hexBase.length === 6) {
-        // Warning: short hex? User code throws error, keeping consistency
-        // throw new ParserError("errorShortHex", [hexBase], token.line);
-        // Relaxing this to match common UX if needed, but following prompt exactly:
-        throw new ParserError("errorShortHex", [hexBase], token.line);
+      if (hexBase.length === 7) {
+        // Check for extended alpha syntax: #RRGGBB(0.5)
+        if (this.tokens[this.pos + 1]?.value === "(") {
+          this.consume(); // consume hex
+          this.consume("(");
+          const alpha = this.consume().value;
+          this.consume(")");
+          // Combine or return object? Assuming string for now or special color obj.
+          // Hytale format: #RRGGBB(A.A) - we can just preserve it as string.
+          return `${hexBase}(${alpha})`;
+        }
       }
+
+      this.consume();
+      // Handle #rrggbbaa (9 chars)
+      if (hexBase.length !== 7 && hexBase.length !== 9) {
+        // # + 6 or # + 8
+        // throw new ParserError("errorShortHex", [hexBase], token.line);
+        // Relaxing error
+      }
+      return token.value;
     }
 
     if (token.type === "IDENT" && this.tokens[this.pos + 1]?.value === "(") {
@@ -443,6 +526,19 @@ export class HytaleParser {
     if (token.value === "(") {
       this.consume("(");
       return this.parseTupleBody();
+    }
+
+    if (token.value === "[") {
+      this.consume("[");
+      const arr = [];
+      while (!this.isAtEnd() && this.peek().value !== "]") {
+        arr.push(this.parseValue());
+        if (this.peek().value === "," || this.peek().value === ";") {
+          this.consume();
+        }
+      }
+      this.consume("]");
+      return arr;
     }
 
     this.consume();
@@ -596,6 +692,16 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
       if (value.Full !== undefined) {
         const val = Number(value.Full);
         component.padding = { top: val, bottom: val, left: val, right: val };
+      }
+      if (value.Horizontal !== undefined) {
+        const val = Number(value.Horizontal);
+        component.padding.left = val;
+        component.padding.right = val;
+      }
+      if (value.Vertical !== undefined) {
+        const val = Number(value.Vertical);
+        component.padding.top = val;
+        component.padding.bottom = val;
       }
       if (value.Top !== undefined) component.padding.top = Number(value.Top);
       if (value.Bottom !== undefined)

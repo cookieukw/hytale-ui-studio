@@ -1,0 +1,84 @@
+
+Group {
+    LayoutMode: Top;
+    Padding: (Full: 20);
+    
+    // Test Right Layout
+    Group d {
+        LayoutMode: Right;
+        Anchor: (Width: 300, Height: 50);
+        Background: { Color: "#333333" };
+        Padding: (Horizontal: 10, Vertical: 5);
+        
+        Label { Text: "Right Aligned 1"; Margin: { Right: 10 }; }
+        Label { Text: "Right Aligned 2"; }
+    }
+    
+    // Test Bottom Layout
+    Group {
+        LayoutMode: Bottom;
+        Anchor: (Width: 100, Height: 150);
+        Background: { Color: "#444444" };
+        Margin: { Top: 10 };
+        
+        Button { Text: "Btam 1"; Anchor: (Height: 30); Margin: { Bottom: 5 }; }
+        Button { Text: "Btam 2"; Anchor: (Height: 30); }
+    }
+    
+    // Test MiddleCenter Layout
+    Group {
+        LayoutMode: MiddleCenter;
+        Anchor: (Width: 200, Height: 100);
+        Background: { Color: "#555555" };
+        Margin: { Top: 10 };
+        
+        Label { Text: "Middle"; }
+        Label { Text: "Center"; }
+    }
+    
+    // Test Full Layout
+    Group {
+        LayoutMode: Full;
+        Anchor: (Width: 200, Height: 100);
+        Background: { Color: "#666666" };
+        Margin: { Top: 10 };
+        
+        Label { Text: "Top Left"; Anchor: (Top: 5, Left: 5); }
+        Label { Text: "Bottom Right"; Anchor: (Bottom: 5, Right: 5); }
+    }
+    
+    // Test LeftScrolling
+    Group {
+        LayoutMode: LeftScrolling;
+        Anchor: (Width: 200, Height: 50);
+        Background: { Color: "#777777" };
+        Margin: { Top: 10 };
+        
+        Button { Text: "Item 1"; Anchor: (Width: 80); Margin: { Right: 5 }; }
+        Button { Text: "Item 2"; Anchor: (Width: 80); Margin: { Right: 5 }; }
+        Button { Text: "Item 3"; Anchor: (Width: 80); Margin: { Right: 5 }; }
+        Button { Text: "Item 4"; Anchor: (Width: 80); }
+    }
+    
+    // Test Center Layout (Horizontal Stack, Horizontally Centered, Vertically Top)
+    Group {
+        LayoutMode: Center;
+        Anchor: (Width: 300, Height: 50);
+        Background: { Color: "#888888" };
+        Margin: { Top: 10 };
+        
+        Button { Text: "Center 1"; Anchor: (Width: 80); Margin: { Right: 5 }; }
+        Button { Text: "Center 2"; Anchor: (Width: 80); }
+    }
+    
+    // Test Middle Layout (Vertical Stack, Vertically Centered, Horizontally Left)
+    Group {
+        LayoutMode: Middle;
+        Anchor: (Width: 100, Height: 150);
+        Background: { Color: "#999999" };
+        Margin: { Top: 10 };
+        
+        Button { Text: "Middle 1"; Anchor: (Height: 30); Margin: { Bottom: 5 }; }
+        Button { Text: "Middle 2"; Anchor: (Height: 30); }
+    }
+}
