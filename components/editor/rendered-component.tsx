@@ -90,7 +90,7 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     let position: "before" | "after" | "inside" = "inside";
 
-    const edgeThreshold = 10; // pixels, or percentage? using percentage is safer for small items
+    // pixels zone for before/after detection
     // Using 25% zone for before/after, but if container is large, limit to max 30px
     const zone = Math.min(height * 0.25, 30);
 
@@ -118,6 +118,8 @@ export const RenderedComponent = memo(function RenderedComponent({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    // Capture dragState BEFORE resetting it so we can use it below
+    const currentDragState = dragState;
     setDragState(null);
 
     const storeDraggingId = useEditorStore.getState().draggingId;
@@ -130,11 +132,11 @@ export const RenderedComponent = memo(function RenderedComponent({
     if (droppedId) {
       if (droppedId === component.id) return; // Dropped on self
 
-      if (dragState?.position === "inside") {
+      if (currentDragState?.position === "inside") {
         moveComponent(droppedId, component.id, component.children?.length || 0);
-      } else if (dragState?.position === "before") {
+      } else if (currentDragState?.position === "before") {
         moveComponent(droppedId, parentId, index ?? 0);
-      } else if (dragState?.position === "after") {
+      } else if (currentDragState?.position === "after") {
         moveComponent(droppedId, parentId, (index ?? 0) + 1);
       }
     }
@@ -154,11 +156,11 @@ export const RenderedComponent = memo(function RenderedComponent({
           };
         }
 
-        if (dragState?.position === "inside") {
+        if (currentDragState?.position === "inside") {
           addComponent(newComp, component.id);
-        } else if (dragState?.position === "before") {
+        } else if (currentDragState?.position === "before") {
           addComponent(newComp, parentId, index ?? 0);
-        } else if (dragState?.position === "after") {
+        } else if (currentDragState?.position === "after") {
           addComponent(newComp, parentId, (index ?? 0) + 1);
         }
       }
@@ -521,9 +523,7 @@ export const RenderedComponent = memo(function RenderedComponent({
       ["Button", "CancelButton"].includes(parentType || "")
     ) {
       style.width = "100%";
-      style.height = "10%";
       style.flexGrow = 1;
-      style.backgroundColor = "#37a8ca";
     }
 
     return style;
@@ -940,7 +940,7 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     case "ProgressBar":
       const val = Number(component.value) || 0;
-      const max = 100; // Implicit max for preview
+      const max = component.max ?? 100;
       const percentage = Math.min(100, Math.max(0, (val / max) * 100));
 
       const barPath = component.barTexturePath

@@ -21,26 +21,6 @@ interface LayoutTabProps {
 }
 
 export function LayoutTab({ component, onUpdate, isRoot }: LayoutTabProps) {
-  const layoutModes: LayoutMode[] = [
-    "Top",
-    "Left",
-    "Center",
-    "Middle",
-    "TopScrolling",
-    "LeftScrolling", // Fixed typo in original file logic if any, but sticking to list
-    "LeftCenterWrap",
-    "CenterMiddle",
-  ];
-  // Note: "LeftScrolling" was missing in the original array I saw in inspector.tsx (lines 334-342),
-  // but it is a valid type. I should check if I missed it in the view.
-  // Original array: Top, Left, Center, Middle, TopScrolling, LeftCenterWrap, CenterMiddle.
-  // "LeftScrolling" and "Right", "Bottom", "MiddleCenter", "Full" seem to be missing from the dropdown list in inspector.tsx?
-  // Wait, I should verify what was in inspector.tsx lines 334+.
-  // Lines 334: ["Top", "Left", "Center", "Middle", "TopScrolling", "LeftCenterWrap", "CenterMiddle"]
-  // It seems the original inspector.tsx didn't have all modes in the list?
-  // I should probably include all of them if I can, or stick to what was there to avoid changing behavior implicitly.
-  // I will add all of them since I implemented them in the types.
-
   const allLayoutModes: LayoutMode[] = [
     "Top",
     "Bottom",
