@@ -731,6 +731,28 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
       component.text = String(value);
       continue;
     }
+    if (key === "Background") {
+      if (!component.background) component.background = {};
+      if (typeof value === "string" && value.startsWith("#")) {
+        // Color literal: Background: #rrggbb; or Background: #rrggbb(0.5);
+        const alphaMatch = value.match(/^(#[0-9a-fA-F]{6})\(([0-9.]+)\)$/);
+        if (alphaMatch) {
+          component.background.color = alphaMatch[1];
+          component.background.opacity = parseFloat(alphaMatch[2]);
+        } else {
+          component.background.color = value;
+        }
+      } else if (typeof value === "object" && value !== null) {
+        // Object form: Background: (Color: #fff, Border: 8);
+        if (value.Color !== undefined)
+          component.background.color = String(value.Color);
+        if (value.Border !== undefined)
+          component.background.border = String(value.Border);
+        if (value.Opacity !== undefined)
+          component.background.opacity = Number(value.Opacity);
+      }
+      continue;
+    }
     if (key === "Value") {
       component.value = value;
       continue;

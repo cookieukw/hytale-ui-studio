@@ -307,10 +307,11 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       textStyle: {
         fontSize: 14,
         textColor: "#ffffff",
-        horizontalAlignment: "Start",
-        verticalAlignment: "Start",
+        horizontalAlignment: "Center",
+        verticalAlignment: "Center",
       },
-      anchor: { width: 100, height: 20 },
+      // No fixed height — let the label grow with its content / font size
+      anchor: { width: 100 },
     },
   },
   {

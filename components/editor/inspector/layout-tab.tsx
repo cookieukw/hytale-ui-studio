@@ -86,27 +86,25 @@ export function LayoutTab({ component, onUpdate, isRoot }: LayoutTabProps) {
               </Select>
             </FieldRow>
 
-            {component.type !== "Group" && (
-              <FieldRow label="Direction">
-                <Select
-                  value={component.direction || "Vertical"}
-                  onValueChange={(value) =>
-                    onUpdate({ direction: value as Direction })
-                  }
-                >
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {directions.map((dir) => (
-                      <SelectItem key={dir} value={dir}>
-                        {dir}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
-            )}
+            <FieldRow label="Direction">
+              <Select
+                value={component.direction || "Vertical"}
+                onValueChange={(value) =>
+                  onUpdate({ direction: value as Direction })
+                }
+              >
+                <SelectTrigger className="h-7 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {directions.map((dir) => (
+                    <SelectItem key={dir} value={dir}>
+                      {dir}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldRow>
           </>
         )}
 

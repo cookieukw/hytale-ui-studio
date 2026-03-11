@@ -203,14 +203,14 @@ export function StyleTab({ component, onUpdate }: StyleTabProps) {
         <CollapsibleSection title="Typography">
           {!["Button", "CancelButton"].includes(component.type) && (
             <FieldRow label="Font Size">
-              <Input
+              <DebouncedInput
                 type="number"
                 value={component.textStyle?.fontSize || 14}
-                onChange={(e) =>
+                onChange={(val) =>
                   onUpdate({
                     textStyle: {
                       ...component.textStyle,
-                      fontSize: Number(e.target.value),
+                      fontSize: Number(val),
                     },
                   })
                 }
@@ -421,14 +421,14 @@ export function StyleTab({ component, onUpdate }: StyleTabProps) {
               }
               className="h-7 w-10"
             />
-            <Input
+            <DebouncedInput
               type="text"
               value={component.background?.color || "#2a2a3a"}
-              onChange={(e) =>
+              onChange={(val) =>
                 onUpdate({
                   background: {
                     ...component.background,
-                    color: e.target.value,
+                    color: String(val),
                   },
                 })
               }
@@ -438,14 +438,14 @@ export function StyleTab({ component, onUpdate }: StyleTabProps) {
         </FieldRow>
 
         <FieldRow label="Border">
-          <Input
+          <DebouncedInput
             type="number"
             value={component.background?.border || ""}
-            onChange={(e) =>
+            onChange={(val) =>
               onUpdate({
                 background: {
                   ...component.background,
-                  border: e.target.value,
+                  border: String(val),
                 },
               })
             }

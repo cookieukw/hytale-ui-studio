@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 import { useEditorStore } from "@/lib/editor-store";
 import { COMPONENT_DEFINITIONS } from "@/lib/component-definitions";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
@@ -40,18 +40,34 @@ export const RenderedComponent = memo(function RenderedComponent({
     position: "before" | "after" | "inside";
   } | null>(null);
 
+  // Track whether a drag just ended so we can suppress the subsequent click event
+  const wasDragging = useRef(false);
+
   // Dropdown specific state (at top level because hooks cannot be conditional)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   if (!isVisible) return null;
 
   const handleClick = (e: React.MouseEvent) => {
+    // Suppress the click that fires right after a drag-drop completes
+    if (wasDragging.current) {
+      wasDragging.current = false;
+      e.stopPropagation();
+      return;
+    }
     e.stopPropagation();
+    // When a child is locked into a Button/CancelButton, clicks should select the parent button
+    if (isLockedInParent) {
+      // Don't call onSelect — let the event NOT propagate further (parent button has its own onClick)
+      // Actually we need to bubble UP so the button's onClick fires.
+      // Remove stopPropagation and let parent handle it.
+      return;
+    }
     onSelect(component.id);
   };
 
   const handleDragStart = (e: React.DragEvent) => {
-    if (isLockedInParent) return; // Should be handled by draggable=false but for safety
+    if (isLockedInParent || component.isLocked) return;
 
     e.stopPropagation();
     setDraggingId(component.id);
@@ -63,10 +79,14 @@ export const RenderedComponent = memo(function RenderedComponent({
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
+    wasDragging.current = true;
     setDraggingId(null);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
+    // Locked components are not valid drop targets
+    if (component.isLocked) return;
+
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
@@ -75,18 +95,21 @@ export const RenderedComponent = memo(function RenderedComponent({
     const y = e.clientY - rect.top;
     const height = rect.height;
 
-    // Check if this component is a container
-    const isContainer = [
-      "Layout",
-      "Div",
-      "Column",
-      "Row",
-      "Card",
-      "Panel",
+    // Buttons are NOT containers — never allow "inside" drops
+    const isButton = ["Button", "CancelButton"].includes(component.type);
 
-      "Group",
-      "ScrollArea",
-    ].includes(component.type);
+    // Check if this component is a container
+    const isContainer =
+      [
+        "Layout",
+        "Div",
+        "Column",
+        "Row",
+        "Card",
+        "Panel",
+        "Group",
+        "ScrollArea",
+      ].includes(component.type) && !isButton;
 
     let position: "before" | "after" | "inside" = "inside";
 
@@ -116,6 +139,7 @@ export const RenderedComponent = memo(function RenderedComponent({
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    if (component.isLocked) return;
     e.preventDefault();
     e.stopPropagation();
     // Capture dragState BEFORE resetting it so we can use it below
@@ -128,15 +152,31 @@ export const RenderedComponent = memo(function RenderedComponent({
       "componentType",
     ) as ComponentType;
 
+    // Buttons are not valid drop containers.
+    // Case 1: this component IS a button — redirect "inside" → "after"
+    const isButton = ["Button", "CancelButton"].includes(component.type);
+    // Case 2: this component lives inside a Button (e.g. a Label child) —
+    //         any drop landing here should be swallowed so the parent Button's
+    //         drop handler can place the item correctly as a sibling.
+    const parentIsButton = ["Button", "CancelButton"].includes(
+      parentType ?? "",
+    );
+    if (parentIsButton) return;
+
+    let resolvedPosition = currentDragState?.position;
+    if (isButton && resolvedPosition === "inside") {
+      resolvedPosition = "after";
+    }
+
     // Move existing component
     if (droppedId) {
       if (droppedId === component.id) return; // Dropped on self
 
-      if (currentDragState?.position === "inside") {
+      if (resolvedPosition === "inside") {
         moveComponent(droppedId, component.id, component.children?.length || 0);
-      } else if (currentDragState?.position === "before") {
+      } else if (resolvedPosition === "before") {
         moveComponent(droppedId, parentId, index ?? 0);
-      } else if (currentDragState?.position === "after") {
+      } else if (resolvedPosition === "after") {
         moveComponent(droppedId, parentId, (index ?? 0) + 1);
       }
     }
@@ -156,11 +196,11 @@ export const RenderedComponent = memo(function RenderedComponent({
           };
         }
 
-        if (currentDragState?.position === "inside") {
+        if (resolvedPosition === "inside") {
           addComponent(newComp, component.id);
-        } else if (currentDragState?.position === "before") {
+        } else if (resolvedPosition === "before") {
           addComponent(newComp, parentId, index ?? 0);
-        } else if (currentDragState?.position === "after") {
+        } else if (resolvedPosition === "after") {
           addComponent(newComp, parentId, (index ?? 0) + 1);
         }
       }
@@ -271,33 +311,42 @@ export const RenderedComponent = memo(function RenderedComponent({
     }
 
     if (component.padding) {
-      style.paddingTop = component.padding.top
-        ? `${component.padding.top}px`
-        : undefined;
-      style.paddingBottom = component.padding.bottom
-        ? `${component.padding.bottom}px`
-        : undefined;
-      style.paddingLeft = component.padding.left
-        ? `${component.padding.left}px`
-        : undefined;
-      style.paddingRight = component.padding.right
-        ? `${component.padding.right}px`
-        : undefined;
+      // Use !== undefined so that padding: 0 is applied (not treated as falsy)
+      style.paddingTop =
+        component.padding.top !== undefined
+          ? `${component.padding.top}px`
+          : undefined;
+      style.paddingBottom =
+        component.padding.bottom !== undefined
+          ? `${component.padding.bottom}px`
+          : undefined;
+      style.paddingLeft =
+        component.padding.left !== undefined
+          ? `${component.padding.left}px`
+          : undefined;
+      style.paddingRight =
+        component.padding.right !== undefined
+          ? `${component.padding.right}px`
+          : undefined;
     }
 
     if (component.margin) {
-      style.marginTop = component.margin.top
-        ? `${component.margin.top}px`
-        : undefined;
-      style.marginBottom = component.margin.bottom
-        ? `${component.margin.bottom}px`
-        : undefined;
-      style.marginLeft = component.margin.left
-        ? `${component.margin.left}px`
-        : undefined;
-      style.marginRight = component.margin.right
-        ? `${component.margin.right}px`
-        : undefined;
+      style.marginTop =
+        component.margin.top !== undefined
+          ? `${component.margin.top}px`
+          : undefined;
+      style.marginBottom =
+        component.margin.bottom !== undefined
+          ? `${component.margin.bottom}px`
+          : undefined;
+      style.marginLeft =
+        component.margin.left !== undefined
+          ? `${component.margin.left}px`
+          : undefined;
+      style.marginRight =
+        component.margin.right !== undefined
+          ? `${component.margin.right}px`
+          : undefined;
     }
 
     if (component.background && !isBlueprint) {
@@ -569,7 +618,7 @@ export const RenderedComponent = memo(function RenderedComponent({
     style: getComponentStyle(),
     onClick: handleClick,
     // Disable dragging if inside a button, so the button handles the drag
-    draggable: !isLockedInParent,
+    draggable: !isLockedInParent && !component.isLocked,
     onDragStart: handleDragStart,
     onDragEnd: handleDragEnd,
     onDragOver: handleDragOver,
@@ -577,44 +626,80 @@ export const RenderedComponent = memo(function RenderedComponent({
     onDrop: handleDrop,
   };
 
-  // Helper to wrap content with indicators
-  // Helper to wrap content with indicators
+  // Helper to wrap content with drag position indicators.
+  // Preserves position from baseProps.style (e.g. position:absolute for root elements).
+  // Falls back to position:relative so indicator lines don't bleed out of the container.
   const renderWithIndicators = (
     content: React.ReactNode,
     extraClass?: string,
     extraStyle?: React.CSSProperties,
     extraProps?: Record<string, any>,
-  ) => (
-    <>
-      <div
-        {...baseProps}
-        {...extraProps}
-        style={{ ...baseProps.style, ...extraStyle }}
-        className={cn(
-          baseProps.className,
-          extraClass,
-          dragState?.position === "inside" &&
-            "ring-2 ring-cyan-400 ring-offset-2",
-        )}
-      >
-        {dragState?.position === "before" && (
-          <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 z-50 pointer-events-none shadow-[0_0_4px_rgba(34,211,238,0.8)]" />
-        )}
-        {content}
-        {dragState?.position === "after" && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-400 z-50 pointer-events-none shadow-[0_0_4px_rgba(34,211,238,0.8)]" />
-        )}
-      </div>
-    </>
-  );
+  ) => {
+    // Only set position:relative if the component doesn't already have a position set
+    // (root elements get position:absolute and must not be overridden)
+    const resolvedPosition = baseProps.style?.position ?? "relative";
+    return (
+      <>
+        <div
+          {...baseProps}
+          {...extraProps}
+          style={{
+            ...baseProps.style,
+            position: resolvedPosition,
+            ...extraStyle,
+          }}
+          className={cn(
+            baseProps.className,
+            extraClass,
+            dragState?.position === "inside" &&
+              "ring-2 ring-cyan-400 ring-offset-2",
+          )}
+        >
+          {dragState?.position === "before" && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-400 z-50 pointer-events-none shadow-[0_0_4px_rgba(34,211,238,0.8)]" />
+          )}
+          {content}
+          {dragState?.position === "after" && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-400 z-50 pointer-events-none shadow-[0_0_4px_rgba(34,211,238,0.8)]" />
+          )}
+        </div>
+      </>
+    );
+  };
 
   switch (component.type) {
-    case "Label":
+    case "Label": {
+      // Labels should always center their content; override any fixed height to prevent clipping on large fonts
+      const labelOverrideStyle: React.CSSProperties = {
+        ...getTextStyle(),
+        display: "flex",
+        alignItems: "center",
+        justifyContent:
+          component.textStyle?.horizontalAlignment === "End"
+            ? "flex-end"
+            : component.textStyle?.horizontalAlignment === "Start"
+              ? "flex-start"
+              : "center",
+        textAlign:
+          component.textStyle?.horizontalAlignment === "End"
+            ? "right"
+            : component.textStyle?.horizontalAlignment === "Start"
+              ? "left"
+              : "center",
+        minHeight: component.anchor?.height
+          ? `${component.anchor.height}px`
+          : undefined,
+        // Don't enforce a fixed height — let the label grow with font size
+        height: undefined,
+        width: "100%",
+        overflow: "visible",
+      };
       return renderWithIndicators(
         component.text || "Label",
         undefined,
-        getTextStyle(),
+        labelOverrideStyle,
       );
+    }
 
     case "TimerLabel":
       // Format seconds to MM:SS
@@ -636,7 +721,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         >
           {component.placeholderText || "Enter text..."}
         </span>,
-        "rounded",
+        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 px-3 flex items-center h-full",
       );
 
     case "NumberField":
@@ -649,7 +734,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         >
           {component.value ?? 0}
         </span>,
-        "rounded",
+        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 px-3 flex items-center h-full",
       );
 
     case "Button":
@@ -859,11 +944,11 @@ export const RenderedComponent = memo(function RenderedComponent({
             </svg>
           </div>
 
-          {/* Options List - Positioned to the RIGHT */}
+          {/* Options List - Positioned BELOW */}
           {isDropdownOpen && (
             <div
-              className="absolute left-full top-[-3px] ml-1 z-[100] flex flex-col bg-[#111927] border border-[#fbbf24] rounded-sm shadow-xl max-h-60 overflow-y-auto"
-              style={{ minWidth: "120px", whiteSpace: "nowrap" }}
+              className="absolute left-0 top-full mt-1 z-[100] flex flex-col bg-[#111927] border border-[#fbbf24] rounded-sm shadow-xl max-h-60 overflow-y-auto"
+              style={{ minWidth: "100%", whiteSpace: "nowrap" }}
             >
               {/* Use children if available, else legacy entries */}
               {((component.children || []).filter(

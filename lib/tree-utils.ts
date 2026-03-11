@@ -247,11 +247,9 @@ export function componentsToCode(
   const spaces = "  ".repeat(depth);
 
   components.forEach((comp) => {
-    // Header: Alias or Type #ID or Type
-    let typeToExport = comp.alias || comp.type;
-    if (!comp.alias && typeToExport === "ScrollArea") {
-      typeToExport = "Group";
-    }
+    // Header: Alias or Type #ID
+    // Note: ScrollArea is a real .ui type, don't remap to Group
+    const typeToExport = comp.alias || comp.type;
     // Sprite is exported as Sprite, which is default behavior
 
     const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
@@ -360,34 +358,41 @@ export function componentsToCode(
     if (comp.layoutMode && comp.type !== "Label" && !isButton) {
       code += `${spaces}  LayoutMode: ${comp.layoutMode};\n`;
     }
-    if (comp.direction && comp.direction === "Vertical") {
+    // Direction (emit for both Horizontal and Vertical)
+    if (comp.direction) {
       code += `${spaces}  Direction: ${comp.direction};\n`;
     }
     if (comp.flexWeight !== undefined) {
       code += `${spaces}  FlexWeight: ${comp.flexWeight};\n`;
     }
 
-    // Background: (Key: Val, ...)
+    // Background: use color literal when only color is set (round-trip safe);
+    // use object form when border or texture is also present.
     if (comp.background) {
-      const parts: string[] = [];
-
-      // Color: #RRGGBB(Opacity) format, no quotes
+      const hasBorder = !!comp.background.border;
+      const hasTexture = !!comp.background.texture;
       const colorString = formatHytaleColor(
         comp.background.color,
         comp.background.opacity,
       );
-      if (colorString) parts.push(`Color: ${colorString}`);
 
-      // Border: Value (Radius)
-      if (comp.background.border) {
-        parts.push(`Border: ${comp.background.border}`);
-      }
-
-      // Opacity is now merged into Color, so we don't list it separately for Background
-      // unless user wants standalone Opacity property? Request said: "opacidade nao é um atributo. ele vai sempre do lado da cor"
-
-      if (parts.length > 0) {
-        code += `${spaces}  Background: (${parts.join(", ")});\n`;
+      if (hasTexture) {
+        // Texture-based background: emit as PatchStyle object
+        const parts: string[] = [];
+        if (colorString) parts.push(`Color: ${colorString}`);
+        if (hasBorder) parts.push(`Border: ${comp.background.border}`);
+        // Texture path isn't exported here (handled by alias in game)
+        if (parts.length > 0) {
+          code += `${spaces}  Background: (${parts.join(", ")});\n`;
+        }
+      } else if (hasBorder && colorString) {
+        // Color + border radius: use object form
+        code += `${spaces}  Background: (Color: ${colorString}, Border: ${comp.background.border});\n`;
+      } else if (hasBorder) {
+        code += `${spaces}  Background: (Border: ${comp.background.border});\n`;
+      } else if (colorString) {
+        // Plain color only: emit as literal (parser-friendly)
+        code += `${spaces}  Background: ${colorString};\n`;
       }
     }
 
