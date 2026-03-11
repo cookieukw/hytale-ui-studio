@@ -126,6 +126,12 @@ export const RenderedComponent = memo(function RenderedComponent({
       else position = "after";
     }
 
+    // If this is a root container, force everything to drop inside it
+    // otherwise dragging near the edges creates overlapping full-screen siblings
+    if (!parentId && isContainer) {
+      position = "inside";
+    }
+
     // Constraint for root components has been removed to allow reordering
     // if (!parentId && position !== "inside") return;
 
@@ -601,7 +607,10 @@ export const RenderedComponent = memo(function RenderedComponent({
     : "";
 
   const selectedClass = isSelected
-    ? "ring-2 ring-primary ring-offset-1 ring-offset-canvas"
+    ? cn(
+        "ring-2 ring-primary",
+        !parentId ? "ring-inset" : "ring-offset-1 ring-offset-canvas",
+      )
     : "";
 
   const baseProps = {
@@ -647,7 +656,10 @@ export const RenderedComponent = memo(function RenderedComponent({
             baseProps.className,
             extraClass,
             dragState?.position === "inside" &&
-              "ring-2 ring-cyan-400 ring-offset-2",
+              cn(
+                "ring-2 ring-cyan-400",
+                !parentId ? "ring-inset" : "ring-offset-2",
+              ),
           )}
         >
           {dragState?.position === "before" && (
