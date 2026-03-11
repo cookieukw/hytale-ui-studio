@@ -360,11 +360,6 @@ export const RenderedComponent = memo(function RenderedComponent({
         style.backgroundSize = "100% 100%"; // Stretch texture usually
         style.backgroundRepeat = "no-repeat";
       }
-      if (component.background.border) {
-        // Hytale "Border" is often used as Border Radius or 9-slice?
-        // For simple visualization, radius is okay, but texture usually handles border visually.
-        style.borderRadius = `${component.background.border}px`;
-      }
       if (component.background.opacity !== undefined) {
         style.opacity = component.background.opacity;
       }

@@ -746,8 +746,6 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         // Object form: Background: (Color: #fff, Border: 8);
         if (value.Color !== undefined)
           component.background.color = String(value.Color);
-        if (value.Border !== undefined)
-          component.background.border = String(value.Border);
         if (value.Opacity !== undefined)
           component.background.opacity = Number(value.Opacity);
       }
@@ -976,7 +974,6 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         if (parts[1] === "Color") component.background.color = String(value);
         if (parts[1] === "Opacity")
           component.background.opacity = Number(value);
-        if (parts[1] === "Border") component.background.border = String(value);
         continue;
       }
     }

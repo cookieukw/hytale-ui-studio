@@ -369,7 +369,6 @@ export function componentsToCode(
     // Background: use color literal when only color is set (round-trip safe);
     // use object form when border or texture is also present.
     if (comp.background) {
-      const hasBorder = !!comp.background.border;
       const hasTexture = !!comp.background.texture;
       const colorString = formatHytaleColor(
         comp.background.color,
@@ -380,16 +379,10 @@ export function componentsToCode(
         // Texture-based background: emit as PatchStyle object
         const parts: string[] = [];
         if (colorString) parts.push(`Color: ${colorString}`);
-        if (hasBorder) parts.push(`Border: ${comp.background.border}`);
         // Texture path isn't exported here (handled by alias in game)
         if (parts.length > 0) {
           code += `${spaces}  Background: (${parts.join(", ")});\n`;
         }
-      } else if (hasBorder && colorString) {
-        // Color + border radius: use object form
-        code += `${spaces}  Background: (Color: ${colorString}, Border: ${comp.background.border});\n`;
-      } else if (hasBorder) {
-        code += `${spaces}  Background: (Border: ${comp.background.border});\n`;
       } else if (colorString) {
         // Plain color only: emit as literal (parser-friendly)
         code += `${spaces}  Background: ${colorString};\n`;

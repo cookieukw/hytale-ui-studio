@@ -437,23 +437,6 @@ export function StyleTab({ component, onUpdate }: StyleTabProps) {
           </div>
         </FieldRow>
 
-        <FieldRow label="Border">
-          <DebouncedInput
-            type="number"
-            value={component.background?.border || ""}
-            onChange={(val) =>
-              onUpdate({
-                background: {
-                  ...component.background,
-                  border: String(val),
-                },
-              })
-            }
-            className="h-7 cursor-text p-1 text-xs"
-            placeholder="Radius (px)"
-          />
-        </FieldRow>
-
         <FieldRow label="Opacity">
           <div className="flex items-center gap-2">
             <Slider
