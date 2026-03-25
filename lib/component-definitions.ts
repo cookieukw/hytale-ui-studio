@@ -164,7 +164,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       name: "CheckBox",
       checked: false,
       anchor: { width: 22, height: 22 },
-      background: { color: "#000000", opacity: 0, border: 7 },
+      background: { color: "#000000", opacity: 0 },
       padding: { top: 4, bottom: 4, left: 4, right: 4 },
     },
   },
@@ -181,7 +181,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       max: 100,
       step: 1,
       anchor: { width: 200, height: 20 },
-      background: { color: "#1a1a2a", border: "2" },
+      background: { color: "#1a1a2a" },
     },
   },
   */
@@ -200,7 +200,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       textStyle: {
         textColor: "#6d7f9a",
       },
-      background: { color: "#38486d", border: 16 },
+      background: { color: "#38486d" },
       padding: { left: 8, right: 8 },
       children: [
         {
@@ -307,10 +307,11 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       textStyle: {
         fontSize: 14,
         textColor: "#ffffff",
-        horizontalAlignment: "Start",
-        verticalAlignment: "Start",
+        horizontalAlignment: "Center",
+        verticalAlignment: "Center",
       },
-      anchor: { width: 100, height: 20 },
+      // No fixed height — let the label grow with its content / font size
+      anchor: { width: 100 },
     },
   },
   {
@@ -429,7 +430,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
       name: "DialogBox",
       anchor: { width: 400, height: 300 },
       layoutMode: "Top",
-      background: { color: "#2a2a3a", border: "#3a3a4a" },
+      background: { color: "#2a2a3a" },
       children: [
         {
           id: generateId(),
@@ -550,7 +551,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           anchor: { left: 0, right: 0, height: 40 },
           margin: { top: 8 },
           padding: { left: 12, right: 12 },
-          background: { color: "#1a1a2a", border: "#3a3a4a" },
+          background: { color: "#1a1a2a" },
         },
       ],
     }),
@@ -655,7 +656,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
           flexWeight: 1,
           anchor: { height: 40 },
           padding: { left: 12, right: 12 },
-          background: { color: "#1a1a2a", border: "#3a3a4a" },
+          background: { color: "#1a1a2a" },
         },
         {
           id: generateId(),
@@ -729,7 +730,7 @@ export const PRESET_DEFINITIONS: PresetDefinition[] = [
       anchor: { width: 350, height: 50 },
       layoutMode: "Left",
       padding: { left: 16, right: 8 },
-      background: { color: "#2a4a3a", border: "#3a5a4a" },
+      background: { color: "#2a4a3a" },
       children: [
         {
           id: generateId(),

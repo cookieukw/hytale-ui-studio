@@ -243,7 +243,7 @@ export function EditorCanvas() {
           onClick={handleCanvasClick}
         >
           <div
-            className="h-[100px] w-full origin-top-left p-4"
+            className="relative h-full w-full origin-top-left"
             style={{
               transform: `scale(${zoom / 100})`,
               width: `${100 / (zoom / 100)}%`,
@@ -274,7 +274,7 @@ export function EditorCanvas() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="relative h-full w-full">
                 {components.map((component, i) => (
                   <RenderedComponent
                     key={component.id}

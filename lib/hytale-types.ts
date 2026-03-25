@@ -56,7 +56,6 @@ export interface TextStyle {
 export interface BackgroundStyle {
   color?: string;
   texture?: string;
-  border?: number | string;
   opacity?: number;
 }
 
