@@ -113,14 +113,22 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     let position: "before" | "after" | "inside" = "inside";
 
+    const isEmptyContainer =
+      isContainer && (!component.children || component.children.length === 0);
+
     // pixels zone for before/after detection
-    // Using 25% zone for before/after, but if container is large, limit to max 30px
-    const zone = Math.min(height * 0.25, 30);
+    // Using 15% zone for before/after, but if container is large, limit to max 15px
+    // This makes the 'inside' zone much larger and easier to hit.
+    const zone = Math.min(height * 0.15, 15);
 
     if (isContainer) {
-      if (y < zone) position = "before";
-      else if (y > height - zone) position = "after";
-      else position = "inside";
+      if (isEmptyContainer) {
+        position = "inside"; // ALWAYS drop inside an empty container
+      } else {
+        if (y < zone) position = "before";
+        else if (y > height - zone) position = "after";
+        else position = "inside";
+      }
     } else {
       if (y < height * 0.5) position = "before";
       else position = "after";
@@ -478,9 +486,9 @@ export const RenderedComponent = memo(function RenderedComponent({
       if (component.type === "Label") {
         style.display = "flex";
         style.flexDirection = "column"; // Usually labels wrap text if needed, but centering relies on flex
-        // Hytal Alignment: Start, Center, End
+        // Hytale Alignment: Start, Center, End
 
-        // Horizontal
+        // Horizontal (TextAlign + AlignItems for Flex)
         if (component.textStyle.horizontalAlignment) {
           const hAlign = component.textStyle.horizontalAlignment;
           style.alignItems =
@@ -497,7 +505,7 @@ export const RenderedComponent = memo(function RenderedComponent({
                 : "left";
         }
 
-        // Vertical
+        // Vertical (JustifyContent for Flex Column)
         if (component.textStyle.verticalAlignment) {
           const vAlign = component.textStyle.verticalAlignment;
           style.justifyContent =
@@ -565,6 +573,16 @@ export const RenderedComponent = memo(function RenderedComponent({
       !style.position
     ) {
       style.flexGrow = 1;
+    }
+
+    // Ensure empty containers are visible and droppable in Blueprint mode
+    if (
+      isBlueprint &&
+      isContainerType &&
+      (!component.children || component.children.length === 0)
+    ) {
+      if (!style.minHeight && !style.height) style.minHeight = "40px";
+      if (!style.minWidth && !style.width) style.minWidth = "40px";
     }
 
     // Special Case: Labels inside Buttons should fill the button to ensure centering works
@@ -677,22 +695,27 @@ export const RenderedComponent = memo(function RenderedComponent({
   switch (component.type) {
     case "Label": {
       // Labels should always center their content; override any fixed height to prevent clipping on large fonts
+      const hAlign = component.textStyle?.horizontalAlignment || "Start";
+      const vAlign = component.textStyle?.verticalAlignment || "Start";
+
       const labelOverrideStyle: React.CSSProperties = {
         ...getTextStyle(),
         display: "flex",
-        alignItems: "center",
-        justifyContent:
-          component.textStyle?.horizontalAlignment === "End"
+        flexDirection: "column",
+        alignItems:
+          hAlign === "End"
             ? "flex-end"
-            : component.textStyle?.horizontalAlignment === "Start"
-              ? "flex-start"
-              : "center",
+            : hAlign === "Center"
+              ? "center"
+              : "flex-start",
+        justifyContent:
+          vAlign === "End"
+            ? "flex-end"
+            : vAlign === "Center"
+              ? "center"
+              : "flex-start",
         textAlign:
-          component.textStyle?.horizontalAlignment === "End"
-            ? "right"
-            : component.textStyle?.horizontalAlignment === "Start"
-              ? "left"
-              : "center",
+          hAlign === "End" ? "right" : hAlign === "Center" ? "center" : "left",
         minHeight: component.anchor?.height
           ? `${component.anchor.height}px`
           : undefined,
@@ -702,7 +725,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         overflow: "visible",
       };
       return renderWithIndicators(
-        component.text || "Label",
+        <span style={{ width: "100%" }}>{component.text || "Label"}</span>,
         undefined,
         labelOverrideStyle,
       );

@@ -19,8 +19,58 @@ interface StyleTabProps {
   onUpdate: (updates: Partial<HytaleComponent>) => void;
 }
 
-export function StyleTab({ component, onUpdate }: StyleTabProps) {
+export function StyleTab({
+  component: initialComponent,
+  onUpdate: originalOnUpdate,
+}: StyleTabProps) {
   const alignments: TextAlignment[] = ["Left", "Center", "Right"];
+
+  const isButtonWithLabel = ["Button", "CancelButton"].includes(
+    initialComponent.type,
+  );
+  let component = initialComponent;
+  let targetChildLabel: HytaleComponent | undefined;
+
+  if (isButtonWithLabel) {
+    targetChildLabel = initialComponent.children?.find(
+      (c) => c.type === "Label" && c.isDeletable === false,
+    );
+    if (targetChildLabel) {
+      component = {
+        ...initialComponent,
+        text: targetChildLabel.text,
+        textStyle: targetChildLabel.textStyle,
+      };
+    }
+  }
+
+  const onUpdate = (updates: Partial<HytaleComponent>) => {
+    if (isButtonWithLabel && targetChildLabel) {
+      const mergedUpdates = { ...updates };
+
+      if ("text" in updates || "textStyle" in updates) {
+        mergedUpdates.children = initialComponent.children?.map((c) =>
+          c.id === targetChildLabel!.id
+            ? {
+                ...c,
+                text:
+                  updates.text !== undefined ? String(updates.text) : c.text,
+                textStyle:
+                  updates.textStyle !== undefined
+                    ? updates.textStyle
+                    : c.textStyle,
+              }
+            : c,
+        );
+        delete mergedUpdates.text;
+        delete mergedUpdates.textStyle;
+      }
+
+      originalOnUpdate(mergedUpdates);
+      return;
+    }
+    originalOnUpdate(updates);
+  };
 
   const hasTextStyle = [
     "Label",
@@ -34,13 +84,21 @@ export function StyleTab({ component, onUpdate }: StyleTabProps) {
     "SecondaryTextButton",
     "TertiaryTextButton",
     "CancelTextButton",
+    "Button",
+    "CancelButton",
   ].includes(component.type);
 
   const hasPlaceholder = ["TextField", "NumberField"].includes(component.type);
   const hasValue = ["ProgressBar", "NumberField", "Slider"].includes(
     component.type,
   );
-  const hasText = ["Label", "TextButton", "Dropdown"].includes(component.type);
+  const hasText = [
+    "Label",
+    "TextButton",
+    "Dropdown",
+    "Button",
+    "CancelButton",
+  ].includes(component.type);
   const hasChecked = ["CheckBox"].includes(component.type);
   const hasOptions = ["Dropdown"].includes(component.type);
 
