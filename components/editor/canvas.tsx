@@ -137,17 +137,37 @@ export function EditorCanvas() {
       e.stopPropagation();
       setIsDragOver(false);
 
+      // 1. File drop from Workspace (highest priority)
+      const dropType = e.dataTransfer.getData("type");
+      if (dropType === "file") {
+        const fileName = e.dataTransfer.getData("fileName");
+        if (fileName) {
+          addComponent(
+            {
+              type: "ImportedUI",
+              name: fileName.replace(".ui", ""),
+              importPath: fileName,
+              anchor: { width: 200, height: 200 },
+            },
+            null,
+          );
+        }
+        return;
+      }
+
+      // 2. Move existing component already on canvas
       const storeDraggingId = useEditorStore.getState().draggingId;
       const componentId =
         storeDraggingId || e.dataTransfer.getData("componentId");
 
-      setDraggingId(null); // Clear dragging state
+      setDraggingId(null);
 
       if (componentId) {
         moveComponent(componentId, null, components.length);
         return;
       }
 
+      // 3. New component from palette
       let componentType = e.dataTransfer.getData(
         "componentType",
       ) as ComponentType;
@@ -185,7 +205,7 @@ export function EditorCanvas() {
         }
       }
     },
-    [addComponent],
+    [addComponent, moveComponent, components.length],
   );
 
   const handleCanvasClick = useCallback(

@@ -93,7 +93,8 @@ export type ComponentType =
   | "Spinner"
   | "ProgressBar"
   | "DropdownBox"
-  | "DropdownEntry";
+  | "DropdownEntry"
+  | "ImportedUI";
 
 export interface SpriteFrame {
   width: number;
@@ -187,6 +188,8 @@ export interface HytaleComponent {
   isDeletable?: boolean;
   inheritance?: string;
   alias?: string;
+  importPath?: string; // For UI Nesting ($C.@Title)
+  isImported?: boolean; // If this component is a placeholder for another UI file
 }
 
 export type PresetType =
@@ -231,7 +234,28 @@ export interface PresetDefinition {
 export type ViewMode = "Design" | "Blueprint" | "Split";
 export type DevicePreview = "Desktop" | "Tablet" | "Mobile" | "Hytale";
 
+export interface UIFile {
+  id: string;
+  name: string; // e.g. "Main.ui"
+  components: HytaleComponent[];
+  imports: string[];
+  lastModified: number;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  files: UIFile[];
+  activeFileId: string | null;
+  lastModified: number;
+  preview?: string; // Optional base64 thumbnail
+}
+
 export interface EditorState {
+  projects: Project[];
+  currentProjectId: string | null;
+  currentFileId: string | null;
+  // These stay as "active" working area for the current editor session
   components: HytaleComponent[];
   selectedId: string | null;
   viewMode: ViewMode;
@@ -244,3 +268,4 @@ export interface EditorState {
   historyIndex: number;
   imports: string[];
 }
+

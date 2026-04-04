@@ -387,6 +387,17 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       effectOffset: 74,
     },
   },
+  {
+    type: "ImportedUI",
+    label: "Imported UI",
+    icon: "FileJson",
+    category: "Layout",
+    defaultProps: {
+      name: "ImportedUI",
+      importPath: "",
+      anchor: { width: 200, height: 200 },
+    },
+  },
 ];
 
 export const PRESET_DEFINITIONS: PresetDefinition[] = [

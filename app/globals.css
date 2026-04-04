@@ -41,6 +41,7 @@
 
   /* Custom IDE colors */
   --panel: oklch(0.14 0.005 260);
+  --project-item: lab(4% -0.15 -1.99);
   --panel-header: oklch(0.18 0.005 260);
   --canvas: oklch(0.1 0.005 260);
   --canvas-grid: oklch(0.18 0.005 260);
@@ -91,6 +92,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-panel: var(--panel);
+  --color-project-item: var(--project-item);
   --color-panel-header: var(--panel-header);
   --color-canvas: var(--canvas);
   --color-canvas-grid: var(--canvas-grid);
