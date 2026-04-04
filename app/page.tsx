@@ -2,9 +2,6 @@
 
 import { EditorToolbar } from "@/components/editor/toolbar";
 import {
-  Layout,
-  FileCode,
-  Layers,
   Undo2,
   Redo2,
   Download,
@@ -15,6 +12,7 @@ import { ComponentTree } from "@/components/editor/component-tree";
 import { EditorCanvas } from "@/components/editor/canvas";
 import { Inspector } from "@/components/editor/inspector";
 import { CodeEditor } from "@/components/editor/code-editor";
+import { FileExplorer } from "@/components/editor/file-explorer";
 import { useEditorStore } from "@/lib/editor-store";
 import {
   ResizableHandle,
@@ -25,8 +23,10 @@ import {
 import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/editor/mobile-nav";
 import { LoadingScreen } from "@/components/loading-screen";
+import { StartScreen } from "@/components/editor/start-screen";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ImperativePanelHandle } from "react-resizable-panels";
 
 export default function HytaleUIStudio() {
   const viewMode = useEditorStore((state) => state.viewMode);
@@ -34,7 +34,21 @@ export default function HytaleUIStudio() {
   const activeMobileTab = useEditorStore((state) => state.activeMobileTab);
   const selectedId = useEditorStore((state) => state.selectedId);
   const removeComponent = useEditorStore((state) => state.removeComponent);
+  const currentProjectId = useEditorStore((state) => state.currentProjectId);
+  const showFileExplorer = useEditorStore((state) => state.showFileExplorer);
+  const importProject = useEditorStore((state) => state.importProject);
+  const exportProject = useEditorStore((state) => state.exportProject);
   const [isLoaded, setIsLoaded] = useState(false);
+  const fileExplorerPanelRef = useRef<ImperativePanelHandle>(null);
+
+  // Collapse/expand the file explorer panel imperatively to avoid panel group layout bugs
+  useEffect(() => {
+    if (showFileExplorer) {
+      fileExplorerPanelRef.current?.expand();
+    } else {
+      fileExplorerPanelRef.current?.collapse();
+    }
+  }, [showFileExplorer]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -89,6 +103,12 @@ export default function HytaleUIStudio() {
     return <LoadingScreen />;
   }
 
+  // If no project is selected, show the Start Screen (Android Studio style)
+  if (!currentProjectId) {
+    return <StartScreen />;
+  }
+
+
   /* Main Content - Desktop Layout */
   /* Hidden on mobile, visible on desktop */
   return (
@@ -99,19 +119,29 @@ export default function HytaleUIStudio() {
       {/* Main Content - Desktop */}
       <div className="hidden md:block flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {/* Left Panel - Palette & Tree */}
+          {/* Left Panel - Workspace, Palette & Tree */}
           <ResizablePanel
-            defaultSize={18}
-            minSize={12}
-            maxSize={25}
+            defaultSize={20}
+            minSize={15}
+            maxSize={30}
             collapsible
             collapsedSize={0}
           >
             <ResizablePanelGroup direction="vertical" className="h-full">
               <ResizablePanel
-                defaultSize={45}
+                ref={fileExplorerPanelRef}
+                defaultSize={showFileExplorer ? 25 : 0}
+                minSize={15}
+                collapsible={true}
+                collapsedSize={0}
+              >
+                <FileExplorer />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              
+              <ResizablePanel
+                defaultSize={40}
                 minSize={25}
-          
                 collapsible={true}
                 collapsedSize={2}
               >
@@ -222,14 +252,7 @@ export default function HytaleUIStudio() {
             <div className="w-px h-6 bg-border mx-1" />
             <button
               onClick={() => {
-                const code = useEditorStore.getState().exportToUI();
-                const blob = new Blob([code], { type: "text/plain" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "interface.ui";
-                a.click();
-                URL.revokeObjectURL(url);
+                exportProject();
               }}
               className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted"
             >
@@ -239,12 +262,11 @@ export default function HytaleUIStudio() {
               onClick={() => {
                 const input = document.createElement("input");
                 input.type = "file";
-                input.accept = ".ui,.txt";
+                input.accept = ".zip";
                 input.onchange = async (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (file) {
-                    const text = await file.text();
-                    useEditorStore.getState().importFromUI(text);
+                    importProject(file);
                   }
                 };
                 input.click();
