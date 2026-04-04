@@ -4,6 +4,7 @@ import { COMPONENT_DEFINITIONS } from "@/lib/component-definitions";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
 import { SpriteRenderer } from "./renderers/sprite-renderer";
+import { FileJson } from "lucide-react";
 
 interface RenderedComponentProps {
   component: HytaleComponent;
@@ -28,6 +29,8 @@ export const RenderedComponent = memo(function RenderedComponent({
   const moveComponent = useEditorStore((state) => state.moveComponent);
   const addComponent = useEditorStore((state) => state.addComponent);
   const setDraggingId = useEditorStore((state) => state.setDraggingId);
+  const projects = useEditorStore((state) => state.projects);
+  const currentProjectId = useEditorStore((state) => state.currentProjectId);
 
   const isSelected = selectedId === component.id;
   const isVisible = component.isVisible ?? true;
@@ -233,8 +236,6 @@ export const RenderedComponent = memo(function RenderedComponent({
       style.bottom = 0;
       style.width = "100%";
       style.height = "100%";
-      // Default to center if not specified otherwise (mimicking the user's "Middle" layout)
-      // We'll let layoutMode logic below handle the flex props, but we enforce size/pos here.
     }
 
     // 2. zIndex Support
@@ -1147,6 +1148,47 @@ export const RenderedComponent = memo(function RenderedComponent({
         </>,
         "rounded",
       );
+
+    case "ImportedUI": {
+      const project = projects.find((p) => p.id === currentProjectId);
+      const importedFile = project?.files.find(
+        (f) => f.name === component.importPath,
+      );
+
+      if (!importedFile || !importedFile.components.length) {
+        return renderWithIndicators(
+          <div className="flex h-full w-full flex-col items-center justify-center rounded border border-dashed border-primary/30 bg-primary/5 text-primary/50">
+            <FileJson className="mb-1 h-6 w-6" />
+            <span className="font-mono text-[10px]">
+              {component.importPath || "No file selected"}
+            </span>
+          </div>,
+        );
+      }
+
+      return renderWithIndicators(
+        <div className="relative inline-flex flex-wrap items-start gap-1 border border-dotted border-primary/20 rounded p-0.5">
+          <div className="absolute right-0 top-0 z-50 rounded-bl bg-primary/20 px-1 font-bold uppercase text-primary text-[8px] pointer-events-none leading-tight">
+            {importedFile.name}
+          </div>
+          {importedFile.components.map((child, i) => (
+            <RenderedComponent
+              key={child.id}
+              component={child}
+              isBlueprint={isBlueprint}
+              selectedId={null}
+              onSelect={() => onSelect(component.id)}
+              index={i}
+              parentId={component.id}
+              parentType={component.type}
+            />
+          ))}
+        </div>,
+        undefined,
+        // Override ImportedUI's own style to be inline/auto-sized
+        { position: "relative", width: "auto", height: "auto", display: "inline-flex" },
+      );
+    }
 
     default:
       // Fallback for generic container behavior if needed or unknown types

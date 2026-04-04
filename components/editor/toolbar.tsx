@@ -10,15 +10,20 @@ import {
   Monitor,
   Tablet,
   Smartphone,
-  Download,
-  Upload,
   Columns2,
   Eye,
+  Home,
+  ChevronRight,
+  FolderCode,
+  FileCode,
+  FileDown,
+  FileUp,
   Layers,
   ZoomIn,
   ZoomOut,
   Maximize2,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -36,6 +41,8 @@ import {
 import { useEditorStore } from "@/lib/editor-store";
 import type { ViewMode, DevicePreview } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
+
+
 
 export function EditorToolbar() {
   const viewMode = useEditorStore((s) => s.viewMode);
@@ -55,30 +62,33 @@ export function EditorToolbar() {
   const historyIndex = useEditorStore((s) => s.historyIndex);
   const historyLength = useEditorStore((s) => s.history.length);
   const exportToUI = useEditorStore((s) => s.exportToUI);
+  const projects = useEditorStore((s) => s.projects);
+  const currentProjectId = useEditorStore((s) => s.currentProjectId);
+  const exitProject = useEditorStore((s) => s.exitProject);
+  const showFileExplorer = useEditorStore((s) => s.showFileExplorer);
+  const setShowFileExplorer = useEditorStore((s) => s.setShowFileExplorer);
+  const exportProject = useEditorStore((s) => s.exportProject);
+  const importProject = useEditorStore((s) => s.importProject);
+
+  const currentProject = projects.find((p) => p.id === currentProjectId);
+
+
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < historyLength - 1;
 
-  const handleExport = () => {
-    const code = exportToUI();
-    const blob = new Blob([code], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "interface.ui";
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExportZip = () => {
+      exportProject();
   };
 
-  const handleImport = () => {
+  const handleImportZip = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".ui,.txt";
+    input.accept = ".zip";
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        const text = await file.text();
-        useEditorStore.getState().importFromUI(text);
+        importProject(file);
       }
     };
     input.click();
@@ -109,20 +119,42 @@ export function EditorToolbar() {
     <TooltipProvider delayDuration={300}>
       <div className="flex h-12 items-center justify-between border-b border-border bg-panel-header px-3">
         {/* Left section */}
-        <div className="flex items-center gap-1">
-          <div className="mr-3 flex items-center gap-2">
-            <img
-              src="/hytale-studio_foreground.png"
-              alt="Logo"
-              className="h-8 w-8 bg-primary rounded "
-            />
-            <span className="hidden sm:inline text-sm font-semibold text-foreground">
-              Hytale UI Studio
-            </span>
-            <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-              Beta
-            </span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+             <div 
+               className="h-8 w-8 bg-primary rounded flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+               onClick={exitProject}
+               title="Back to Projects"
+             >
+                <img
+                  src="/hytale-studio_foreground.png"
+                  alt="Logo"
+                  className="h-6 w-6"
+                />
+             </div>
+             
+             <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  onClick={exitProject}
+                >
+                  <Home className="h-4 w-4" />
+                </Button>
+                
+                {currentProject && (
+                  <>
+                    <ChevronRight className="h-3 w-3 text-muted-foreground/50" />
+                    <span className="text-xs font-bold text-foreground truncate max-w-[150px]">
+                      {currentProject.name}
+                    </span>
+                  </>
+                )}
+             </div>
           </div>
+
+
 
           <Separator orientation="vertical" className="mx-2 h-6" />
 
@@ -154,6 +186,25 @@ export function EditorToolbar() {
               </Button>
             </TooltipTrigger>
             <TooltipContent>Redo</TooltipContent>
+          </Tooltip>
+
+          <Separator orientation="vertical" className="mx-2 h-6" />
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-8 w-8",
+                  showFileExplorer && "bg-primary/20 text-primary hover:bg-primary/30",
+                )}
+                onClick={() => setShowFileExplorer(!showFileExplorer)}
+              >
+                <FolderCode className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Workspace Browser</TooltipContent>
           </Tooltip>
 
           <Separator orientation="vertical" className="mx-2 h-6" />
@@ -311,34 +362,33 @@ export function EditorToolbar() {
 
           <Separator orientation="vertical" className="mx-2 h-6" />
 
-          {/* Import/Export */}
+          {/* Import/Export ZIP */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={handleImport}
+                onClick={handleImportZip}
               >
-                <Upload className="h-4 w-4" />
+                <FileUp className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Import .ui</TooltipContent>
+            <TooltipContent>Import Project (.zip)</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="default"
-                size="sm"
-                className="h-8 gap-1.5"
-                onClick={handleExport}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleExportZip}
               >
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Export</span>
+                <FileDown className="h-4 w-4 text-primary" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Export .ui</TooltipContent>
+            <TooltipContent>Export Project (.zip)</TooltipContent>
           </Tooltip>
         </div>
       </div>

@@ -27,6 +27,7 @@ import {
   List,
   SlidersHorizontal,
   Loader2,
+  FileCode,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -70,6 +71,7 @@ const componentIcons: Record<
   Sprite: ImageIcon,
   DropdownBox: List,
   DropdownEntry: Type,
+  ImportedUI: FileCode,
 };
 
 interface TreeNodeProps {

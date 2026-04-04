@@ -5,7 +5,9 @@ import {
   Palette,
   MousePointer,
   Settings2,
+  Edit2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -157,6 +159,53 @@ export function Inspector() {
             </Select>
           </div>
         </div>
+
+        {/* Nested UI Selector for ImportedUI */}
+        {component.type === "ImportedUI" && (
+          <div className="px-3 py-2 border-b border-border bg-primary/5">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-semibold text-primary uppercase">
+                Linked UI File
+              </span>
+              <Select
+                value={component.importPath || ""}
+                onValueChange={(val) => handleUpdate({ importPath: val })}
+              >
+                <SelectTrigger className="h-8 text-xs flex-1 bg-background border-primary/30">
+                  <SelectValue placeholder="Select UI file..." />
+                </SelectTrigger>
+                <SelectContent className="bg-panel border-border">
+                  {useEditorStore.getState().projects
+                    .find(p => p.id === useEditorStore.getState().currentProjectId)
+                    ?.files.filter(f => f.id !== useEditorStore.getState().currentFileId)
+                    .map((file) => (
+                      <SelectItem key={file.id} value={file.name}>
+                        {file.name}
+                      </SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
+              {component.importPath && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-full border-primary/20 hover:bg-primary/10 hover:text-primary transition-all text-[11px] mt-2 bg-background"
+                  onClick={() => {
+                    const project = useEditorStore.getState().projects.find(p => p.id === useEditorStore.getState().currentProjectId);
+                    const file = project?.files.find(f => f.name === component.importPath);
+                    if (file) {
+                      useEditorStore.getState().switchFile(file.id);
+                    }
+                  }}
+                >
+                  <Edit2 className="h-3 w-3 mr-2" />
+                  Edit {component.importPath}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         <ScrollArea className="flex-1">
           {/* Layout Tab */}
