@@ -226,6 +226,9 @@ export function EditorCanvas() {
 
   const isBlueprint = viewMode === "Blueprint";
 
+  // The scale factor for the canvas preview
+  const scale = zoom / 100;
+
   return (
     <div
       className="flex h-full flex-col overflow-hidden bg-canvas relative"
@@ -246,29 +249,36 @@ export function EditorCanvas() {
           backgroundSize: showGrid ? "20px 20px" : undefined,
         }}
       >
+        {/*
+          Outer wrapper: sized to the scaled device resolution so the scroll
+          container knows how much space to reserve. The inner canvas is
+          rendered at its true pixel dimensions and scaled via CSS transform.
+        */}
         <div
-          ref={canvasRef}
-          className={cn(
-            "relative  shrink-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
-            isDragOver && "border-primary border-dashed",
-          )}
           style={{
-            width: deviceSize.width * (zoom / 130),
-            height: deviceSize.height * (zoom / 130),
+            width: deviceSize.width * scale,
+            height: deviceSize.height * scale,
+            flexShrink: 0,
+            position: "relative",
           }}
-          onDragOver={handleDragOver}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={handleCanvasClick}
         >
           <div
-            className="relative h-full w-full origin-top-left"
+            ref={canvasRef}
+            className={cn(
+              "absolute top-0 left-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
+              isDragOver && "border-primary border-dashed",
+            )}
             style={{
-              transform: `scale(${zoom / 100})`,
-              width: `${100 / (zoom / 100)}%`,
-              height: `${100 / (zoom / 100)}%`,
+              width: deviceSize.width,
+              height: deviceSize.height,
+              transformOrigin: "top left",
+              transform: `scale(${scale})`,
             }}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleCanvasClick}
           >
             {components.length === 0 ||
             components.every((c) => c.isVisible === false) ? (

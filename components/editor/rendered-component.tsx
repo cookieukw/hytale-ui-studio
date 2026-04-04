@@ -14,6 +14,7 @@ interface RenderedComponentProps {
   index?: number;
   parentId?: string | null;
   parentType?: ComponentType | null;
+  parentLayoutMode?: string | null;
 }
 
 export const RenderedComponent = memo(function RenderedComponent({
@@ -24,6 +25,7 @@ export const RenderedComponent = memo(function RenderedComponent({
   index,
   parentId = null,
   parentType,
+  parentLayoutMode,
 }: RenderedComponentProps) {
   // Use store directly for actions to avoid prop drilling
   const moveComponent = useEditorStore((state) => state.moveComponent);
@@ -224,155 +226,123 @@ export const RenderedComponent = memo(function RenderedComponent({
     }
   };
 
-  const getComponentStyle = (): React.CSSProperties => {
+  const getComponentStyle = (parentLayoutMode?: string): React.CSSProperties => {
     const style: React.CSSProperties = {};
 
-    // 1. Root Element Special Behavior
+    // ─── Root Element ─────────────────────────────────────────────────────────
     if (!parentId) {
       style.position = "absolute";
-      style.top = 0;
-      style.left = 0;
-      style.right = 0;
+      style.top    = 0;
+      style.left   = 0;
+      style.right  = 0;
       style.bottom = 0;
-      style.width = "100%";
+      style.width  = "100%";
       style.height = "100%";
     }
 
-    // 2. zIndex Support
+    // ─── zIndex ───────────────────────────────────────────────────────────────
     if (component.zIndex !== undefined) {
       style.zIndex = component.zIndex;
     }
 
+    // ─── Anchor System ────────────────────────────────────────────────────────
+    // Hytale Anchor defines BOTH position AND size inside the parent.
+    //   Full: N          → abs, all 4 edges at N px
+    //   Left+Right only  → abs, stretches horizontally
+    //   Top+Bottom only  → abs, stretches vertically
+    //   Any single edge  → abs, sized by Width/Height
+    //   Only Width/Height → relative flow
     if (component.anchor && parentId) {
-      if (component.anchor.width) {
-        style.width =
-          typeof component.anchor.width === "string"
-            ? component.anchor.width
-            : `${component.anchor.width}px`;
-      }
-      if (component.anchor.height) {
-        style.height =
-          typeof component.anchor.height === "string"
-            ? component.anchor.height
-            : `${component.anchor.height}px`;
-      }
-      if (component.anchor.full) {
-        style.width = "100%";
-        style.flexGrow = 1;
-        style.minHeight = "100%";
-      }
+      const a = component.anchor;
 
-      // 3. Absolute Positioning Logic (Overlay)
-      // If any specific anchor position is set, we treat it as absolute (unless it's Root).
-      const hasPositioning =
-        component.anchor.top !== undefined ||
-        component.anchor.bottom !== undefined ||
-        component.anchor.left !== undefined ||
-        component.anchor.right !== undefined;
+      const hasTop    = a.top    !== undefined;
+      const hasBottom = a.bottom !== undefined;
+      const hasLeft   = a.left   !== undefined;
+      const hasRight  = a.right  !== undefined;
+      const hasWidth  = a.width  !== undefined;
+      const hasHeight = a.height !== undefined;
+      const hasFull   = a.full   === true;
 
-      if (parentId) {
-        if (hasPositioning) {
-          style.position = "absolute";
-        } else {
-          style.position = "relative"; // Standard flow
-        }
-      }
+      const hasAnyEdge = hasTop || hasBottom || hasLeft || hasRight;
 
-      // Explicit positioning application
-      if (component.anchor.top !== undefined)
-        style.top =
-          typeof component.anchor.top === "string"
-            ? component.anchor.top
-            : `${component.anchor.top}px`;
-      if (component.anchor.bottom !== undefined)
-        style.bottom =
-          typeof component.anchor.bottom === "string"
-            ? component.anchor.bottom
-            : `${component.anchor.bottom}px`;
-      if (component.anchor.left !== undefined)
-        style.left =
-          typeof component.anchor.left === "string"
-            ? component.anchor.left
-            : `${component.anchor.left}px`;
-      if (component.anchor.right !== undefined)
-        style.right =
-          typeof component.anchor.right === "string"
-            ? component.anchor.right
-            : `${component.anchor.right}px`;
-
-      // Emulate Hytale stretch behavior in Layouts (Flex)
-      // If Left and Right are set, we stretch horizontally
-      if (
-        component.anchor.left !== undefined &&
-        component.anchor.right !== undefined
-      ) {
-        style.alignSelf = "stretch";
-        // If in absolute context, left/right handles it. If flex, alignSelf handles it.
-        // We can remove width to allow stretch
-        if (!component.anchor.width) style.width = "auto";
-      }
-      // If Top and Bottom are set, stretch vertically
-      if (
-        component.anchor.top !== undefined &&
-        component.anchor.bottom !== undefined
-      ) {
-        style.alignSelf = "stretch";
-        style.height = "100%"; // Explicitly force 100% height for absolute or relative positioning behavior
-        if (component.anchor.height) {
-          // If explicit height is set, it overrides 'auto' or '100%'?
-          // Usually top+bottom overrides height. But in CSS Flex, height is disregarded if flex-basis.
-        }
+      if (hasFull) {
+        // Anchor: (Full: N) — fill parent with no margins
+        style.position = "absolute";
+        style.top    = 0;
+        style.bottom = 0;
+        style.left   = 0;
+        style.right  = 0;
+        // If size is also specified, honour it (rare but valid per spec)
+        if (hasWidth)  { style.width  = typeof a.width  === "string" ? a.width  : `${a.width}px`;  delete style.left; delete style.right;  }
+        if (hasHeight) { style.height = typeof a.height === "string" ? a.height : `${a.height}px`; delete style.top;  delete style.bottom; }
+      } else if (hasAnyEdge) {
+        style.position = "absolute";
+        if (hasTop)    style.top    = `${a.top}px`;
+        if (hasBottom) style.bottom = `${a.bottom}px`;
+        if (hasLeft)   style.left   = `${a.left}px`;
+        if (hasRight)  style.right  = `${a.right}px`;
+        // Explicit size alongside edge pins
+        if (hasWidth)  style.width  = typeof a.width  === "string" ? a.width  : `${a.width}px`;
+        if (hasHeight) style.height = typeof a.height === "string" ? a.height : `${a.height}px`;
+        // Left+Right without Width → horizontal stretch
+        if (hasLeft && hasRight && !hasWidth) delete style.width;
+        // Top+Bottom without Height → vertical stretch
+        if (hasTop && hasBottom && !hasHeight) delete style.height;
+      } else {
+        // Widget-sized: only Width/Height, flows normally
+        style.position = "relative";
+        if (hasWidth)  style.width  = typeof a.width  === "string" ? a.width  : `${a.width}px`;
+        if (hasHeight) style.height = typeof a.height === "string" ? a.height : `${a.height}px`;
       }
     }
 
+    // ─── Gap via opposite-edge anchor ────────────────────────────────────────
+    // In Hytale stack layouts the "trailing" anchor edge acts as a gap:
+    //   Top/MiddleCenter mode  → anchor.bottom = marginBottom
+    //   Bottom mode            → anchor.top    = marginTop
+    //   Left/CenterMiddle mode → anchor.right  = marginRight
+    //   Right mode             → anchor.left   = marginLeft
+    if (component.anchor && parentId && parentLayoutMode) {
+      const a = component.anchor;
+      if (parentLayoutMode === "Top" || parentLayoutMode === "TopScrolling" || parentLayoutMode === "MiddleCenter") {
+        if (a.bottom !== undefined) style.marginBottom = `${a.bottom}px`;
+      }
+      if (parentLayoutMode === "Bottom") {
+        if (a.top !== undefined) style.marginTop = `${a.top}px`;
+      }
+      if (parentLayoutMode === "Left" || parentLayoutMode === "LeftScrolling" || parentLayoutMode === "CenterMiddle" || parentLayoutMode === "LeftCenterWrap") {
+        if (a.right !== undefined) style.marginRight = `${a.right}px`;
+      }
+      if (parentLayoutMode === "Right") {
+        if (a.left !== undefined) style.marginLeft = `${a.left}px`;
+      }
+    }
+
+    // ─── Padding ──────────────────────────────────────────────────────────────
     if (component.padding) {
-      // Use !== undefined so that padding: 0 is applied (not treated as falsy)
-      style.paddingTop =
-        component.padding.top !== undefined
-          ? `${component.padding.top}px`
-          : undefined;
-      style.paddingBottom =
-        component.padding.bottom !== undefined
-          ? `${component.padding.bottom}px`
-          : undefined;
-      style.paddingLeft =
-        component.padding.left !== undefined
-          ? `${component.padding.left}px`
-          : undefined;
-      style.paddingRight =
-        component.padding.right !== undefined
-          ? `${component.padding.right}px`
-          : undefined;
+      if (component.padding.top    !== undefined) style.paddingTop    = `${component.padding.top}px`;
+      if (component.padding.bottom !== undefined) style.paddingBottom = `${component.padding.bottom}px`;
+      if (component.padding.left   !== undefined) style.paddingLeft   = `${component.padding.left}px`;
+      if (component.padding.right  !== undefined) style.paddingRight  = `${component.padding.right}px`;
     }
 
+    // ─── Margin ───────────────────────────────────────────────────────────────
     if (component.margin) {
-      style.marginTop =
-        component.margin.top !== undefined
-          ? `${component.margin.top}px`
-          : undefined;
-      style.marginBottom =
-        component.margin.bottom !== undefined
-          ? `${component.margin.bottom}px`
-          : undefined;
-      style.marginLeft =
-        component.margin.left !== undefined
-          ? `${component.margin.left}px`
-          : undefined;
-      style.marginRight =
-        component.margin.right !== undefined
-          ? `${component.margin.right}px`
-          : undefined;
+      if (component.margin.top    !== undefined) style.marginTop    = `${component.margin.top}px`;
+      if (component.margin.bottom !== undefined) style.marginBottom = `${component.margin.bottom}px`;
+      if (component.margin.left   !== undefined) style.marginLeft   = `${component.margin.left}px`;
+      if (component.margin.right  !== undefined) style.marginRight  = `${component.margin.right}px`;
     }
 
+    // ─── Background ───────────────────────────────────────────────────────────
     if (component.background && !isBlueprint) {
       style.backgroundColor = component.background.color;
       if (component.background.texture) {
-        // Handle texture path, assuming relative to public or needing / prefix
         const texture = component.background.texture.startsWith("/")
           ? component.background.texture
           : `/${component.background.texture}`;
-        style.backgroundImage = `url(${texture})`;
-        style.backgroundSize = "100% 100%"; // Stretch texture usually
+        style.backgroundImage  = `url(${texture})`;
+        style.backgroundSize   = "100% 100%";
         style.backgroundRepeat = "no-repeat";
       }
       if (component.background.opacity !== undefined) {
@@ -380,189 +350,158 @@ export const RenderedComponent = memo(function RenderedComponent({
       }
     }
 
+    // ─── Outline (OutlineColor + OutlineSize) ─────────────────────────────────
+    // Rendered via inset box-shadow so it doesn't affect layout dimensions.
+    if (component.outlineColor && component.outlineSize) {
+      style.boxShadow = `inset 0 0 0 ${component.outlineSize}px ${component.outlineColor}`;
+    }
+
+    // ─── FlexWeight ───────────────────────────────────────────────────────────
     if (component.flexWeight) {
       style.flex = component.flexWeight;
     }
 
+    // ─── Direction (legacy) ───────────────────────────────────────────────────
     if (component.direction) {
       style.flexDirection =
         component.direction === "Vertical" ? "column" : "row";
     }
 
+    // ─── LayoutMode ───────────────────────────────────────────────────────────
+    // Defines how THIS element arranges its CHILDREN.
     if (component.layoutMode) {
       style.display = "flex";
       switch (component.layoutMode) {
         case "Top":
-          style.flexDirection = "column";
-          style.alignItems = "center"; // "Centro topo" -> Horizontal Center
-          style.justifyContent = "flex-start"; // Vertical Top
+          // Vertical stack top→bottom. Children fill full width (stretch).
+          style.flexDirection  = "column";
+          style.alignItems     = "stretch";
+          style.justifyContent = "flex-start";
+          break;
+        case "Bottom":
+          // Vertical stack, children pinned to bottom.
+          style.flexDirection  = "column";
+          style.alignItems     = "stretch";
+          style.justifyContent = "flex-end";
           break;
         case "Left":
-          style.flexDirection = "row";
-          style.alignItems = "center"; // "Centro esquerda" -> Vertical Center
-          style.justifyContent = "flex-start"; // Horizontal Left
+          // Horizontal stack left→right. Children fill full height (stretch).
+          style.flexDirection  = "row";
+          style.alignItems     = "stretch";
+          style.justifyContent = "flex-start";
           break;
         case "Right":
-          style.flexDirection = "row";
-          style.alignItems = "center";
+          // Horizontal stack, children pinned to right edge.
+          style.flexDirection  = "row";
+          style.alignItems     = "stretch";
           style.justifyContent = "flex-end";
           break;
         case "Center":
-          style.flexDirection = "row";
-          style.alignItems = "center";
+          // Centres children horizontally.
+          style.flexDirection  = "row";
+          style.alignItems     = "center";
           style.justifyContent = "center";
           break;
         case "Middle":
-          style.flexDirection = "column";
-          style.alignItems = "center";
+          // Centres children vertically.
+          style.flexDirection  = "column";
+          style.alignItems     = "center";
           style.justifyContent = "center";
           break;
-        case "Bottom":
-          style.flexDirection = "column";
-          style.alignItems = "center";
-          style.justifyContent = "flex-end";
-          break;
-        case "TopScrolling":
-          style.flexDirection = "column";
-          style.alignItems = "center"; // "Centro topo"
-          style.justifyContent = "flex-start";
-          style.overflowY = "auto";
-          style.overflowX = "hidden";
-          break;
-        case "LeftScrolling":
-          style.flexDirection = "row";
-          style.alignItems = "center";
-          style.justifyContent = "flex-start";
-          style.overflowX = "auto";
-          style.overflowY = "hidden";
-          break;
-        case "LeftCenterWrap":
-          style.flexDirection = "row";
-          style.flexWrap = "wrap";
-          style.justifyContent = "center"; // Center pages horizontally
-          style.alignContent = "flex-start"; // Stack lines from top
-          style.alignItems = "flex-start"; // Items align to top
-          break;
         case "CenterMiddle":
-          style.flexDirection = "row";
-          style.alignItems = "center";
+          // Horizontal stack, centred both axes.
+          style.flexDirection  = "row";
+          style.alignItems     = "center";
           style.justifyContent = "center";
           break;
         case "MiddleCenter":
-          style.flexDirection = "column";
-          style.alignItems = "center";
+          // Vertical stack, centred both axes.
+          style.flexDirection  = "column";
+          style.alignItems     = "center";
           style.justifyContent = "center";
           break;
+        case "TopScrolling":
+          style.flexDirection  = "column";
+          style.alignItems     = "stretch";
+          style.justifyContent = "flex-start";
+          style.overflowY      = "auto";
+          style.overflowX      = "hidden";
+          break;
+        case "LeftScrolling":
+          style.flexDirection  = "row";
+          style.alignItems     = "stretch";
+          style.justifyContent = "flex-start";
+          style.overflowX      = "auto";
+          style.overflowY      = "hidden";
+          break;
+        case "LeftCenterWrap":
+          style.flexDirection  = "row";
+          style.flexWrap       = "wrap";
+          style.justifyContent = "center";
+          style.alignContent   = "flex-start";
+          style.alignItems     = "flex-start";
+          break;
         case "Full":
-          style.display = "block";
-          style.position = "relative";
+          // Children use Anchor for absolute positioning within this element.
+          style.display   = "block";
+          style.position  = style.position ?? "relative";
           break;
       }
     }
 
+    // ─── TextStyle ────────────────────────────────────────────────────────────
     if (component.textStyle) {
-      style.color = component.textStyle.textColor;
-      style.fontSize = component.textStyle.fontSize
-        ? `${component.textStyle.fontSize}px`
-        : undefined;
-      style.fontWeight = component.textStyle.renderBold ? "bold" : undefined;
-      style.textTransform = component.textStyle.renderUppercase
-        ? "uppercase"
-        : undefined;
-      // Map TitleCase TextAlignment to CSS textAlign
-      if (component.textStyle.alignment) {
-        style.textAlign =
-          component.textStyle.alignment.toLowerCase() as React.CSSProperties["textAlign"];
+      style.color         = component.textStyle.textColor;
+      style.fontSize      = component.textStyle.fontSize ? `${component.textStyle.fontSize}px` : undefined;
+      style.fontWeight    = component.textStyle.renderBold ? "bold" : undefined;
+      style.textTransform = component.textStyle.renderUppercase ? "uppercase" : undefined;
 
+      if (component.textStyle.alignment) {
+        style.textAlign = component.textStyle.alignment.toLowerCase() as React.CSSProperties["textAlign"];
         const align = component.textStyle.alignment;
-        style.justifyContent =
-          align === "Center"
-            ? "center"
-            : align === "Right"
-              ? "flex-end"
-              : "flex-start";
+        style.justifyContent = align === "Center" ? "center" : align === "Right" ? "flex-end" : "flex-start";
       }
 
-      // Explicit Hytale Alignment for Labels
       if (component.type === "Label") {
-        style.display = "flex";
-        style.flexDirection = "column"; // Usually labels wrap text if needed, but centering relies on flex
-        // Hytale Alignment: Start, Center, End
-
-        // Horizontal (TextAlign + AlignItems for Flex)
-        if (component.textStyle.horizontalAlignment) {
-          const hAlign = component.textStyle.horizontalAlignment;
-          style.alignItems =
-            hAlign === "Center"
-              ? "center"
-              : hAlign === "End"
-                ? "flex-end"
-                : "flex-start";
-          style.textAlign =
-            hAlign === "Center"
-              ? "center"
-              : hAlign === "End"
-                ? "right"
-                : "left";
-        }
-
-        // Vertical (JustifyContent for Flex Column)
-        if (component.textStyle.verticalAlignment) {
-          const vAlign = component.textStyle.verticalAlignment;
-          style.justifyContent =
-            vAlign === "Center"
-              ? "center"
-              : vAlign === "End"
-                ? "flex-end"
-                : "flex-start";
-        }
+        if (!style.display) style.display = "flex";
+        style.flexDirection = "column";
+        const hAlign = component.textStyle.horizontalAlignment || "Start";
+        const vAlign = component.textStyle.verticalAlignment   || "Start";
+        style.alignItems     = hAlign === "Center" ? "center" : hAlign === "End" ? "flex-end" : "flex-start";
+        style.justifyContent = vAlign === "Center" ? "center" : vAlign === "End" ? "flex-end" : "flex-start";
+        style.textAlign      = hAlign === "Center" ? "center" : hAlign === "End" ? "right" : "left";
       }
     }
 
-    // Force Linear Layout for Group and ScrollArea
+    // ─── Group / ScrollArea defaults ──────────────────────────────────────────
     if (component.type === "Group" || component.type === "ScrollArea") {
-      style.display = "flex";
-      // Default to row (Horizontal) for Group, column for others if not specified
-      if (!style.flexDirection) {
-        style.flexDirection = component.type === "Group" ? "row" : "column";
+      if (!style.display) {
+        style.display = "flex";
+        if (!style.flexDirection) style.flexDirection = "row";
       }
-
-      // Root Element Default Alignment (if not specified by LayoutMode)
-      if (!parentId && !component.layoutMode) {
-        style.justifyContent = "center";
-        style.alignItems = "center";
-      }
-
       if (component.type === "ScrollArea") {
         style.overflowY = "auto";
         style.overflowX = "hidden";
       }
     }
 
-    // Explicitly Center Content for Buttons (as LayoutMode was removed)
-    // Explicitly Center Content for Buttons (simulating Hytale native behavior)
+    // ─── Button content centering ─────────────────────────────────────────────
     if (["Button", "CancelButton"].includes(component.type)) {
-      style.display = "flex";
-      style.flexDirection = "column";
+      style.display        = "flex";
+      style.flexDirection  = "column";
       style.justifyContent = "center";
-      style.alignItems = "center";
-      style.textAlign = "center";
+      style.alignItems     = "center";
+      style.textAlign      = "center";
     }
 
-    // Default to Full Width for all components if not explicitly set
-    if (!style.width && !parentId) {
-      style.width = "100%";
-    } else if (!style.width) {
+    // ─── Default width for non-absolute elements ──────────────────────────────
+    if (!style.width && style.position !== "absolute") {
       style.width = "100%";
     }
 
-    // Default "Fill Space" behavior for Container types if no explicit height/flex is set
-    // This matches the "occupy everything" requirement for parent elements
+    // ─── Default flexGrow for container children ──────────────────────────────
     const isContainerType = [
-      "Group",
-      "Panel",
-      "DecoratedContainer",
-      "ScrollArea",
+      "Group", "Panel", "DecoratedContainer", "ScrollArea",
     ].includes(component.type);
 
     if (
@@ -571,27 +510,27 @@ export const RenderedComponent = memo(function RenderedComponent({
       !style.height &&
       !style.flex &&
       !style.flexGrow &&
-      !style.position
+      style.position !== "absolute"
     ) {
       style.flexGrow = 1;
     }
 
-    // Ensure empty containers are visible and droppable in Blueprint mode
+    // ─── Blueprint min-size for empty containers ──────────────────────────────
     if (
       isBlueprint &&
       isContainerType &&
       (!component.children || component.children.length === 0)
     ) {
       if (!style.minHeight && !style.height) style.minHeight = "40px";
-      if (!style.minWidth && !style.width) style.minWidth = "40px";
+      if (!style.minWidth  && !style.width)  style.minWidth  = "40px";
     }
 
-    // Special Case: Labels inside Buttons should fill the button to ensure centering works
+    // ─── Labels inside Buttons fill the button ────────────────────────────────
     if (
       component.type === "Label" &&
       ["Button", "CancelButton"].includes(parentType || "")
     ) {
-      style.width = "100%";
+      style.width    = "100%";
       style.flexGrow = 1;
     }
 
@@ -638,7 +577,7 @@ export const RenderedComponent = memo(function RenderedComponent({
       blueprintClass,
       selectedClass,
     ),
-    style: getComponentStyle(),
+    style: getComponentStyle(parentLayoutMode ?? undefined),
     onClick: handleClick,
     // Disable dragging if inside a button, so the button handles the drag
     draggable: !isLockedInParent && !component.isLocked,
@@ -784,6 +723,7 @@ export const RenderedComponent = memo(function RenderedComponent({
               index={i}
               parentId={component.id}
               parentType={component.type}
+              parentLayoutMode={component.layoutMode}
             />
           ))}
         </>,
@@ -1123,6 +1063,7 @@ export const RenderedComponent = memo(function RenderedComponent({
               index={i}
               parentId={component.id}
               parentType={component.type}
+              parentLayoutMode={component.layoutMode}
             />
           ))}
         </>,
@@ -1143,6 +1084,7 @@ export const RenderedComponent = memo(function RenderedComponent({
               index={i}
               parentId={component.id}
               parentType={component.type}
+              parentLayoutMode={component.layoutMode}
             />
           ))}
         </>,
@@ -1204,6 +1146,7 @@ export const RenderedComponent = memo(function RenderedComponent({
               index={i}
               parentId={component.id}
               parentType={component.type}
+              parentLayoutMode={component.layoutMode}
             />
           ))}
         </>,
