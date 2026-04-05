@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "hytale-ui-studio",
+  "productName": "Hytale UI Studio",
   "version": "0.1.0",
   "identifier": "com.cookie.uistudio",
   "build": {
