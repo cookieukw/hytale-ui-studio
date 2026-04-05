@@ -4,6 +4,7 @@ import { generateId } from "../tree-utils";
 import { parseAndMapCode } from "../hytale-parser";
 import JSZip from "jszip";
 import type { UIFile } from "../hytale-types";
+import { isTauri } from "../tauri-utils";
 
 export const createProjectSlice: StateCreator<
   EditorStore,
@@ -143,77 +144,120 @@ export const createProjectSlice: StateCreator<
 
   exportProject: async () => {
     const state = get();
-    const project = state.projects.find(p => p.id === state.currentProjectId);
+    const project = state.projects.find((p) => p.id === state.currentProjectId);
     if (!project) return;
 
     const zip = new JSZip();
     const projectFolder = zip.folder(project.name);
 
     const { componentsToCode } = await import("../tree-utils");
-    
-    project.files.forEach(file => {
-        const code = componentsToCode(file.components, 0, file.imports);
-        projectFolder?.file(file.name, code);
+
+    project.files.forEach((file) => {
+      const code = componentsToCode(file.components, 0, file.imports);
+      projectFolder?.file(file.name, code);
     });
 
     const content = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(content);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${project.name}.zip`;
-    link.click();
-    URL.revokeObjectURL(url);
+
+    if (isTauri()) {
+      try {
+        const { save } = await import("@tauri-apps/plugin-dialog");
+        const { writeFile } = await import("@tauri-apps/plugin-fs");
+        const filePath = await save({
+          defaultPath: `${project.name}.zip`,
+          filters: [{ name: "ZIP Archive", extensions: ["zip"] }],
+        });
+
+        if (filePath) {
+          const buffer = await content.arrayBuffer();
+          await writeFile(filePath, new Uint8Array(buffer));
+        }
+      } catch (e) {
+        console.error("Tauri export failed", e);
+      }
+    } else {
+      const url = URL.createObjectURL(content);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${project.name}.zip`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
   },
 
-  importProject: async (zipFile: File) => {
-      try {
-          const zip = await JSZip.loadAsync(zipFile);
-          const files: UIFile[] = [];
-          
-          const filePromises: Promise<void>[] = [];
-          
-          zip.forEach((relativePath, file) => {
-              if (relativePath.endsWith(".ui")) {
-                  const promise = file.async("string").then(content => {
-                      const { components, imports } = parseAndMapCode(content);
-                      files.push({
-                          id: generateId(),
-                          name: relativePath.split("/").pop() || "unnamed.ui",
-                          components,
-                          imports,
-                          lastModified: Date.now()
-                      });
-                  });
-                  filePromises.push(promise);
-              }
-          });
+  importProject: async (zipFile?: File) => {
+    try {
+      let finalFile: any = zipFile;
 
-          await Promise.all(filePromises);
+      if (!finalFile && isTauri()) {
+        const { open } = await import("@tauri-apps/plugin-dialog");
+        const { readFile } = await import("@tauri-apps/plugin-fs");
+        const filePath = await open({
+          multiple: false,
+          filters: [{ name: "ZIP Archive", extensions: ["zip"] }],
+        });
 
-          if (files.length > 0) {
-              const projectId = generateId();
-              const newProject = {
-                  id: projectId,
-                  name: zipFile.name.replace(".zip", ""),
-                  files,
-                  activeFileId: files[0].id,
-                  lastModified: Date.now(),
-              };
-
-              set((state) => ({
-                  projects: [...state.projects, newProject],
-                  currentProjectId: projectId,
-                  currentFileId: files[0].id,
-                  components: files[0].components,
-                  imports: files[0].imports,
-                  selectedId: null,
-                  history: [files[0].components],
-                  historyIndex: 0
-              }));
-              get().syncCodeFromComponents();
-          }
-      } catch (e) {
-          console.error("Failed to import ZIP", e);
+        if (filePath && typeof filePath === "string") {
+          const content = await readFile(filePath);
+          finalFile = new File(
+            [content],
+            filePath.split(/[\/\\]/).pop() || "project.zip",
+            { type: "application/zip" },
+          );
+        } else {
+          return;
+        }
       }
+
+      if (!finalFile) return;
+
+      const zip = await JSZip.loadAsync(finalFile);
+      const files: UIFile[] = [];
+
+      const filePromises: Promise<void>[] = [];
+
+      zip.forEach((relativePath, file) => {
+        if (relativePath.endsWith(".ui")) {
+          const promise = file.async("string").then((content) => {
+            const { components, imports } = parseAndMapCode(content);
+            files.push({
+              id: generateId(),
+              name: relativePath.split("/").pop() || "unnamed.ui",
+              components,
+              imports,
+              lastModified: Date.now(),
+            });
+          });
+          filePromises.push(promise);
+        }
+      });
+
+      await Promise.all(filePromises);
+
+      if (files.length > 0) {
+        const projectId = generateId();
+        const newProject = {
+          id: projectId,
+          name: (finalFile as File).name.replace(".zip", ""),
+          files,
+          activeFileId: files[0].id,
+          lastModified: Date.now(),
+        };
+
+        set((state) => ({
+          projects: [...state.projects, newProject],
+          currentProjectId: projectId,
+          currentFileId: files[0].id,
+          components: files[0].components,
+          imports: files[0].imports,
+          selectedId: null,
+          history: [files[0].components],
+          historyIndex: 0,
+        }));
+        get().syncCodeFromComponents();
+      }
+    } catch (e) {
+      console.error("Failed to import ZIP", e);
+    }
   },
 });

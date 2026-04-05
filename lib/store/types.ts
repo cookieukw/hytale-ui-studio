@@ -76,7 +76,7 @@ export interface EditorStore extends EditorState {
 
   // Multi-File Export (ZIP)
   exportProject: () => Promise<void>;
-  importProject: (file: File) => Promise<void>;
+  importProject: (file?: File) => Promise<void>;
 
   showFileExplorer: boolean;
   setShowFileExplorer: (show: boolean) => void;
