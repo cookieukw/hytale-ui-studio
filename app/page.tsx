@@ -1,4 +1,3 @@
-"use client";
 
 import { EditorToolbar } from "@/components/editor/toolbar";
 import {
