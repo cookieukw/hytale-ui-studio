@@ -115,6 +115,68 @@ export function EditorCanvas() {
     return () => observer.disconnect();
   }, [fitToScreen, deviceSize, zoom, setZoom]); // depend on zoom to check diff, but be careful
 
+  // Wheel zoom and pan logic
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+    let startScrollLeft = 0;
+    let startScrollTop = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault(); // Always prevent default scroll
+      // Slower zoom for trackpads (which send small deltaY), faster for mice
+      const isTrackpad = Math.abs(e.deltaY) < 50;
+      const zoomStep = isTrackpad ? 2 : 10;
+      const zoomDelta = e.deltaY > 0 ? -zoomStep : zoomStep;
+      
+      const currentZoom = useEditorStore.getState().zoom;
+      useEditorStore.getState().setZoom(currentZoom + zoomDelta);
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      // Middle mouse button (1) or Alt+Left Click to pan
+      if (e.button === 1 || (e.button === 0 && e.altKey)) {
+        isPanning = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startScrollLeft = container.scrollLeft;
+        startScrollTop = container.scrollTop;
+        container.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isPanning) return;
+      e.preventDefault();
+      container.scrollLeft = startScrollLeft - (e.clientX - startX);
+      container.scrollTop = startScrollTop - (e.clientY - startY);
+    };
+
+    const handlePointerUp = () => {
+      if (isPanning) {
+        isPanning = false;
+        container.style.cursor = '';
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    container.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+      container.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, []);
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
@@ -239,7 +301,7 @@ export function EditorCanvas() {
     >
       <div
         ref={containerRef}
-        className="relative flex flex-1 items-center justify-center overflow-auto p-4"
+        className="relative flex flex-1 items-center justify-center overflow-hidden p-4"
         onClick={handleCanvasClick}
         style={{
           backgroundImage: showGrid
