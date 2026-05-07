@@ -566,7 +566,7 @@ export const RenderedComponent = memo(function RenderedComponent({
 
   const selectedClass = isSelected
     ? cn(
-        "ring-2 ring-primary",
+        "ring-2 ring-primary z-10",
         !parentId ? "ring-inset" : "ring-offset-1 ring-offset-canvas",
       )
     : "";
@@ -691,7 +691,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         >
           {component.placeholderText || "Enter text..."}
         </span>,
-        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 flex items-center h-full overflow-hidden",
+        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 flex items-center overflow-hidden",
       );
 
     case "NumberField":
@@ -705,7 +705,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         >
           {component.value ?? 0}
         </span>,
-        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 flex items-center h-full overflow-hidden",
+        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 flex items-center overflow-hidden",
       );
 
     case "Button":
