@@ -33,7 +33,7 @@ export function StyleTab({
 
   if (isButtonWithLabel) {
     targetChildLabel = initialComponent.children?.find(
-      (c) => c.type === "Label" && c.isDeletable === false,
+      (c) => c.type === "Label",
     );
     if (targetChildLabel) {
       component = {
