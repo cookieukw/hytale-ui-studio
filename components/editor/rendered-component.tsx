@@ -685,26 +685,27 @@ export const RenderedComponent = memo(function RenderedComponent({
       return renderWithIndicators(
         <span
           className={cn(
-            "text-sm",
             isBlueprint ? "text-primary/70" : "text-muted-foreground",
           )}
+          style={getTextStyle()}
         >
           {component.placeholderText || "Enter text..."}
         </span>,
-        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 px-3 flex items-center h-full",
+        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 flex items-center h-full overflow-hidden",
       );
 
     case "NumberField":
       return renderWithIndicators(
         <span
           className={cn(
-            "font-mono text-sm",
+            "font-mono",
             isBlueprint ? "text-primary/70" : "text-foreground",
           )}
+          style={getTextStyle()}
         >
           {component.value ?? 0}
         </span>,
-        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 px-3 flex items-center h-full",
+        "rounded-sm border-b-2 border-[#fbbf24] bg-black/20 flex items-center h-full overflow-hidden",
       );
 
     case "Button":

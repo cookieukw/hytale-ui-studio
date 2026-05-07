@@ -554,8 +554,12 @@ export function componentsToCode(
         }
       } else {
         // Standard Element export
-        // Label also uses Style: (...) syntax now per user request
-        if (comp.type === "Label") {
+        // Label, TextField, NumberField use Style: (...) syntax
+        if (
+          comp.type === "Label" ||
+          comp.type === "TextField" ||
+          comp.type === "NumberField"
+        ) {
           const parts: string[] = [];
           if (comp.textStyle.fontSize)
             parts.push(`FontSize: ${comp.textStyle.fontSize}`);
@@ -566,15 +570,22 @@ export function componentsToCode(
           if (comp.textStyle.renderBold) parts.push(`RenderBold: true`);
           if (comp.textStyle.renderUppercase)
             parts.push(`RenderUppercase: true`);
-          // Label does NOT have generic Alignment option per user request
-          if (comp.textStyle.horizontalAlignment)
-            parts.push(
-              `HorizontalAlignment: ${comp.textStyle.horizontalAlignment}`,
-            );
-          if (comp.textStyle.verticalAlignment)
-            parts.push(
-              `VerticalAlignment: ${comp.textStyle.verticalAlignment}`,
-            );
+
+          if (comp.type === "Label") {
+            // Label uses HorizontalAlignment/VerticalAlignment
+            if (comp.textStyle.horizontalAlignment)
+              parts.push(
+                `HorizontalAlignment: ${comp.textStyle.horizontalAlignment}`,
+              );
+            if (comp.textStyle.verticalAlignment)
+              parts.push(
+                `VerticalAlignment: ${comp.textStyle.verticalAlignment}`,
+              );
+          } else {
+            // TextField and NumberField use generic Alignment
+            if (comp.textStyle.alignment)
+              parts.push(`Alignment: ${comp.textStyle.alignment}`);
+          }
 
           if (parts.length > 0) {
             code += `${spaces}  Style: (${parts.join(", ")});\n`;
