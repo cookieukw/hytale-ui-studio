@@ -1009,5 +1009,17 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     }
   }
 
+  // Post-process internal children
+  if (
+    ["Button", "SecondaryButton", "TertiaryButton", "CancelButton"].includes(
+      component.type,
+    )
+  ) {
+    const labelChild = component.children.find((c: any) => c.type === "Label");
+    if (labelChild) {
+      labelChild.isDeletable = false;
+    }
+  }
+
   return component;
 }
