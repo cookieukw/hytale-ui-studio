@@ -33,7 +33,7 @@ export function StyleTab({
 
   if (isButtonWithLabel) {
     targetChildLabel = initialComponent.children?.find(
-      (c) => c.type === "Label" && c.isDeletable === false,
+      (c) => c.type === "Label",
     );
     if (targetChildLabel) {
       component = {
@@ -259,23 +259,21 @@ export function StyleTab({
 
       {hasTextStyle && (
         <CollapsibleSection title="Typography">
-          {!["Button", "CancelButton"].includes(component.type) && (
-            <FieldRow label="Font Size">
-              <DebouncedInput
-                type="number"
-                value={component.textStyle?.fontSize || 14}
-                onChange={(val) =>
-                  onUpdate({
-                    textStyle: {
-                      ...component.textStyle,
-                      fontSize: Number(val),
-                    },
-                  })
-                }
-                className="h-7 text-xs"
-              />
-            </FieldRow>
-          )}
+          <FieldRow label="Font Size">
+            <DebouncedInput
+              type="number"
+              value={component.textStyle?.fontSize || 14}
+              onChange={(val) =>
+                onUpdate({
+                  textStyle: {
+                    ...component.textStyle,
+                    fontSize: Number(val),
+                  },
+                })
+              }
+              className="h-7 text-xs"
+            />
+          </FieldRow>
 
           <FieldRow label="Color">
             <div className="flex gap-2">
@@ -307,7 +305,7 @@ export function StyleTab({
             </div>
           </FieldRow>
 
-          {component.type === "Label" ? (
+          {component.type === "Label" || ["Button", "CancelButton"].includes(component.type) ? (
             <>
               <FieldRow label="H. Align">
                 <Select

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorStore } from "@/lib/editor-store";
 import { ProjectItem } from "./project-item";
+import { isTauri } from "@/lib/tauri-utils";
 
 export function ProjectsTab() {
   const projects = useEditorStore((s) => s.projects);
@@ -16,6 +17,7 @@ export function ProjectsTab() {
   const renameProject = useEditorStore((s) => s.renameProject);
   const duplicateProject = useEditorStore((s) => s.duplicateProject);
   const importFromUI = useEditorStore((s) => s.importFromUI);
+  const importProject = useEditorStore((s) => s.importProject);
 
   const [search, setSearch] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -32,21 +34,55 @@ export function ProjectsTab() {
     setNewProjectName("");
   };
 
-  const handleOpenLocal = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".ui";
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const text = await file.text();
-        importFromUI(text);
-        // The imported project will have no ID in state unless manually named
-        createProject(file.name.replace(".ui", ""));
-        importFromUI(text);
+  const handleOpenLocal = async () => {
+    if (isTauri()) {
+      try {
+        const { open } = await import("@tauri-apps/plugin-dialog");
+        const { readTextFile, readFile } = await import("@tauri-apps/plugin-fs");
+        const filePath = await open({
+          multiple: false,
+          filters: [
+            { name: "Hytale UI or ZIP", extensions: ["zip", "ui"] },
+          ],
+        });
+        
+        if (filePath && typeof filePath === "string") {
+          if (filePath.endsWith(".zip")) {
+            const content = await readFile(filePath);
+            const finalFile = new File(
+              [content],
+              filePath.split(/[\/\\]/).pop() || "project.zip",
+              { type: "application/zip" },
+            );
+            importProject(finalFile);
+          } else if (filePath.endsWith(".ui")) {
+            const content = await readTextFile(filePath);
+            const name = filePath.split(/[\/\\]/).pop() || "Imported.ui";
+            createProject(name.replace(".ui", ""));
+            importFromUI(content);
+          }
+        }
+      } catch (e) {
+        console.error(e);
       }
-    };
-    input.click();
+    } else {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".zip,.ui";
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          if (file.name.endsWith(".zip")) {
+            importProject(file);
+          } else {
+            const text = await file.text();
+            createProject(file.name.replace(".ui", ""));
+            importFromUI(text);
+          }
+        }
+      };
+      input.click();
+    }
   };
 
   return (

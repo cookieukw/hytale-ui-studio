@@ -115,6 +115,68 @@ export function EditorCanvas() {
     return () => observer.disconnect();
   }, [fitToScreen, deviceSize, zoom, setZoom]); // depend on zoom to check diff, but be careful
 
+  // Wheel zoom and pan logic
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+    let startScrollLeft = 0;
+    let startScrollTop = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault(); // Always prevent default scroll
+      // Slower zoom for trackpads (which send small deltaY), faster for mice
+      const isTrackpad = Math.abs(e.deltaY) < 50;
+      const zoomStep = isTrackpad ? 2 : 10;
+      const zoomDelta = e.deltaY > 0 ? -zoomStep : zoomStep;
+      
+      const currentZoom = useEditorStore.getState().zoom;
+      useEditorStore.getState().setZoom(currentZoom + zoomDelta);
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      // Middle mouse button (1) or Alt+Left Click to pan
+      if (e.button === 1 || (e.button === 0 && e.altKey)) {
+        isPanning = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startScrollLeft = container.scrollLeft;
+        startScrollTop = container.scrollTop;
+        container.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isPanning) return;
+      e.preventDefault();
+      container.scrollLeft = startScrollLeft - (e.clientX - startX);
+      container.scrollTop = startScrollTop - (e.clientY - startY);
+    };
+
+    const handlePointerUp = () => {
+      if (isPanning) {
+        isPanning = false;
+        container.style.cursor = '';
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    container.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+      container.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, []);
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
@@ -226,6 +288,9 @@ export function EditorCanvas() {
 
   const isBlueprint = viewMode === "Blueprint";
 
+  // The scale factor for the canvas preview
+  const scale = zoom / 100;
+
   return (
     <div
       className="flex h-full flex-col overflow-hidden bg-canvas relative"
@@ -236,7 +301,7 @@ export function EditorCanvas() {
     >
       <div
         ref={containerRef}
-        className="relative flex flex-1 items-center justify-center overflow-auto p-4"
+        className="relative flex flex-1 items-center justify-center overflow-hidden p-4"
         onClick={handleCanvasClick}
         style={{
           backgroundImage: showGrid
@@ -246,29 +311,36 @@ export function EditorCanvas() {
           backgroundSize: showGrid ? "20px 20px" : undefined,
         }}
       >
+        {/*
+          Outer wrapper: sized to the scaled device resolution so the scroll
+          container knows how much space to reserve. The inner canvas is
+          rendered at its true pixel dimensions and scaled via CSS transform.
+        */}
         <div
-          ref={canvasRef}
-          className={cn(
-            "relative  shrink-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
-            isDragOver && "border-primary border-dashed",
-          )}
           style={{
-            width: deviceSize.width * (zoom / 130),
-            height: deviceSize.height * (zoom / 130),
+            width: deviceSize.width * scale,
+            height: deviceSize.height * scale,
+            flexShrink: 0,
+            position: "relative",
           }}
-          onDragOver={handleDragOver}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={handleCanvasClick}
         >
           <div
-            className="relative h-full w-full origin-top-left"
+            ref={canvasRef}
+            className={cn(
+              "absolute top-0 left-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
+              isDragOver && "border-primary border-dashed",
+            )}
             style={{
-              transform: `scale(${zoom / 100})`,
-              width: `${100 / (zoom / 100)}%`,
-              height: `${100 / (zoom / 100)}%`,
+              width: deviceSize.width,
+              height: deviceSize.height,
+              transformOrigin: "top left",
+              transform: `scale(${scale})`,
             }}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleCanvasClick}
           >
             {components.length === 0 ||
             components.every((c) => c.isVisible === false) ? (

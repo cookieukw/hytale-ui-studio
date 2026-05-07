@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { isTauri } from "@/lib/tauri-utils";
 
 import {
   Undo2,
@@ -82,16 +83,20 @@ export function EditorToolbar() {
   };
 
   const handleImportZip = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".zip";
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        importProject(file);
-      }
-    };
-    input.click();
+    if (isTauri()) {
+      importProject();
+    } else {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".zip";
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          importProject(file);
+        }
+      };
+      input.click();
+    }
   };
 
   const viewModeOptions: {
