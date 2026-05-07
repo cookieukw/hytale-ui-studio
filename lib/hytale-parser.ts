@@ -712,6 +712,31 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
       continue;
     }
 
+    if (key === "Margin" && typeof value === "object") {
+      if (!component.margin) component.margin = {};
+      if (value.Full !== undefined) {
+        const val = Number(value.Full);
+        component.margin = { top: val, bottom: val, left: val, right: val };
+      }
+      if (value.Horizontal !== undefined) {
+        const val = Number(value.Horizontal);
+        component.margin.left = val;
+        component.margin.right = val;
+      }
+      if (value.Vertical !== undefined) {
+        const val = Number(value.Vertical);
+        component.margin.top = val;
+        component.margin.bottom = val;
+      }
+      if (value.Top !== undefined) component.margin.top = Number(value.Top);
+      if (value.Bottom !== undefined)
+        component.margin.bottom = Number(value.Bottom);
+      if (value.Left !== undefined) component.margin.left = Number(value.Left);
+      if (value.Right !== undefined)
+        component.margin.right = Number(value.Right);
+      continue;
+    }
+
     // 2. Standard Properties
     if (key === "Format" && typeof value === "object") {
       if (value.MaxDecimalPlaces !== undefined)
@@ -729,6 +754,10 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     if (key === "Text") {
       // Note: Text is not a valid property for DropdownBox, but is valid for Label, Button, etc.
       component.text = String(value);
+      continue;
+    }
+    if (key === "PlaceholderText") {
+      component.placeholderText = String(value);
       continue;
     }
     if (key === "Background") {
@@ -807,7 +836,8 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
 
       if (!component.textStyle) component.textStyle = {};
       if (value.FontSize) component.textStyle.fontSize = Number(value.FontSize);
-      if (value.Color) component.textStyle.textColor = String(value.Color);
+      if (value.TextColor) component.textStyle.textColor = String(value.TextColor);
+      else if (value.Color) component.textStyle.textColor = String(value.Color);
       if (value.RenderBold)
         component.textStyle.renderBold =
           value.RenderBold === true || value.RenderBold === "true";

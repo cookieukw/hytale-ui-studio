@@ -348,6 +348,28 @@ export function componentsToCode(
       }
     }
 
+    // Margin: (Key: Val, ...)
+    if (comp.margin) {
+      const { top, bottom, left, right } = comp.margin;
+      if (
+        top !== undefined &&
+        top === bottom &&
+        top === left &&
+        top === right
+      ) {
+        code += `${spaces}  Margin: (Full: ${top});\n`;
+      } else {
+        const parts: string[] = [];
+        if (top !== undefined) parts.push(`Top: ${top}`);
+        if (bottom !== undefined) parts.push(`Bottom: ${bottom}`);
+        if (left !== undefined) parts.push(`Left: ${left}`);
+        if (right !== undefined) parts.push(`Right: ${right}`);
+        if (parts.length > 0) {
+          code += `${spaces}  Margin: (${parts.join(", ")});\n`;
+        }
+      }
+    }
+
     // LayoutMode
     const isButton = [
       "Button",
