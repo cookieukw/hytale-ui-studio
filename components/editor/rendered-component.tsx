@@ -662,7 +662,6 @@ export const RenderedComponent = memo(function RenderedComponent({
           : undefined,
         // Don't enforce a fixed height — let the label grow with font size
         height: undefined,
-        width: "100%",
         overflow: "visible",
       };
       return renderWithIndicators(
