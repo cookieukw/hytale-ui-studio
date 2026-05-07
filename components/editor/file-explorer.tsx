@@ -24,6 +24,7 @@ export function FileExplorer() {
   const deleteFile = useEditorStore((state) => state.deleteFile);
   const renameFile = useEditorStore((state) => state.renameFile);
   const duplicateFile = useEditorStore((state) => state.duplicateFile);
+  const importFromUI = useEditorStore((state) => state.importFromUI);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
@@ -38,6 +39,42 @@ export function FileExplorer() {
       createFile(newFileName.trim());
       setNewFileName("");
       setIsCreateDialogOpen(false);
+    }
+  };
+
+  const handleImportFile = async () => {
+    // Import tauri conditionally or handle via standard input
+    try {
+      const { isTauri } = await import("@/lib/tauri-utils");
+      if (isTauri()) {
+        const { open } = await import("@tauri-apps/plugin-dialog");
+        const { readTextFile } = await import("@tauri-apps/plugin-fs");
+        const filePath = await open({
+          multiple: false,
+          filters: [{ name: "Hytale UI", extensions: ["ui"] }],
+        });
+        if (filePath && typeof filePath === "string") {
+          const content = await readTextFile(filePath);
+          const name = filePath.split(/[\/\\]/).pop() || "Imported.ui";
+          createFile(name);
+          importFromUI(content);
+        }
+      } else {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".ui";
+        input.onchange = async (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) {
+            const text = await file.text();
+            createFile(file.name);
+            importFromUI(text);
+          }
+        };
+        input.click();
+      }
+    } catch (e) {
+      console.error("Failed to import file", e);
     }
   };
 
@@ -63,14 +100,26 @@ export function FileExplorer() {
           <FileCode className="h-4 w-4 text-primary" />
           Workspace
         </h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 hover:bg-primary/10 hover:text-primary transition-colors"
-          onClick={() => setIsCreateDialogOpen(true)}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 hover:bg-primary/10 hover:text-primary transition-colors"
+            onClick={handleImportFile}
+            title="Import .ui file"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 hover:bg-primary/10 hover:text-primary transition-colors"
+            onClick={() => setIsCreateDialogOpen(true)}
+            title="New file"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1">

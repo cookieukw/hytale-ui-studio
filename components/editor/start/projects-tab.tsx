@@ -34,9 +34,37 @@ export function ProjectsTab() {
     setNewProjectName("");
   };
 
-  const handleOpenLocal = () => {
+  const handleOpenLocal = async () => {
     if (isTauri()) {
-      importProject();
+      try {
+        const { open } = await import("@tauri-apps/plugin-dialog");
+        const { readTextFile, readFile } = await import("@tauri-apps/plugin-fs");
+        const filePath = await open({
+          multiple: false,
+          filters: [
+            { name: "Hytale UI or ZIP", extensions: ["zip", "ui"] },
+          ],
+        });
+        
+        if (filePath && typeof filePath === "string") {
+          if (filePath.endsWith(".zip")) {
+            const content = await readFile(filePath);
+            const finalFile = new File(
+              [content],
+              filePath.split(/[\/\\]/).pop() || "project.zip",
+              { type: "application/zip" },
+            );
+            importProject(finalFile);
+          } else if (filePath.endsWith(".ui")) {
+            const content = await readTextFile(filePath);
+            const name = filePath.split(/[\/\\]/).pop() || "Imported.ui";
+            createProject(name.replace(".ui", ""));
+            importFromUI(content);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
     } else {
       const input = document.createElement("input");
       input.type = "file";
@@ -48,7 +76,6 @@ export function ProjectsTab() {
             importProject(file);
           } else {
             const text = await file.text();
-            importFromUI(text);
             createProject(file.name.replace(".ui", ""));
             importFromUI(text);
           }
