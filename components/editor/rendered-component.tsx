@@ -573,7 +573,8 @@ export const RenderedComponent = memo(function RenderedComponent({
 
   const baseProps = {
     className: cn(
-      "cursor-pointer transition-all duration-300 ease-in-out",
+      "transition-all duration-300 ease-in-out",
+      isLockedInParent ? "pointer-events-none" : "cursor-pointer",
       blueprintClass,
       selectedClass,
     ),
