@@ -1,5 +1,5 @@
 [package]
-name = "Hytale UI Studio"
+name = "hytale-ui-studio"
 version = "1.0.0"
 description = "Hytale UI Studio is a powerful, web-based visual editor designed specifically for creating and managing user interfaces for Hytale. Built with modern web technologies, it provides an intuitive drag-and-drop experience coupled with a real-time code editor and live preview."
 authors = ["cookieukw"]
