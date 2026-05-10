@@ -54,7 +54,29 @@ Hytale UI Studio is a powerful, web-based visual editor designed specifically fo
    pnpm dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## 📦 Building
+
+You can build Hytale UI Studio for Linux and Windows.
+
+### 🐧 Build for Linux (Local)
+To build the application on your Linux machine, run the provided script:
+
+```bash
+./scripts/build.sh
+```
+
+The output will be in `src-tauri/target/release/bundle/`.
+
+### 🪟 Build for Windows & Linux (CI/CD)
+The project is configured with **GitHub Actions**. Every time you push to the `main` branch:
+1. It automatically builds for both Windows and Linux.
+2. You can download the binaries from the **Actions** tab on GitHub.
+
+To create an official **Release**:
+1. Push a tag starting with `v` (e.g., `git tag v1.0.0 && git push --tags`).
+2. GitHub will automatically create a draft release with all the installers attached.
 
 ## 📄 License
 

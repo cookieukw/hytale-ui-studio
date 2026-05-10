@@ -1,6 +1,6 @@
 {
   "name": "hytale-ui-studio",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "author": "cookie",
   "license": "GPL-3.0-or-later",
@@ -9,7 +9,10 @@
     "build": "vite build",
     "dev": "vite",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:build": "tauri build",
+    "tauri:dev": "tauri dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
