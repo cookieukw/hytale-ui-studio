@@ -264,6 +264,8 @@ export const RenderedComponent = memo(function RenderedComponent({
       const hasFull   = a.full   === true;
 
       const hasAnyEdge = hasTop || hasBottom || hasLeft || hasRight;
+      const isAbsolute = hasAnyEdge && (parentLayoutMode === "Full" || !parentLayoutMode);
+      const isCollapsingStackAbsolute = hasAnyEdge && (parentLayoutMode && parentLayoutMode !== "Full");
 
       if (hasFull) {
         // Anchor: (Full: N) — fill parent with no margins
@@ -275,7 +277,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         // If size is also specified, honour it (rare but valid per spec)
         if (hasWidth)  { style.width  = typeof a.width  === "string" ? a.width  : `${a.width}px`;  delete style.left; delete style.right;  }
         if (hasHeight) { style.height = typeof a.height === "string" ? a.height : `${a.height}px`; delete style.top;  delete style.bottom; }
-      } else if (hasAnyEdge) {
+      } else if (isAbsolute) {
         style.position = "absolute";
         if (hasTop)    style.top    = `${a.top}px`;
         if (hasBottom) style.bottom = `${a.bottom}px`;
@@ -288,6 +290,17 @@ export const RenderedComponent = memo(function RenderedComponent({
         if (hasLeft && hasRight && !hasWidth) delete style.width;
         // Top+Bottom without Height → vertical stretch
         if (hasTop && hasBottom && !hasHeight) delete style.height;
+        
+        // Hytale layout behavior: if absolute child has no horizontal anchors, it centers horizontally
+        if (!hasLeft && !hasRight) {
+          style.left = "50%";
+          style.transform = "translateX(-50%)";
+        }
+      } else if (isCollapsingStackAbsolute) {
+        // Inside a stacking layout, children with absolute anchors collapse and overlap in Hytale
+        style.position = "absolute";
+        if (hasWidth)  style.width  = typeof a.width  === "string" ? a.width  : `${a.width}px`;
+        if (hasHeight) style.height = typeof a.height === "string" ? a.height : `${a.height}px`;
       } else {
         // Widget-sized: only Width/Height, flows normally
         style.position = "relative";

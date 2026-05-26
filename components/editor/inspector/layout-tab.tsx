@@ -18,9 +18,10 @@ interface LayoutTabProps {
   component: HytaleComponent;
   onUpdate: (updates: Partial<HytaleComponent>) => void;
   isRoot: boolean;
+  parentLayoutMode?: string | null;
 }
 
-export function LayoutTab({ component, onUpdate, isRoot }: LayoutTabProps) {
+export function LayoutTab({ component, onUpdate, isRoot, parentLayoutMode }: LayoutTabProps) {
   const allLayoutModes: LayoutMode[] = [
     "Top",
     "Bottom",
@@ -49,6 +50,7 @@ export function LayoutTab({ component, onUpdate, isRoot }: LayoutTabProps) {
           component={component}
           onUpdate={onUpdate}
           disabled={isRoot}
+          parentLayoutMode={parentLayoutMode}
         />
       </CollapsibleSection>
 

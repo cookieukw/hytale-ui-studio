@@ -29,6 +29,7 @@ import { LayoutTab } from "./inspector/layout-tab";
 import { StyleTab } from "./inspector/style-tab";
 import { StatesTab } from "./inspector/states-tab";
 import { AdvancedTab } from "./inspector/advanced-tab";
+import { findComponentLocation, findComponentById } from "@/lib/tree-utils";
 
 export function Inspector() {
   const selectedId = useEditorStore((state) => state.selectedId);
@@ -83,6 +84,10 @@ export function Inspector() {
 
   // Check if component is a root component (top-level)
   const isRoot = components.some((c) => c.id === component.id);
+
+  const parentLoc = selectedId ? findComponentLocation(components, selectedId) : null;
+  const parentComponent = parentLoc && parentLoc.parentId ? findComponentById(components, parentLoc.parentId) : null;
+  const parentLayoutMode = parentComponent?.layoutMode || null;
 
   return (
     <div className="flex h-full flex-col border-l border-border bg-panel">
@@ -214,6 +219,7 @@ export function Inspector() {
               component={component}
               onUpdate={handleUpdate}
               isRoot={isRoot}
+              parentLayoutMode={parentLayoutMode}
             />
           </TabsContent>
 
