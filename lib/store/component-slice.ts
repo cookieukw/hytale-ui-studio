@@ -235,28 +235,39 @@ export const createComponentSlice: StateCreator<
 
   refreshDefinitions: () => {
     const state = get();
-    const components = [...state.components];
 
-    const updateRecursive = (comps: HytaleComponent[]) => {
-      comps.forEach((comp) => {
+    const updateRecursive = (comps: HytaleComponent[]): HytaleComponent[] =>
+      comps.map((comp) => {
         const def = COMPONENT_DEFINITIONS.find((d) => d.type === comp.type);
-        if (def && def.defaultProps) {
-          if (def.defaultProps.alias) comp.alias = def.defaultProps.alias;
-          if (def.defaultProps.scrollbarStyle) comp.scrollbarStyle = def.defaultProps.scrollbarStyle;
+        // Build a new object only if something actually changes
+        let updated: HytaleComponent = comp;
+        if (def?.defaultProps) {
+          const overrides: Partial<HytaleComponent> = {};
+          if (def.defaultProps.alias !== undefined) overrides.alias = def.defaultProps.alias;
+          if (def.defaultProps.scrollbarStyle !== undefined) overrides.scrollbarStyle = def.defaultProps.scrollbarStyle;
+          if (Object.keys(overrides).length > 0) updated = { ...comp, ...overrides };
         }
-        if (comp.children) updateRecursive(comp.children);
+        if (comp.children) {
+          const newChildren = updateRecursive(comp.children);
+          // Only create new object if children actually changed
+          if (newChildren !== comp.children) updated = { ...updated, children: newChildren };
+        }
+        return updated;
       });
-    };
 
-    updateRecursive(components);
+    const updatedComponents = updateRecursive(state.components);
     set((state) => ({
-      components,
+      components: updatedComponents,
       projects: state.projects.map((p) =>
         p.id === state.currentProjectId
-          ? { 
-              ...p, 
-              files: p.files.map(f => f.id === state.currentFileId ? { ...f, components, lastModified: Date.now() } : f),
-              lastModified: Date.now() 
+          ? {
+              ...p,
+              files: p.files.map((f) =>
+                f.id === state.currentFileId
+                  ? { ...f, components: updatedComponents, lastModified: Date.now() }
+                  : f,
+              ),
+              lastModified: Date.now(),
             }
           : p,
       ),
