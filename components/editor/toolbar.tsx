@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { isTauri } from "@/lib/tauri-utils";
 
 import {
@@ -23,6 +23,7 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
+  HelpCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ import {
 import { useEditorStore } from "@/lib/editor-store";
 import type { ViewMode, DevicePreview } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
+import { ChangelogModal } from "./changelog-modal";
 
 
 
@@ -72,8 +74,7 @@ export function EditorToolbar() {
   const importProject = useEditorStore((s) => s.importProject);
 
   const currentProject = projects.find((p) => p.id === currentProjectId);
-
-
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < historyLength - 1;
@@ -391,8 +392,27 @@ export function EditorToolbar() {
             </TooltipTrigger>
             <TooltipContent>Export Project (.zip)</TooltipContent>
           </Tooltip>
+
+          <Separator orientation="vertical" className="mx-2 h-6" />
+
+          {/* Changelog Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setIsChangelogOpen(true)}
+              >
+                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Release Notes / Changelog</TooltipContent>
+          </Tooltip>
         </div>
       </div>
+
+      <ChangelogModal open={isChangelogOpen} onOpenChange={setIsChangelogOpen} />
     </TooltipProvider>
   );
 }

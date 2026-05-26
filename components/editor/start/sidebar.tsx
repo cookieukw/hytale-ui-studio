@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { FolderOpen, Settings, Plus, HelpCircle, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavButton } from "./nav-button";
 import { StartTab } from "./types";
+import { ChangelogModal } from "../changelog-modal";
 
 interface SidebarProps {
   activeTab: StartTab;
@@ -11,6 +13,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+
   return (
     <div className="w-[240px] flex flex-col border-r border-border bg-sidebar">
       <div className="p-6 pb-2">
@@ -20,7 +24,13 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold text-white tracking-tight uppercase">UI Studio</span>
-            <span className="text-[10px] text-muted-foreground font-medium">Version 3.0 Beta</span>
+            <span
+              onClick={() => setIsChangelogOpen(true)}
+              className="text-[10px] text-primary hover:text-primary/80 font-semibold cursor-pointer hover:underline flex items-center gap-1 mt-0.5"
+              title="Click to see Changelog"
+            >
+              Version 3.0 Beta ✨
+            </span>
           </div>
         </div>
       </div>
@@ -65,6 +75,8 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           </a>
         </Button>
       </div>
+
+      <ChangelogModal open={isChangelogOpen} onOpenChange={setIsChangelogOpen} />
     </div>
   );
 }
