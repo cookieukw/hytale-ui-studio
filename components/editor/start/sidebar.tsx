@@ -20,7 +20,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold text-white tracking-tight uppercase">UI Studio</span>
-            <span className="text-[10px] text-muted-foreground font-medium">Version 2.0 Beta</span>
+            <span className="text-[10px] text-muted-foreground font-medium">Version 3.0 Beta</span>
           </div>
         </div>
       </div>
