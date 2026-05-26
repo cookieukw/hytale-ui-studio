@@ -1,4 +1,5 @@
 import { HytaleComponent, ComponentType } from "./hytale-types";
+import { generateId } from "./tree-utils";
 
 // --- Types ---
 
@@ -619,9 +620,6 @@ function deepMerge(target: any, source: any) {
 
 // --- Adapter to HytaleComponent ---
 
-function generateId(): string {
-  return `comp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-}
 
 export function parseAndMapCode(code: string): {
   components: HytaleComponent[];
@@ -826,14 +824,11 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         value.MaskTexturePath ||
         value.OutlineColor
       ) {
-        // This is likely a DropdownBoxStyle
-        // But wait, Label also uses Style for TextStyle.
-        // If component type is Dropdown, we map Style to dropdownStyle.
-        // DropdownBoxStyle seems to contain visual props, different from TextStyle
         component.dropdownStyle = value;
-        continue;
+        continue; // Dropdown style is separate from TextStyle — skip text parsing
       }
 
+      // For Label, TextField, NumberField etc: map Style to textStyle
       if (!component.textStyle) component.textStyle = {};
       if (value.FontSize) component.textStyle.fontSize = Number(value.FontSize);
       if (value.TextColor) component.textStyle.textColor = String(value.TextColor);
