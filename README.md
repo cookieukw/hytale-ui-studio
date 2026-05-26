@@ -106,7 +106,7 @@ The project is configured with **GitHub Actions**. Every time you push to the `m
 2. You can download the binaries from the **Actions** tab on GitHub.
 
 To create an official **Release**:
-1. Push a tag starting with `v` (e.g., `git tag v2.0.0 && git push --tags`).
+1. Push a tag starting with `v` (e.g., `git tag v3.0.0 && git push --tags`).
 2. GitHub will automatically create a draft release with all the installers attached.
 
 ---

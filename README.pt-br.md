@@ -106,7 +106,7 @@ O projeto está configurado com **GitHub Actions**. Toda vez que você fizer pus
 2. Você pode baixar os binários na aba **Actions** no GitHub.
 
 Para criar um **Release** oficial:
-1. Faça push de uma tag começando com `v` (ex: `git tag v2.0.0 && git push --tags`).
+1. Faça push de uma tag começando com `v` (ex: `git tag v3.0.0 && git push --tags`).
 2. O GitHub criará automaticamente um rascunho de release com todos os instaladores anexados.
 
 ---
