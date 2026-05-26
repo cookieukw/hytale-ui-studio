@@ -161,12 +161,14 @@ export function duplicateComponent(
   };
 }
 
-// Helper to format Hytale colors: #RRGGBB or #RRGGBB(Alpha) checks if hex is 3 or 6 digits
+// Helper to format Hytale colors.
+// Supports: #RGB → #RRGGBB, #RRGGBB, #RRGGBBAA, #RRGGBB(alpha)
 export const formatHytaleColor = (hex?: string, opacity?: number): string => {
   if (!hex) return "";
 
-  // Normalize hex to 6 digits
   let cleanHex = hex.replace("#", "");
+
+  // Expand shorthand #RGB → #RRGGBB
   if (cleanHex.length === 3) {
     cleanHex = cleanHex
       .split("")
@@ -174,6 +176,13 @@ export const formatHytaleColor = (hex?: string, opacity?: number): string => {
       .join("");
   }
 
+  // 8-digit hex (#RRGGBBAA) — Hytale inline-alpha format, pass through as-is.
+  // The opacity parameter is ignored because the alpha is already embedded.
+  if (cleanHex.length === 8) {
+    return `#${cleanHex}`;
+  }
+
+  // 6-digit hex with separate opacity → #RRGGBB(alpha) Hytale syntax
   if (opacity !== undefined && opacity < 1) {
     return `#${cleanHex}(${opacity})`;
   }

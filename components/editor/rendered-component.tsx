@@ -60,14 +60,10 @@ export const RenderedComponent = memo(function RenderedComponent({
       e.stopPropagation();
       return;
     }
+    // Children locked inside a Button must not intercept the click —
+    // let it bubble up so the parent Button's onClick fires.
+    if (isLockedInParent) return;
     e.stopPropagation();
-    // When a child is locked into a Button/CancelButton, clicks should select the parent button
-    if (isLockedInParent) {
-      // Don't call onSelect — let the event NOT propagate further (parent button has its own onClick)
-      // Actually we need to bubble UP so the button's onClick fires.
-      // Remove stopPropagation and let parent handle it.
-      return;
-    }
     onSelect(component.id);
   };
 
@@ -300,6 +296,7 @@ export const RenderedComponent = memo(function RenderedComponent({
         // Inside a stacking layout, children with absolute anchors collapse and overlap in Hytale
         style.position = "absolute";
         if (hasWidth)  style.width  = typeof a.width  === "string" ? a.width  : `${a.width}px`;
+        else           style.width  = "auto"; // prevent zero-width collapse
         if (hasHeight) style.height = typeof a.height === "string" ? a.height : `${a.height}px`;
       } else {
         // Widget-sized: only Width/Height, flows normally
@@ -309,7 +306,24 @@ export const RenderedComponent = memo(function RenderedComponent({
       }
     }
 
+    // ─── Padding ──────────────────────────────────────────────────────────────
+    if (component.padding) {
+      if (component.padding.top    !== undefined) style.paddingTop    = `${component.padding.top}px`;
+      if (component.padding.bottom !== undefined) style.paddingBottom = `${component.padding.bottom}px`;
+      if (component.padding.left   !== undefined) style.paddingLeft   = `${component.padding.left}px`;
+      if (component.padding.right  !== undefined) style.paddingRight  = `${component.padding.right}px`;
+    }
+
+    // ─── Margin ───────────────────────────────────────────────────────────────
+    if (component.margin) {
+      if (component.margin.top    !== undefined) style.marginTop    = `${component.margin.top}px`;
+      if (component.margin.bottom !== undefined) style.marginBottom = `${component.margin.bottom}px`;
+      if (component.margin.left   !== undefined) style.marginLeft   = `${component.margin.left}px`;
+      if (component.margin.right  !== undefined) style.marginRight  = `${component.margin.right}px`;
+    }
+
     // ─── Gap via opposite-edge anchor ────────────────────────────────────────
+    // Applied AFTER margin so the layout gap takes precedence over explicit margins.
     // In Hytale stack layouts the "trailing" anchor edge acts as a gap:
     //   Top/MiddleCenter mode  → anchor.bottom = marginBottom
     //   Bottom mode            → anchor.top    = marginTop
@@ -329,22 +343,6 @@ export const RenderedComponent = memo(function RenderedComponent({
       if (parentLayoutMode === "Right") {
         if (a.left !== undefined) style.marginLeft = `${a.left}px`;
       }
-    }
-
-    // ─── Padding ──────────────────────────────────────────────────────────────
-    if (component.padding) {
-      if (component.padding.top    !== undefined) style.paddingTop    = `${component.padding.top}px`;
-      if (component.padding.bottom !== undefined) style.paddingBottom = `${component.padding.bottom}px`;
-      if (component.padding.left   !== undefined) style.paddingLeft   = `${component.padding.left}px`;
-      if (component.padding.right  !== undefined) style.paddingRight  = `${component.padding.right}px`;
-    }
-
-    // ─── Margin ───────────────────────────────────────────────────────────────
-    if (component.margin) {
-      if (component.margin.top    !== undefined) style.marginTop    = `${component.margin.top}px`;
-      if (component.margin.bottom !== undefined) style.marginBottom = `${component.margin.bottom}px`;
-      if (component.margin.left   !== undefined) style.marginLeft   = `${component.margin.left}px`;
-      if (component.margin.right  !== undefined) style.marginRight  = `${component.margin.right}px`;
     }
 
     // ─── Background ───────────────────────────────────────────────────────────
@@ -819,13 +817,12 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     case "Dropdown":
     case "DropdownBox":
-      // Extract options from children if available
-      const childOptions = (component.children || [])
-        .filter((c) => c.type === "DropdownEntry")
-        .map((c) => c.text || c.value || c.name);
-
-      const items =
-        childOptions.length > 0 ? childOptions : component.entries || [];
+      // Extract options from children if available (filter once, reuse everywhere)
+      const dropdownEntries = (component.children || []).filter(
+        (c) => c.type === "DropdownEntry",
+      );
+      const childOptions = dropdownEntries.map((c) => c.text || c.value || c.name);
+      const items = childOptions.length > 0 ? childOptions : component.entries || [];
 
       const isDisabled = component.disabled;
       const readOnly = component.isReadOnly;
@@ -936,12 +933,8 @@ export const RenderedComponent = memo(function RenderedComponent({
               style={{ minWidth: "100%", whiteSpace: "nowrap" }}
             >
               {/* Use children if available, else legacy entries */}
-              {((component.children || []).filter(
-                (c) => c.type === "DropdownEntry",
-              ).length > 0
-                ? (component.children || []).filter(
-                    (c) => c.type === "DropdownEntry",
-                  )
+              {(dropdownEntries.length > 0
+                ? dropdownEntries
                 : (component.entries || []).map((e) => ({
                     id: e,
                     value: e,
