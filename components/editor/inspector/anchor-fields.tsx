@@ -87,7 +87,7 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={disabled || isStackLayout}
+          disabled={!!disabled || !!isStackLayout}
         />
       </FieldRow>
       <FieldRow label="Right">
@@ -100,7 +100,7 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={disabled || isStackLayout}
+          disabled={!!disabled || !!isStackLayout}
         />
       </FieldRow>
       <FieldRow label="Top">
@@ -113,7 +113,7 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={disabled || isStackLayout}
+          disabled={!!disabled || !!isStackLayout}
         />
       </FieldRow>
       <FieldRow label="Bottom">
@@ -126,7 +126,7 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={disabled || isStackLayout}
+          disabled={!!disabled || !!isStackLayout}
         />
       </FieldRow>
 
