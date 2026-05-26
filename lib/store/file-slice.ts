@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { EditorStore } from "./types";
-import { generateId } from "../tree-utils";
+import { generateId, regenerateIds } from "../tree-utils";
 
 export const createFileSlice: StateCreator<
   EditorStore,
@@ -41,7 +41,7 @@ export const createFileSlice: StateCreator<
           components: [],
           imports: [],
           selectedId: null,
-          history: [[]],
+          history: [{ components: [], imports: [] }],
           historyIndex: 0,
           code: "",
       }));
@@ -63,7 +63,7 @@ export const createFileSlice: StateCreator<
           components: file.components,
           imports: file.imports,
           selectedId: null,
-          history: [file.components],
+          history: [{ components: file.components, imports: file.imports }],
           historyIndex: 0,
       }));
       get().syncCodeFromComponents();
@@ -91,7 +91,7 @@ export const createFileSlice: StateCreator<
               components: activeFile.components,
               imports: activeFile.imports,
               selectedId: null,
-              history: [activeFile.components],
+              history: [{ components: activeFile.components, imports: activeFile.imports }],
               historyIndex: 0,
           };
       });
@@ -122,6 +122,8 @@ export const createFileSlice: StateCreator<
           ...file,
           id: newId,
           name: file.name.replace(".ui", " (Copy).ui"),
+          // Regenerate all component IDs to prevent collisions within the same project
+          components: file.components.map((c) => regenerateIds(c, new Set())),
           lastModified: Date.now(),
       };
 

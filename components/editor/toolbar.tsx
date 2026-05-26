@@ -78,10 +78,6 @@ export function EditorToolbar() {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < historyLength - 1;
 
-  const handleExportZip = () => {
-      exportProject();
-  };
-
   const handleImportZip = () => {
     if (isTauri()) {
       importProject();
@@ -388,7 +384,7 @@ export function EditorToolbar() {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={handleExportZip}
+                onClick={exportProject}
               >
                 <FileDown className="h-4 w-4 text-primary" />
               </Button>

@@ -251,6 +251,11 @@ export interface Project {
   preview?: string; // Optional base64 thumbnail
 }
 
+export interface HistoryEntry {
+  components: HytaleComponent[];
+  imports: string[];
+}
+
 export interface EditorState {
   projects: Project[];
   currentProjectId: string | null;
@@ -264,7 +269,7 @@ export interface EditorState {
   snapToGrid: boolean;
   zoom: number;
   code: string;
-  history: HytaleComponent[][];
+  history: HistoryEntry[];
   historyIndex: number;
   imports: string[];
 }

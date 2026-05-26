@@ -14,27 +14,38 @@ export const createHistorySlice: StateCreator<
     | "saveToHistory"
   >
 > = (set, get) => ({
-  history: [[]],
+  history: [{ components: [], imports: [] }],
   historyIndex: 0,
 
   undo: () => {
     const state = get();
     if (state.historyIndex > 0) {
       const newIndex = state.historyIndex - 1;
+      // Capture entry outside set() to avoid closure over stale state
+      const entry = state.history[newIndex];
       set((state) => ({
         historyIndex: newIndex,
-        components: state.history[newIndex],
+        components: entry.components,
+        imports: entry.imports,
         projects: state.projects.map((p) =>
           p.id === state.currentProjectId
             ? {
                 ...p,
-                files: p.files.map(f => f.id === state.currentFileId ? { ...f, components: state.history[newIndex], lastModified: Date.now() } : f),
+                files: p.files.map((f) =>
+                  f.id === state.currentFileId
+                    ? {
+                        ...f,
+                        components: entry.components,
+                        imports: entry.imports,
+                        lastModified: Date.now(),
+                      }
+                    : f,
+                ),
                 lastModified: Date.now(),
               }
             : p,
         ),
       }));
-
       get().syncCodeFromComponents();
     }
   },
@@ -43,20 +54,30 @@ export const createHistorySlice: StateCreator<
     const state = get();
     if (state.historyIndex < state.history.length - 1) {
       const newIndex = state.historyIndex + 1;
+      const entry = state.history[newIndex];
       set((state) => ({
         historyIndex: newIndex,
-        components: state.history[newIndex],
+        components: entry.components,
+        imports: entry.imports,
         projects: state.projects.map((p) =>
           p.id === state.currentProjectId
             ? {
                 ...p,
-                files: p.files.map(f => f.id === state.currentFileId ? { ...f, components: state.history[newIndex], lastModified: Date.now() } : f),
+                files: p.files.map((f) =>
+                  f.id === state.currentFileId
+                    ? {
+                        ...f,
+                        components: entry.components,
+                        imports: entry.imports,
+                        lastModified: Date.now(),
+                      }
+                    : f,
+                ),
                 lastModified: Date.now(),
               }
             : p,
         ),
       }));
-
       get().syncCodeFromComponents();
     }
   },
@@ -64,8 +85,13 @@ export const createHistorySlice: StateCreator<
   saveToHistory: () => {
     const state = get();
     const newHistory = state.history.slice(0, state.historyIndex + 1);
-    newHistory.push(JSON.parse(JSON.stringify(state.components)));
+    // Deep-copy components, shallow-copy imports (strings are immutable)
+    newHistory.push({
+      components: JSON.parse(JSON.stringify(state.components)),
+      imports: [...state.imports],
+    });
 
+    // Cap at 50 entries to avoid unbounded memory growth
     if (newHistory.length > 50) {
       newHistory.shift();
     }

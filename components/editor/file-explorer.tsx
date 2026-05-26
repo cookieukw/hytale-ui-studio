@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { isTauri } from "@/lib/tauri-utils";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +46,6 @@ export function FileExplorer() {
   const handleImportFile = async () => {
     // Import tauri conditionally or handle via standard input
     try {
-      const { isTauri } = await import("@/lib/tauri-utils");
       if (isTauri()) {
         const { open } = await import("@tauri-apps/plugin-dialog");
         const { readTextFile } = await import("@tauri-apps/plugin-fs");

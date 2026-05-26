@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { EditorStore } from "./types";
-import { generateId } from "../tree-utils";
+import { generateId, regenerateIds, componentsToCode } from "../tree-utils";
 import { parseAndMapCode } from "../hytale-parser";
 import JSZip from "jszip";
 import type { UIFile } from "../hytale-types";
@@ -54,7 +54,7 @@ export const createProjectSlice: StateCreator<
       components: [],
       imports: [],
       selectedId: null,
-      history: [[]],
+      history: [{ components: [], imports: [] }],
       historyIndex: 0,
       code: "",
     }));
@@ -72,7 +72,7 @@ export const createProjectSlice: StateCreator<
       components: activeFile.components,
       imports: activeFile.imports,
       selectedId: null,
-      history: [activeFile.components],
+      history: [{ components: activeFile.components, imports: activeFile.imports }],
       historyIndex: 0,
     });
     get().syncCodeFromComponents();
@@ -97,7 +97,9 @@ export const createProjectSlice: StateCreator<
         components: activeFile ? activeFile.components : [],
         imports: activeFile ? activeFile.imports : [],
         selectedId: null,
-        history: activeFile ? [activeFile.components] : [[]],
+        history: activeFile
+        ? [{ components: activeFile.components, imports: activeFile.imports }]
+        : [{ components: [], imports: [] }],
         historyIndex: 0,
       };
     });
@@ -117,10 +119,26 @@ export const createProjectSlice: StateCreator<
     if (!project) return;
 
     const newId = generateId();
+    // Map original fileIds → new fileIds so activeFileId reference stays consistent
+    const fileIdMap = new Map<string, string>();
+    const newFiles = project.files.map((file) => {
+      const newFileId = generateId();
+      fileIdMap.set(file.id, newFileId);
+      return {
+        ...file,
+        id: newFileId,
+        // Regenerate all component IDs to prevent ID collisions across projects
+        components: file.components.map((c) => regenerateIds(c, new Set())),
+        lastModified: Date.now(),
+      };
+    });
+
     const newProject = {
       ...project,
       id: newId,
       name: `${project.name} (Copy)`,
+      files: newFiles,
+      activeFileId: fileIdMap.get(project.activeFileId ?? "") ?? newFiles[0]?.id ?? "",
       lastModified: Date.now(),
     };
 
@@ -136,7 +154,7 @@ export const createProjectSlice: StateCreator<
       components: [],
       imports: [],
       selectedId: null,
-      history: [[]],
+      history: [{ components: [], imports: [] }],
       historyIndex: 0,
       code: "",
     });
@@ -149,8 +167,6 @@ export const createProjectSlice: StateCreator<
 
     const zip = new JSZip();
     const projectFolder = zip.folder(project.name);
-
-    const { componentsToCode } = await import("../tree-utils");
 
     project.files.forEach((file) => {
       const code = componentsToCode(file.components, 0, file.imports);
@@ -212,27 +228,28 @@ export const createProjectSlice: StateCreator<
       if (!finalFile) return;
 
       const zip = await JSZip.loadAsync(finalFile);
-      const files: UIFile[] = [];
 
-      const filePromises: Promise<void>[] = [];
-
-      zip.forEach((relativePath, file) => {
+      // Collect entries first so async resolution preserves ZIP entry order
+      const zipEntries: [string, JSZip.JSZipObject][] = [];
+      zip.forEach((relativePath, zipFile) => {
         if (relativePath.endsWith(".ui")) {
-          const promise = file.async("string").then((content) => {
-            const { components, imports } = parseAndMapCode(content);
-            files.push({
-              id: generateId(),
-              name: relativePath.split("/").pop() || "unnamed.ui",
-              components,
-              imports,
-              lastModified: Date.now(),
-            });
-          });
-          filePromises.push(promise);
+          zipEntries.push([relativePath, zipFile]);
         }
       });
 
-      await Promise.all(filePromises);
+      const files: UIFile[] = await Promise.all(
+        zipEntries.map(async ([relativePath, zipFile]) => {
+          const content = await zipFile.async("string");
+          const { components, imports } = parseAndMapCode(content);
+          return {
+            id: generateId(),
+            name: relativePath.split("/").pop() || "unnamed.ui",
+            components,
+            imports,
+            lastModified: Date.now(),
+          };
+        }),
+      );
 
       if (files.length > 0) {
         const projectId = generateId();
@@ -251,7 +268,7 @@ export const createProjectSlice: StateCreator<
           components: files[0].components,
           imports: files[0].imports,
           selectedId: null,
-          history: [files[0].components],
+          history: [{ components: files[0].components, imports: files[0].imports }],
           historyIndex: 0,
         }));
         get().syncCodeFromComponents();

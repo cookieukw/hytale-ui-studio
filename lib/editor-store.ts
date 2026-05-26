@@ -10,6 +10,7 @@ import { createFileSlice } from "./store/file-slice";
 import { createComponentSlice } from "./store/component-slice";
 import { createHistorySlice } from "./store/history-slice";
 import { createCodeSlice } from "./store/code-slice";
+import { componentsToCode } from "./tree-utils";
 
 export const useEditorStore = create<EditorStore>()(
   persist(
@@ -23,7 +24,8 @@ export const useEditorStore = create<EditorStore>()(
     }),
     {
       name: "hytale-ui-studio-storage",
-      // Partialize to avoid persisting everything (like history or dragging state) if desired
+      // Only persist the project data and UI preferences.
+      // components/imports/code are derived from projects[] and restored via onRehydrateStorage.
       partialize: (state) => ({
         projects: state.projects,
         currentProjectId: state.currentProjectId,
@@ -35,6 +37,29 @@ export const useEditorStore = create<EditorStore>()(
         zoom: state.zoom,
         showFileExplorer: state.showFileExplorer,
       }),
-    }
-  )
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // Restore working state from the active file after localStorage hydration
+        const project = state.projects.find(
+          (p) => p.id === state.currentProjectId,
+        );
+        const activeFile =
+          project?.files.find((f) => f.id === state.currentFileId) ??
+          project?.files[0];
+        if (activeFile) {
+          state.components = activeFile.components;
+          state.imports   = activeFile.imports;
+          state.history   = [
+            { components: activeFile.components, imports: activeFile.imports },
+          ];
+          state.historyIndex = 0;
+          state.code = componentsToCode(
+            activeFile.components,
+            0,
+            activeFile.imports,
+          );
+        }
+      },
+    },
+  ),
 );
