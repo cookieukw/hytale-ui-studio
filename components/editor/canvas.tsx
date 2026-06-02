@@ -325,6 +325,7 @@ export function EditorCanvas() {
           }}
         >
           <div
+            id="exportable-canvas"
             ref={canvasRef}
             className={cn(
               "absolute top-0 left-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",

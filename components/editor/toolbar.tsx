@@ -24,6 +24,7 @@ import {
   ZoomOut,
   Maximize2,
   HelpCircle,
+  Camera,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,8 @@ import { useEditorStore } from "@/lib/editor-store";
 import type { ViewMode, DevicePreview } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
 import { ChangelogModal } from "./changelog-modal";
+import { toPng } from "html-to-image";
+import { toast } from "sonner";
 
 
 
@@ -91,6 +94,37 @@ export function EditorToolbar() {
         }
       };
       input.click();
+    }
+  };
+
+  const handleExportImage = async () => {
+    const node = document.getElementById("exportable-canvas");
+    if (!node) {
+      toast.error("Canvas not found!");
+      return;
+    }
+    
+    const toastId = toast.loading("Capturing layout image...");
+    
+    try {
+      // Capture the original resolution, overriding the zoom scale
+      const dataUrl = await toPng(node, {
+        style: {
+          transform: "scale(1)",
+          transformOrigin: "top left",
+        },
+        pixelRatio: 1, // Keep 1:1 with Hytale native resolution (or 2 for high-res)
+      });
+      
+      const link = document.createElement("a");
+      link.download = `${currentProject?.name || "hytale-layout"}-preview.png`;
+      link.href = dataUrl;
+      link.click();
+      
+      toast.success("Image exported successfully!", { id: toastId });
+    } catch (err) {
+      console.error("Failed to export image", err);
+      toast.error("Failed to export image. Check console for details.", { id: toastId });
     }
   };
 
@@ -342,6 +376,23 @@ export function EditorToolbar() {
               </TooltipContent>
             </Tooltip>
           </div>
+
+          <Separator orientation="vertical" className="mx-2 h-6" />
+
+          {/* Export Image */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-primary"
+                onClick={handleExportImage}
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Export as Image (PNG)</TooltipContent>
+          </Tooltip>
 
           <Separator orientation="vertical" className="mx-2 h-6" />
 
