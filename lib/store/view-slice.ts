@@ -32,11 +32,11 @@ export const createViewSlice: StateCreator<
 > = (set) => ({
   selectedId: null,
   viewMode: "Design",
-  devicePreview: "Desktop",
+  devicePreview: "Hytale",
   showGrid: true,
   snapToGrid: true,
-  zoom: 80,
-  fitToScreen: true,
+  zoom: 35,
+  fitToScreen: false,
   draggingId: null,
   showFileExplorer: true,
   activeMobileTab: "View",
@@ -48,7 +48,7 @@ export const createViewSlice: StateCreator<
   setDevicePreview: (preview) => {
     let newZoom = 80;
     if (preview === "Desktop") newZoom = 80;
-    if (preview === "Hytale") newZoom = 50;
+    if (preview === "Hytale") newZoom = 35;
     if (preview === "Tablet") newZoom = 70;
     if (preview === "Mobile") newZoom = 100;
     set({ devicePreview: preview, zoom: newZoom, fitToScreen: false });

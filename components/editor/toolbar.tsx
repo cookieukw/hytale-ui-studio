@@ -268,8 +268,8 @@ export function EditorToolbar() {
 
         {/* Right section */}
         <div className="flex items-center gap-1">
-          {/* Device Preview */}
-          <div className="mr-2 hidden md:flex items-center gap-0.5 rounded-lg bg-secondary p-1">
+          {/* Device Preview (Hidden for now) */}
+          <div className="mr-2 hidden items-center gap-0.5 rounded-lg bg-secondary p-1">
             {deviceOptions.map((option) => (
               <Tooltip key={option.value}>
                 <TooltipTrigger asChild>
