@@ -380,7 +380,9 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     // ─── FlexWeight ───────────────────────────────────────────────────────────
     if (component.flexWeight) {
-      style.flex = component.flexWeight;
+      style.flexGrow = component.flexWeight;
+      style.flexShrink = 1;
+      style.flexBasis = "0%";
     }
 
     // ─── Direction (legacy) ───────────────────────────────────────────────────
@@ -487,8 +489,8 @@ export const RenderedComponent = memo(function RenderedComponent({
       if (component.type === "Label") {
         if (!style.display) style.display = "flex";
         style.flexDirection = "column";
-        const hAlign = component.textStyle.horizontalAlignment || "Start";
-        const vAlign = component.textStyle.verticalAlignment   || "Start";
+        const hAlign = component.textStyle?.horizontalAlignment || "Start";
+        const vAlign = component.textStyle?.verticalAlignment   || "Start";
         style.alignItems     = hAlign === "Center" ? "center" : hAlign === "End" ? "flex-end" : "flex-start";
         style.justifyContent = vAlign === "Center" ? "center" : vAlign === "End" ? "flex-end" : "flex-start";
         style.textAlign      = hAlign === "Center" ? "center" : hAlign === "End" ? "right" : "left";
@@ -512,11 +514,18 @@ export const RenderedComponent = memo(function RenderedComponent({
       style.textAlign      = "center";
     }
 
-    // ─── Default width for non-absolute elements ──────────────────────────────
-    if (!style.width && style.position !== "absolute") {
-      style.width = "100%";
+    // ─── Cross-axis Stretch ───────────────────────────────────────────────────
+    if (parentId && parentLayoutMode && style.position !== "absolute") {
+      const stretchesHorizontally = ["Top", "Bottom", "TopScrolling"].includes(parentLayoutMode);
+      const stretchesVertically = ["Left", "Right", "LeftScrolling"].includes(parentLayoutMode);
+      
+      if (stretchesHorizontally && !style.width && !component.anchor?.width) {
+        style.width = "100%";
+      }
+      if (stretchesVertically && !style.height && !component.anchor?.height) {
+        style.height = "100%";
+      }
     }
-
     // ─── Default flexGrow for container children ──────────────────────────────
     const isContainerType =
       ["Group", "Panel", "DecoratedContainer"].includes(component.type);
