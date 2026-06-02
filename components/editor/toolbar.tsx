@@ -68,8 +68,6 @@ export function EditorToolbar() {
   const projects = useEditorStore((s) => s.projects);
   const currentProjectId = useEditorStore((s) => s.currentProjectId);
   const exitProject = useEditorStore((s) => s.exitProject);
-  const showFileExplorer = useEditorStore((s) => s.showFileExplorer);
-  const setShowFileExplorer = useEditorStore((s) => s.setShowFileExplorer);
   const exportProject = useEditorStore((s) => s.exportProject);
   const importProject = useEditorStore((s) => s.importProject);
 
@@ -192,24 +190,7 @@ export function EditorToolbar() {
 
           <Separator orientation="vertical" className="mx-2 h-6" />
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8",
-                  showFileExplorer && "bg-primary/20 text-primary hover:bg-primary/30",
-                )}
-                onClick={() => setShowFileExplorer(!showFileExplorer)}
-              >
-                <FolderCode className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Workspace Browser</TooltipContent>
-          </Tooltip>
 
-          <Separator orientation="vertical" className="mx-2 h-6" />
 
           <Tooltip>
             <TooltipTrigger asChild>

@@ -5,7 +5,12 @@ import {
   Redo2,
   Download,
   Upload,
+  FolderCode,
+  Layers,
+  ListTree,
+  FileCode,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentPalette } from "@/components/editor/component-palette";
 import { ComponentTree } from "@/components/editor/component-tree";
 import { EditorCanvas } from "@/components/editor/canvas";
@@ -24,8 +29,7 @@ import { MobileNav } from "@/components/editor/mobile-nav";
 import { LoadingScreen } from "@/components/loading-screen";
 import { StartScreen } from "@/components/editor/start-screen";
 
-import { useEffect, useRef, useState } from "react";
-import type { ImperativePanelHandle } from "react-resizable-panels";
+import { useEffect, useState } from "react";
 
 export default function HytaleUIStudio() {
   const viewMode = useEditorStore((state) => state.viewMode);
@@ -34,20 +38,9 @@ export default function HytaleUIStudio() {
   const selectedId = useEditorStore((state) => state.selectedId);
   const removeComponent = useEditorStore((state) => state.removeComponent);
   const currentProjectId = useEditorStore((state) => state.currentProjectId);
-  const showFileExplorer = useEditorStore((state) => state.showFileExplorer);
   const importProject = useEditorStore((state) => state.importProject);
   const exportProject = useEditorStore((state) => state.exportProject);
   const [isLoaded, setIsLoaded] = useState(false);
-  const fileExplorerPanelRef = useRef<ImperativePanelHandle>(null);
-
-  // Collapse/expand the file explorer panel imperatively to avoid panel group layout bugs
-  useEffect(() => {
-    if (showFileExplorer) {
-      fileExplorerPanelRef.current?.expand();
-    } else {
-      fileExplorerPanelRef.current?.collapse();
-    }
-  }, [showFileExplorer]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -126,49 +119,42 @@ export default function HytaleUIStudio() {
             collapsible
             collapsedSize={0}
           >
-            <ResizablePanelGroup direction="vertical" className="h-full">
-              <ResizablePanel
-                ref={fileExplorerPanelRef}
-                defaultSize={showFileExplorer ? 25 : 0}
-                minSize={15}
-                collapsible={true}
-                collapsedSize={0}
-              >
-                <FileExplorer />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              
-              <ResizablePanel
-                defaultSize={40}
-                minSize={25}
-                collapsible={true}
-                collapsedSize={2}
-              >
-                <ComponentPalette />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel
-                style={{
-                  transition: "transform 0.2s ease-in-out",
-                  transform: "translateX(0)",
-                }}
-                defaultSize={30}
-                minSize={20}
-                collapsible={true}
-                collapsedSize={2}
-              >
-                <ComponentTree />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel
-                defaultSize={25}
-                minSize={15}
-                collapsible={true}
-                collapsedSize={1}
-              >
-                <CodeEditor />
-              </ResizablePanel>
-            </ResizablePanelGroup>
+            <Tabs defaultValue="workspace" className="flex h-full flex-col">
+              <div className="flex shrink-0 items-center border-b border-border bg-panel px-2 py-1.5">
+                <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1">
+                  <TabsTrigger value="workspace" title="Workspace" className="px-0">
+                    <FolderCode className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="components" title="Components" className="px-0">
+                    <Layers className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="tree" title="Component Tree" className="px-0">
+                    <ListTree className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="code" title="UI Code" className="px-0">
+                    <FileCode className="h-4 w-4" />
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <div className="flex-1 overflow-hidden">
+                <TabsContent value="workspace" className="h-full m-0 data-[state=active]:flex flex-col border-none p-0 outline-none">
+                  <FileExplorer />
+                </TabsContent>
+
+                <TabsContent value="components" className="h-full m-0 data-[state=active]:flex flex-col border-none p-0 outline-none">
+                  <ComponentPalette />
+                </TabsContent>
+
+                <TabsContent value="tree" className="h-full m-0 data-[state=active]:flex flex-col border-none p-0 outline-none">
+                  <ComponentTree />
+                </TabsContent>
+
+                <TabsContent value="code" className="h-full m-0 data-[state=active]:flex flex-col border-none p-0 outline-none">
+                  <CodeEditor />
+                </TabsContent>
+              </div>
+            </Tabs>
           </ResizablePanel>
 
           <ResizableHandle withHandle />
