@@ -259,9 +259,21 @@ export const RenderedComponent = memo(function RenderedComponent({
       const hasHeight = a.height !== undefined;
       const hasFull   = a.full   === true;
 
-      const hasAnyEdge = hasTop || hasBottom || hasLeft || hasRight;
-      const isAbsolute = hasAnyEdge && (parentLayoutMode === "Full" || !parentLayoutMode);
-      const isCollapsingStackAbsolute = hasAnyEdge && (parentLayoutMode && parentLayoutMode !== "Full");
+      // Identify edges that act purely as gaps in the current stacking mode
+      const isTopGap = (parentLayoutMode === "Bottom") && hasTop;
+      const isBottomGap = (parentLayoutMode === "Top" || parentLayoutMode === "TopScrolling" || parentLayoutMode === "MiddleCenter") && hasBottom;
+      const isLeftGap = (parentLayoutMode === "Right") && hasLeft;
+      const isRightGap = (parentLayoutMode === "Left" || parentLayoutMode === "LeftScrolling" || parentLayoutMode === "CenterMiddle" || parentLayoutMode === "LeftCenterWrap") && hasRight;
+
+      // An edge causes absolute positioning ONLY if it's not the gap edge for the current stack
+      const hasAbsoluteTop    = hasTop && !isTopGap;
+      const hasAbsoluteBottom = hasBottom && !isBottomGap;
+      const hasAbsoluteLeft   = hasLeft && !isLeftGap;
+      const hasAbsoluteRight  = hasRight && !isRightGap;
+
+      const hasAnyAbsoluteEdge = hasAbsoluteTop || hasAbsoluteBottom || hasAbsoluteLeft || hasAbsoluteRight;
+      const isAbsolute = hasAnyAbsoluteEdge && (parentLayoutMode === "Full" || !parentLayoutMode);
+      const isCollapsingStackAbsolute = hasAnyAbsoluteEdge && (parentLayoutMode && parentLayoutMode !== "Full");
 
       if (hasFull) {
         // Anchor: (Full: N) — fill parent with no margins
