@@ -23,20 +23,7 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
       background: { color: "#2a2a3a", opacity: 1 },
     },
   },
-  {
-    type: "ScrollArea",
-    label: "Scroll Area",
-    icon: "ScrollText",
-    category: "Layout",
-    defaultProps: {
-      name: "ScrollArea",
-      scrollbarStyle: "$C.@DefaultScrollbarStyle",
-      showScrollbar: true,
-      anchor: {},
-      layoutMode: "Top",
-      background: { color: "#1a1a2a", opacity: 1 },
-    },
-  },
+
 
   {
     type: "Panel",

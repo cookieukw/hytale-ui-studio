@@ -109,7 +109,6 @@ export const RenderedComponent = memo(function RenderedComponent({
         "Card",
         "Panel",
         "Group",
-        "ScrollArea",
       ].includes(component.type) && !isButton;
 
     let position: "before" | "after" | "inside" = "inside";
@@ -496,15 +495,11 @@ export const RenderedComponent = memo(function RenderedComponent({
       }
     }
 
-    // ─── Group / ScrollArea defaults ──────────────────────────────────────────
-    if (component.type === "Group" || component.type === "ScrollArea") {
+    // ─── Group defaults ──────────────────────────────────────────
+    if (component.type === "Group") {
       if (!style.display) {
         style.display = "flex";
         if (!style.flexDirection) style.flexDirection = "row";
-      }
-      if (component.type === "ScrollArea") {
-        style.overflowY = "auto";
-        style.overflowX = "hidden";
       }
     }
 
@@ -523,9 +518,8 @@ export const RenderedComponent = memo(function RenderedComponent({
     }
 
     // ─── Default flexGrow for container children ──────────────────────────────
-    const isContainerType = [
-      "Group", "Panel", "DecoratedContainer", "ScrollArea",
-    ].includes(component.type);
+    const isContainerType =
+      ["Group", "Panel", "DecoratedContainer"].includes(component.type);
 
     if (
       isContainerType &&
@@ -1067,26 +1061,6 @@ export const RenderedComponent = memo(function RenderedComponent({
           )}
         </>,
         "relative rounded-sm",
-      );
-
-    case "ScrollArea":
-      return renderWithIndicators(
-        <>
-          {component.children?.map((child, i) => (
-            <RenderedComponent
-              key={child.id}
-              component={child}
-              isBlueprint={isBlueprint}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              index={i}
-              parentId={component.id}
-              parentType={component.type}
-              parentLayoutMode={component.layoutMode}
-            />
-          ))}
-        </>,
-        "overflow-hidden rounded",
       );
 
     case "Group":

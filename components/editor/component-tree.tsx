@@ -46,7 +46,6 @@ const componentIcons: Record<
   React.ComponentType<{ className?: string }>
 > = {
   Group: Square,
-  ScrollArea: ScrollText,
   Panel: Square,
   ContentSeparator: MoreVertical,
   VerticalSeparator: MoreVertical,

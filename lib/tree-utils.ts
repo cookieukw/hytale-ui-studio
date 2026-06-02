@@ -257,9 +257,8 @@ export function componentsToCode(
 
   components.forEach((comp) => {
     // Header: Alias or Type #ID
-    // Note: ScrollArea is a real .ui type, don't remap to Group
-    const typeToExport = comp.alias || comp.type;
     // Sprite is exported as Sprite, which is default behavior
+    const typeToExport = comp.alias || comp.type;
 
     const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
     code += `${spaces}${typeToExport}${idPart} {\n`;

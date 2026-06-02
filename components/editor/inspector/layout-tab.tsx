@@ -64,7 +64,7 @@ export function LayoutTab({ component, onUpdate, isRoot, parentLayoutMode }: Lay
 
       <CollapsibleSection title="Layout">
         {/* Only show LayoutMode and Direction for containers */}
-        {["Group", "Panel", "ScrollArea"].includes(component.type) && (
+        {["Group", "Panel"].includes(component.type) && (
           <>
             <FieldRow label="Mode">
               <Select

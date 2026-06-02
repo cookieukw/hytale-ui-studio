@@ -88,7 +88,6 @@ export type ComponentType =
   | "CheckBox"
   | "Dropdown"
   | "Slider"
-  | "ScrollArea"
   | "Sprite"
   | "Spinner"
   | "ProgressBar"
