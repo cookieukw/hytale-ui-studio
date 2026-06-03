@@ -13,7 +13,6 @@ import {
   Smartphone,
   Columns2,
   Eye,
-  Home,
   ChevronRight,
   FolderCode,
   FileCode,
@@ -141,18 +140,8 @@ export function EditorToolbar() {
                 />
              </div>
              
-             <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={exitProject}
-                  title="Home"
-                >
-                  <Home className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex items-center">
+           <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded ml-1">
                     v{packageJson.version}
                   </span>
