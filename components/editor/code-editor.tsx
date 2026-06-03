@@ -23,38 +23,7 @@ export function CodeEditor() {
   const highlightRange = useMemo(() => {
     if (!selectedId || !code) return null;
 
-    // 1. Find the component and its "header signature"
-    let targetComponent: any = null;
-    let matchCount = 0;
-    let targetMatchIndex = -1;
-
-    const findTarget = (list: any[]) => {
-      for (const comp of list) {
-        // Construct header signature logic matching componentsToCode
-        const idPart =
-          comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
-        const header = `${comp.type}${idPart}`;
-
-        // If we haven't found target yet, track matching signatures
-        if (!targetComponent) {
-          if (comp.id === selectedId) {
-            targetComponent = comp;
-            targetMatchIndex = matchCount;
-            return; // Found it
-          }
-        }
-
-        // Count generic matches for this header to disambiguate
-        // Wait, checking *after* finding target is tricky if we don't know the signature yet.
-        // Better: Traverse once to find target and its signature.
-        // Then traverse again (or simultaneous?)
-        // Actually, we need to know "This is the 3rd 'Label {' in the file".
-        // But 'Label {' might appear nested. The file generated is flat-ish but recursive.
-        // Let's rely on exact pre-order traversal sequence matching the code generation sequence.
-      }
-    };
-
-    // Better strategy: Generate a flat list of "Headers" in pre-order
+    // Generate a flat list of "Headers" in pre-order, matching the code generation order
     const flatHeaders: { id: string; header: string }[] = [];
     const traverse = (list: any[]) => {
       for (const comp of list) {
