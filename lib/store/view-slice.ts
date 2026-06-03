@@ -54,12 +54,13 @@ export const createViewSlice: StateCreator<
   setViewMode: (mode) => set({ viewMode: mode }),
   
   setDevicePreview: (preview) => {
-    let newZoom = 80;
-    if (preview === "Desktop") newZoom = 80;
-    if (preview === "Hytale") newZoom = 35;
-    if (preview === "Tablet") newZoom = 70;
-    if (preview === "Mobile") newZoom = 100;
-    set({ devicePreview: preview, zoom: newZoom, fitToScreen: false });
+    const zoomByDevice: Record<typeof preview, number> = {
+      Desktop: 80,
+      Hytale: 35,
+      Tablet: 70,
+      Mobile: 100,
+    };
+    set({ devicePreview: preview, zoom: zoomByDevice[preview], fitToScreen: false });
   },
 
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
