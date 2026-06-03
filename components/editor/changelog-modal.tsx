@@ -211,7 +211,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
+                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
                       <h4 className="text-xs font-semibold text-white">Export Filename Resolution</h4>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed pl-1">
@@ -223,7 +223,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
+                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
                       <h4 className="text-xs font-semibold text-white">Recursive Component Counter</h4>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed pl-1">
@@ -235,7 +235,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
+                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
                       <h4 className="text-xs font-semibold text-white">Cross-Axis Stretch (Anchor Full: 1)</h4>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed pl-1">
@@ -247,7 +247,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
+                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
                       <h4 className="text-xs font-semibold text-white">CenterMiddle Layout Flow</h4>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed pl-1">
