@@ -6,6 +6,20 @@ import { cn } from "@/lib/utils";
 import { SpriteRenderer } from "./renderers/sprite-renderer";
 import { FileJson } from "lucide-react";
 
+function hexToRgba(hex: string, alpha: number): string {
+  let r = 0, g = 0, b = 0;
+  if (hex.length === 4) {
+    r = parseInt(hex[1] + hex[1], 16);
+    g = parseInt(hex[2] + hex[2], 16);
+    b = parseInt(hex[3] + hex[3], 16);
+  } else if (hex.length === 7) {
+    r = parseInt(hex.slice(1, 3), 16);
+    g = parseInt(hex.slice(3, 5), 16);
+    b = parseInt(hex.slice(5, 7), 16);
+  }
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 interface RenderedComponentProps {
   component: HytaleComponent;
   isBlueprint: boolean;
@@ -377,7 +391,14 @@ export const RenderedComponent = memo(function RenderedComponent({
 
     // ─── Background ───────────────────────────────────────────────────────────
     if (component.background && !isBlueprint) {
-      style.backgroundColor = component.background.color;
+      if (component.background.color) {
+        if (component.background.opacity !== undefined) {
+          style.backgroundColor = hexToRgba(component.background.color, component.background.opacity);
+        } else {
+          style.backgroundColor = component.background.color;
+        }
+      }
+      
       if (component.background.texture) {
         const texture = component.background.texture.startsWith("/")
           ? component.background.texture
@@ -385,9 +406,9 @@ export const RenderedComponent = memo(function RenderedComponent({
         style.backgroundImage = `url(${texture})`;
         style.backgroundSize = "100% 100%";
         style.backgroundRepeat = "no-repeat";
-      }
-      if (component.background.opacity !== undefined) {
-        style.opacity = component.background.opacity;
+        
+        // Note: CSS does not allow applying opacity exclusively to a background-image.
+        // Applying style.opacity here would incorrectly make the children transparent.
       }
     }
 
