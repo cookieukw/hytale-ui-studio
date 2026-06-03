@@ -87,9 +87,9 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <div className="flex gap-3">
                     <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
                     <div>
-                      <h4 className="text-sm font-semibold text-white">Full CSS Padding & Margin Parity</h4>
+                      <h4 className="text-sm font-semibold text-white">1:1 Hytale Engine Parity</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                        The visual editor now 100% replicates Hytale's native padding and margin behaviors. Nested components are properly pushed inwards, preserving background color edges just like the in-game UI.
+                        The visual editor now 100% replicates Hytale's native padding, stack anchoring, and margin behaviors. What you build in the visual canvas is mathematically guaranteed to render perfectly in the game client.
                       </p>
                     </div>
                   </div>
@@ -99,9 +99,9 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <div className="flex gap-3">
                     <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
                     <div>
-                      <h4 className="text-sm font-semibold text-white">Advanced Primitive Properties Parser</h4>
+                      <h4 className="text-sm font-semibold text-white">Massive Component Refactoring</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                        Added support for primitive number parsing of layout properties (e.g. `Padding: 10;`). The system now intelligently scales values to `Top/Bottom/Left/Right` automatically!
+                        The monolithic RenderedComponent was completely dismantled. The Drag-and-Drop mechanics, styles, and visual rendering factory were extracted, significantly improving editor performance and maintainability.
                       </p>
                     </div>
                   </div>
@@ -113,7 +113,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                     <div>
                       <h4 className="text-sm font-semibold text-white">Quality of Life Improvements</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                        Added a new "Export as Image" feature to easily share your layouts. We also implemented resizable panels for better workspace organization, fixed mouse-wheel scrolling in the canvas, and set the default zoom to 35% with the engine locked to Hytale.
+                        Added a new "Export as Image" feature to easily share your layouts. We also implemented resizable panels for better workspace organization, fixed mouse-wheel scrolling in the canvas, and locked the engine to Hytale.
                       </p>
                     </div>
                   </div>
@@ -327,9 +327,9 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                       <RefreshCw className="h-3 w-3" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-white">Parser Precision Upgrade</h4>
+                      <h4 className="text-sm font-semibold text-white">Component Content Renderer Abstraction</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                        Extensively decoupled strict object type checks from the parser to gracefully read shorthand properties like `Padding: 15;` avoiding silent node drops.
+                        Abstracted the visual UI node generator into an independent `ComponentContentRenderer` factory. The UI shell is now completely decoupled from the Hytale tags switch statement.
                       </p>
                     </div>
                   </div>
