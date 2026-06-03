@@ -54,7 +54,7 @@ export const createProjectSlice: StateCreator<
       components: [],
       imports: [],
       selectedId: null,
-      history: [{ components: [], imports: [] }],
+      history: [{ components: [], imports: [], actionName: "Initial State" }],
       historyIndex: 0,
       code: "",
     }));
@@ -72,7 +72,7 @@ export const createProjectSlice: StateCreator<
       components: activeFile.components,
       imports: activeFile.imports,
       selectedId: null,
-      history: [{ components: activeFile.components, imports: activeFile.imports }],
+      history: [{ components: activeFile.components, imports: activeFile.imports, actionName: "Initial State" }],
       historyIndex: 0,
     });
     get().syncCodeFromComponents();
@@ -98,8 +98,8 @@ export const createProjectSlice: StateCreator<
         imports: activeFile ? activeFile.imports : [],
         selectedId: null,
         history: activeFile
-        ? [{ components: activeFile.components, imports: activeFile.imports }]
-        : [{ components: [], imports: [] }],
+        ? [{ components: activeFile.components, imports: activeFile.imports, actionName: "Initial State" }]
+        : [{ components: [], imports: [], actionName: "Initial State" }],
         historyIndex: 0,
       };
     });
@@ -154,7 +154,7 @@ export const createProjectSlice: StateCreator<
       components: [],
       imports: [],
       selectedId: null,
-      history: [{ components: [], imports: [] }],
+      history: [{ components: [], imports: [], actionName: "Initial State" }],
       historyIndex: 0,
       code: "",
     });
@@ -268,7 +268,7 @@ export const createProjectSlice: StateCreator<
           components: files[0].components,
           imports: files[0].imports,
           selectedId: null,
-          history: [{ components: files[0].components, imports: files[0].imports }],
+          history: [{ components: files[0].components, imports: files[0].imports, actionName: "Initial State" }],
           historyIndex: 0,
         }));
         get().syncCodeFromComponents();

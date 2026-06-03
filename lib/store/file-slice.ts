@@ -41,7 +41,7 @@ export const createFileSlice: StateCreator<
           components: [],
           imports: [],
           selectedId: null,
-          history: [{ components: [], imports: [] }],
+          history: [{ components: [], imports: [], actionName: "Initial State" }],
           historyIndex: 0,
           code: "",
       }));
@@ -63,7 +63,7 @@ export const createFileSlice: StateCreator<
           components: file.components,
           imports: file.imports,
           selectedId: null,
-          history: [{ components: file.components, imports: file.imports }],
+          history: [{ components: file.components, imports: file.imports, actionName: "Initial State" }],
           historyIndex: 0,
       }));
       get().syncCodeFromComponents();
@@ -91,7 +91,7 @@ export const createFileSlice: StateCreator<
               components: activeFile.components,
               imports: activeFile.imports,
               selectedId: null,
-              history: [{ components: activeFile.components, imports: activeFile.imports }],
+              history: [{ components: activeFile.components, imports: activeFile.imports, actionName: "Initial State" }],
               historyIndex: 0,
           };
       });
