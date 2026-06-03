@@ -40,6 +40,34 @@ Hytale UI Studio is a powerful visual editor designed specifically for creating 
 
 ---
 
+## 📐 1:1 Hytale Engine Parity
+
+Hytale UI Studio isn't just a basic drawing tool—it implements a pixel-perfect **1:1 emulation of Hytale's proprietary UI layout engine** within the browser using React and CSS mathematics. The visual canvas isn't an approximation; it's an exact replica of how Hytale computes dimensions, positions, and stacks.
+
+Here is the "juice" behind the emulation:
+
+### 1. The LayoutMode Engine
+In Hytale, `LayoutMode` dictates how children are stacked. We mapped these custom rules natively using Flexbox:
+- **Directional Stacks:** `Top` and `Bottom` become vertical flex columns. `Left` and `Right` become horizontal flex rows. 
+- **Centering Variants:** Hytale's `CenterMiddle` (horizontal stack, centered) and `MiddleCenter` (vertical stack, centered) are explicitly translated into axis-specific `alignItems` and `justifyContent` properties.
+- **Advanced Wrapping:** `LeftCenterWrap` perfectly wraps overflowing horizontal content using `flexWrap: "wrap"` while keeping rows centered via `alignContent: "flex-start"`.
+- **Absolute Overrides:** The `Full` layout mode disables flex entirely, switching to a `position: absolute` bounding box where children are freely placed.
+
+### 2. The Anchor-to-Margin Magic (Stack Context)
+Hytale's `Anchor` system behaves completely differently depending on the parent's `LayoutMode`. We reverse-engineered this behavior:
+- **In `Full` Layout:** Anchors (`Top`, `Bottom`, `Left`, `Right`) act as absolute pixel coordinates bounding the child.
+- **In Stack Layouts:** *This is where the magic happens.* If a parent has `LayoutMode: Top` (a vertical stack), `Anchor.Top` and `Anchor.Bottom` stop being coordinates and become **directional margins** (gaps between items). Our engine intercepts the Anchor definitions at runtime and translates them into `marginTop`/`marginBottom` or `marginLeft`/`marginRight` based on the parent's flow axis.
+
+### 3. Proportional FlexWeight
+When multiple elements compete for remaining space, Hytale uses `FlexWeight`. We emulate this directly by mapping `FlexWeight` to the CSS `flexGrow` property while forcing `flexBasis: "0%"`. This guarantees the browser mathematically distributes the remaining container width exactly as Hytale's UI processor does.
+
+### 4. Box-Sizing & Padding Mathematics
+Hytale calculates Padding as an *additive* expansion to the container, rather than an inner squish. To replicate this without breaking HTML Flexbox rules, our engine enforces a strict `border-box` model, manually adding the `Padding` vectors to the explicitly defined `Anchor.Width` and `Anchor.Height`.
+
+When you drag and drop a component in Hytale UI Studio, what you see is mathematically guaranteed to be what you get when injected into the real game client via UI commands.
+
+---
+
 ## 🛠️ Built With
 
 | Technology | Purpose |

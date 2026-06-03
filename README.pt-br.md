@@ -40,6 +40,34 @@ O Hytale UI Studio é um poderoso editor visual projetado especificamente para c
 
 ---
 
+## 📐 Paridade 1:1 com a Engine do Hytale
+
+O Hytale UI Studio não é apenas uma ferramenta básica de desenho — ele implementa uma **emulação 1:1 pixel-perfect da engine proprietária de layout do Hytale** dentro do navegador, usando React e matemática CSS. O canvas visual não é uma aproximação; é uma réplica exata de como o Hytale calcula dimensões, posições e empilhamento.
+
+Aqui está o "suco" técnico por trás dessa emulação:
+
+### 1. O Motor de LayoutMode
+No Hytale, o `LayoutMode` dita como os componentes filhos são empilhados. Mapeamos essas regras customizadas nativamente usando Flexbox:
+- **Pilhas Direcionais:** `Top` e `Bottom` viram colunas flex verticais. `Left` e `Right` viram linhas flex horizontais.
+- **Variantes de Centralização:** O `CenterMiddle` do Hytale (pilha horizontal, centralizada) e o `MiddleCenter` (pilha vertical, centralizada) são traduzidos explicitamente em propriedades de `alignItems` e `justifyContent` específicas para seus eixos.
+- **Quebra de Linha (Wrap):** O `LeftCenterWrap` quebra o conteúdo horizontal de forma perfeita usando `flexWrap: "wrap"` enquanto mantém as linhas centralizadas através de `alignContent: "flex-start"`.
+- **Sobrescrita Absoluta:** O layout `Full` desativa o flex completamente, ativando um sistema `position: absolute` onde os filhos são posicionados livremente.
+
+### 2. A Mágica do Anchor-para-Margem (Contexto de Stack)
+O sistema de `Anchor` do Hytale se comporta de maneira completamente diferente dependendo do `LayoutMode` do pai. Nós fizemos engenharia reversa desse comportamento:
+- **No layout `Full`:** As âncoras (`Top`, `Bottom`, `Left`, `Right`) agem como coordenadas absolutas em pixels que definem os limites do componente.
+- **Nos layouts de Pilha (Stacks):** *Aqui acontece a mágica.* Se um pai tem `LayoutMode: Top` (uma pilha vertical), `Anchor.Top` e `Anchor.Bottom` deixam de ser coordenadas e se tornam **margens direcionais** (espaço entre os itens). Nossa engine intercepta as definições do Anchor em tempo real e as converte para `marginTop`/`marginBottom` ou `marginLeft`/`marginRight` dependendo do eixo da pilha pai.
+
+### 3. FlexWeight Proporcional
+Quando múltiplos elementos competem pelo espaço restante na tela, o Hytale usa o `FlexWeight`. Nós emulamos isso diretamente mapeando o `FlexWeight` para a propriedade CSS `flexGrow`, forçando um `flexBasis: "0%"`. Isso garante que o navegador distribua matematicamente a largura do contêiner exatamente como o processador de UI do Hytale faz.
+
+### 4. Matemática de Box-Sizing e Padding
+O Hytale calcula o Padding como uma expansão *aditiva* ao contêiner, e não como um esmagamento interno (squish). Para replicar isso sem quebrar as leis do Flexbox do HTML, nossa engine impõe um modelo estrito de `border-box`, somando manualmente os vetores de `Padding` à largura e altura (`Anchor.Width` e `Anchor.Height`) previamente definidas.
+
+Quando você arrasta e solta um componente no Hytale UI Studio, o que você vê é matematicamente garantido de ser exatamente o que aparecerá no cliente real do jogo através dos comandos de UI.
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 | Tecnologia | Uso |
