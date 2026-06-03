@@ -13,6 +13,7 @@ import { DebouncedColorPicker } from "../debounced-color-picker";
 import { CollapsibleSection } from "./collapsible-section";
 import { FieldRow } from "./field-row";
 import { Input } from "@/components/ui/input";
+import { updateComponentInTree } from "@/lib/tree-utils";
 
 interface StyleTabProps {
   component: HytaleComponent;
@@ -30,40 +31,62 @@ export function StyleTab({
   );
   let component = initialComponent;
   let targetChildLabel: HytaleComponent | undefined;
+  let targetChildGroup: HytaleComponent | undefined;
 
   if (isButtonWithLabel) {
     targetChildLabel = initialComponent.children?.find(
       (c) => c.type === "Label",
     );
-    if (targetChildLabel) {
+    targetChildGroup = initialComponent.children?.find(
+      (c) => c.type === "Group",
+    );
+
+    if (!targetChildLabel && targetChildGroup?.children) {
+      targetChildLabel = targetChildGroup.children.find(
+        (c) => c.type === "Label",
+      );
+    }
+
+    if (targetChildLabel || targetChildGroup) {
       component = {
         ...initialComponent,
-        text: targetChildLabel.text,
-        textStyle: targetChildLabel.textStyle,
       };
+      if (targetChildLabel) {
+        component.text = targetChildLabel.text;
+        component.textStyle = targetChildLabel.textStyle;
+      }
+      if (targetChildGroup) {
+        component.background = targetChildGroup.background;
+      }
     }
   }
 
   const onUpdate = (updates: Partial<HytaleComponent>) => {
-    if (isButtonWithLabel && targetChildLabel) {
+    if (isButtonWithLabel && (targetChildLabel || targetChildGroup)) {
       const mergedUpdates = { ...updates };
+      let updatedChildren = initialComponent.children || [];
+      let childrenChanged = false;
 
-      if ("text" in updates || "textStyle" in updates) {
-        mergedUpdates.children = initialComponent.children?.map((c) =>
-          c.id === targetChildLabel!.id
-            ? {
-                ...c,
-                text:
-                  updates.text !== undefined ? String(updates.text) : c.text,
-                textStyle:
-                  updates.textStyle !== undefined
-                    ? updates.textStyle
-                    : c.textStyle,
-              }
-            : c,
-        );
+      if (targetChildLabel && ("text" in updates || "textStyle" in updates)) {
+        updatedChildren = updateComponentInTree(updatedChildren, targetChildLabel.id, {
+          text: updates.text !== undefined ? String(updates.text) : targetChildLabel.text,
+          textStyle: updates.textStyle !== undefined ? updates.textStyle : targetChildLabel.textStyle,
+        });
         delete mergedUpdates.text;
         delete mergedUpdates.textStyle;
+        childrenChanged = true;
+      }
+
+      if (targetChildGroup && "background" in updates) {
+        updatedChildren = updateComponentInTree(updatedChildren, targetChildGroup.id, {
+          background: updates.background,
+        });
+        delete mergedUpdates.background;
+        childrenChanged = true;
+      }
+
+      if (childrenChanged) {
+        mergedUpdates.children = updatedChildren;
       }
 
       originalOnUpdate(mergedUpdates);
