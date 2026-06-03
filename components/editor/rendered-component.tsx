@@ -262,10 +262,10 @@ export const RenderedComponent = memo(function RenderedComponent({
       const hasHeight = a.height !== undefined;
 
       // Identify edges that act purely as gaps in the current stacking mode
-      const isTopGap = ["Bottom", "Top", "TopScrolling", "MiddleCenter"].includes(parentLayoutMode);
-      const isBottomGap = ["Top", "Bottom", "TopScrolling", "MiddleCenter"].includes(parentLayoutMode);
-      const isLeftGap = ["Right", "Left", "LeftScrolling", "CenterMiddle", "Center", "LeftCenterWrap"].includes(parentLayoutMode);
-      const isRightGap = ["Left", "Right", "LeftScrolling", "CenterMiddle", "Center", "LeftCenterWrap"].includes(parentLayoutMode);
+      const isTopGap = ["Bottom", "Top", "TopScrolling", "MiddleCenter"].includes(parentLayoutMode ?? "");
+      const isBottomGap = ["Top", "Bottom", "TopScrolling", "MiddleCenter"].includes(parentLayoutMode ?? "");
+      const isLeftGap = ["Right", "Left", "LeftScrolling", "CenterMiddle", "Center", "LeftCenterWrap"].includes(parentLayoutMode ?? "");
+      const isRightGap = ["Left", "Right", "LeftScrolling", "CenterMiddle", "Center", "LeftCenterWrap"].includes(parentLayoutMode ?? "");
 
       const hasAbsoluteTop = hasTop && !isTopGap;
       const hasAbsoluteBottom = hasBottom && !isBottomGap;
@@ -311,13 +311,13 @@ export const RenderedComponent = memo(function RenderedComponent({
         // In stack layouts, cross-axis anchors (e.g. Top/Bottom in a horizontal stack)
         // cause the element to stretch along that cross axis, keeping it in flow.
         if (hasAbsoluteTop && hasAbsoluteBottom && !hasHeight) {
-          style.height = `calc(100% - ${a.top + a.bottom}px)`;
+          style.height = `calc(100% - ${(a.top || 0) + (a.bottom || 0)}px)`;
           style.marginTop = `${a.top}px`;
           style.marginBottom = `${a.bottom}px`;
           style.alignSelf = "stretch";
         }
         if (hasAbsoluteLeft && hasAbsoluteRight && !hasWidth) {
-          style.width = `calc(100% - ${a.left + a.right}px)`;
+          style.width = `calc(100% - ${(a.left || 0) + (a.right || 0)}px)`;
           style.marginLeft = `${a.left}px`;
           style.marginRight = `${a.right}px`;
           style.alignSelf = "stretch";
