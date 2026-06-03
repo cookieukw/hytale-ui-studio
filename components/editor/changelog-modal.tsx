@@ -118,6 +118,18 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                     </div>
                   </div>
 
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">4</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Template Gallery</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added a brand new "Templates" tab on the start screen! You can now start projects instantly using production-ready, fully-functional Hytale UI templates (like RPG Inventory and Skill Tree).
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
                     <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                       <Badge variant="outline" className="text-muted-foreground">v3.0.0</Badge>
@@ -200,6 +212,18 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
+                      <h4 className="text-xs font-semibold text-white">Recursive Component Counter</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      Fixed a bug on the start screen where the project component count only displayed the root elements. It now recursively scans all files and deeply nested UI elements to show the true total component sum.
+                    </p>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
                       <h4 className="text-xs font-semibold text-white">Cross-Axis Stretch (Anchor Full: 1)</h4>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed pl-1">
