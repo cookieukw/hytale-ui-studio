@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { NavButton } from "./nav-button";
 import { StartTab } from "./types";
 import { ChangelogModal } from "../changelog-modal";
-import packageJson from "../../../package.json";
+import packageJson from "@/package.json";
 
 interface SidebarProps {
   activeTab: StartTab;

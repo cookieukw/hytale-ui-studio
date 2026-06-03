@@ -47,7 +47,7 @@ import { cn } from "@/lib/utils";
 import { ChangelogModal } from "./changelog-modal";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
-import packageJson from "../../package.json";
+import packageJson from "@/package.json";
 
 
 
