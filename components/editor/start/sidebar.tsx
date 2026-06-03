@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FolderOpen, Settings, Plus, HelpCircle, Github } from "lucide-react";
+import { FolderOpen, Settings, Plus, HelpCircle, LayoutTemplate, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavButton } from "./nav-button";
 import { StartTab } from "./types";
@@ -42,6 +42,12 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           onClick={() => setActiveTab("Projects")}
           icon={<FolderOpen className="h-4 w-4" />}
           label="Projects"
+        />
+        <NavButton
+          active={activeTab === "Templates"}
+          onClick={() => setActiveTab("Templates")}
+          icon={<LayoutTemplate className="h-4 w-4" />}
+          label="Templates"
         />
         <NavButton
           active={activeTab === "Customize"}

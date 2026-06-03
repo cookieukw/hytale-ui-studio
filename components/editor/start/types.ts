@@ -1,1 +1,1 @@
-export type StartTab = "Projects" | "Customize" | "Plugins" | "Learn";
+export type StartTab = "Projects" | "Templates" | "Customize" | "Plugins" | "Learn";

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sidebar } from "./start/sidebar";
 import { ProjectsTab } from "./start/projects-tab";
+import { TemplatesTab } from "./start/templates-tab";
 import { StartTab } from "./start/types";
 
 export function StartScreen() {
@@ -16,6 +17,8 @@ export function StartScreen() {
       <div className="flex-1 flex flex-col bg-background">
         {activeTab === "Projects" ? (
           <ProjectsTab />
+        ) : activeTab === "Templates" ? (
+          <TemplatesTab />
         ) : (
           <div className="p-12 flex flex-col items-center justify-center h-full">
             <div className="text-center">
