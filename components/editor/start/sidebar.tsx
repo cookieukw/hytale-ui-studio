@@ -20,7 +20,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     <div className="w-[240px] flex flex-col border-r border-border bg-sidebar">
       <div className="p-6 pb-2">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+          <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
             <img src="/hytale-studio_foreground.png" alt="Logo" className="h-8 w-8" />
           </div>
           <div className="flex flex-col">
