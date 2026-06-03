@@ -45,7 +45,7 @@ import {
 import { useEditorStore } from "@/lib/editor-store";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
-import { findComponentLocation } from "@/lib/tree-utils";
+import { findComponentLocation, isDescendant } from "@/lib/tree-utils";
 
 const componentIcons: Record<
   ComponentType,
@@ -372,8 +372,8 @@ export function ComponentTree() {
     e.preventDefault();
     e.stopPropagation();
 
-    // Prevent dragging an item into itself or its children (simplified, real check needed for children)
-    if (localDraggingId === targetComponent.id) {
+    // Prevent dragging an item into itself or its children
+    if (localDraggingId === targetComponent.id || (localDraggingId && isDescendant(components, localDraggingId, targetComponent.id))) {
       setDragOverId(null);
       setDropPosition(null);
       return;
@@ -386,10 +386,11 @@ export function ComponentTree() {
     // Can this target accept children?
     const isContainer = targetComponent.type === "Group" || targetComponent.type === "Panel";
 
-    // 25% top = before, 25% bottom = after, 50% middle = inside (if container)
-    if (y < height * 0.25) {
+    // 35% top = before, 35% bottom = after, 30% middle = inside (if container)
+    // This makes it much easier to drop elements above/below a container without accidentally dropping inside
+    if (y < height * 0.35) {
       setDropPosition("before");
-    } else if (y > height * 0.75) {
+    } else if (y > height * 0.65) {
       setDropPosition("after");
     } else {
       if (isContainer) {
@@ -409,6 +410,12 @@ export function ComponentTree() {
     const draggedId = e.dataTransfer.getData("componentId");
     
     if (draggedId && draggedId !== targetId && dropPosition) {
+      if (isDescendant(components, draggedId, targetId)) {
+        setDragOverId(null);
+        setDropPosition(null);
+        setLocalDraggingId(null);
+        return;
+      }
       // Find where the target is currently located
       const targetLocation = findComponentLocation(components, targetId);
       

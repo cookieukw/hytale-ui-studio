@@ -22,6 +22,18 @@ export function findComponentLocation(
   return null;
 }
 
+export function isDescendant(
+  components: HytaleComponent[],
+  parentId: string,
+  childId: string,
+): boolean {
+  const parent = findComponentById(components, parentId);
+  if (!parent || !parent.children) return false;
+  
+  // Recursively check if childId exists inside parent.children
+  return !!findComponentById(parent.children, childId);
+}
+
 export function generateId(): string {
   return `comp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
