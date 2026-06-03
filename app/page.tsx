@@ -31,6 +31,7 @@ import { LoadingScreen } from "@/components/loading-screen";
 import { StartScreen } from "@/components/editor/start-screen";
 import { EditorCommandPalette } from "@/components/editor/command-palette";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { StatusBar } from "@/components/editor/status-bar";
 
 import { useEffect, useState } from "react";
 
@@ -194,6 +195,9 @@ export default function HytaleUIStudio() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+      
+      {/* Status Bar */}
+      <StatusBar />
 
       {/* Mobile Layout */}
       <div className="md:hidden flex h-full flex-col bg-background">
