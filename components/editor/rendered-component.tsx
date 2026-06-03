@@ -1,7 +1,7 @@
 import React, { memo, useRef, useState } from "react";
 import { useEditorStore } from "@/lib/editor-store";
 import { COMPONENT_DEFINITIONS } from "@/lib/component-definitions";
-import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
+import type { HytaleComponent, ComponentType, Padding } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
 import { SpriteRenderer } from "./renderers/sprite-renderer";
 import { FileJson } from "lucide-react";
@@ -29,6 +29,7 @@ interface RenderedComponentProps {
   parentId?: string | null;
   parentType?: ComponentType | null;
   parentLayoutMode?: string | null;
+  parentPadding?: Padding;
 }
 
 export const RenderedComponent = memo(function RenderedComponent({
@@ -40,6 +41,7 @@ export const RenderedComponent = memo(function RenderedComponent({
   parentId = null,
   parentType,
   parentLayoutMode,
+  parentPadding,
 }: RenderedComponentProps) {
   // Use store directly for actions to avoid prop drilling
   const moveComponent = useEditorStore((state) => state.moveComponent);
@@ -231,6 +233,7 @@ export const RenderedComponent = memo(function RenderedComponent({
 
   const getComponentStyle = (
     parentLayoutMode?: string,
+    parentPadding?: Padding,
   ): React.CSSProperties => {
     const style: React.CSSProperties = {};
 
@@ -322,10 +325,18 @@ export const RenderedComponent = memo(function RenderedComponent({
       // We rely on isAbsolute and isCollapsingStackAbsolute below.
       if (isAbsolute) {
         style.position = "absolute";
-        if (hasTop) style.top = `${a.top}px`;
-        if (hasBottom) style.bottom = `${a.bottom}px`;
-        if (hasLeft) style.left = `${a.left}px`;
-        if (hasRight) style.right = `${a.right}px`;
+        
+        // Hytale absolute positioning is relative to the CONTENT box, not the padding box.
+        // We offset CSS absolute positions by the parent's padding to mimic this.
+        const pTop = parentPadding?.top ?? parentPadding?.full ?? 0;
+        const pBottom = parentPadding?.bottom ?? parentPadding?.full ?? 0;
+        const pLeft = parentPadding?.left ?? parentPadding?.full ?? 0;
+        const pRight = parentPadding?.right ?? parentPadding?.full ?? 0;
+
+        if (hasTop) style.top = `${Number(a.top) + pTop}px`;
+        if (hasBottom) style.bottom = `${Number(a.bottom) + pBottom}px`;
+        if (hasLeft) style.left = `${Number(a.left) + pLeft}px`;
+        if (hasRight) style.right = `${Number(a.right) + pRight}px`;
         // Explicit size alongside edge pins
         if (hasWidth) {
           const w = typeof a.width === "string" ? parseFloat(a.width) : (a.width || 0);
@@ -711,7 +722,7 @@ export const RenderedComponent = memo(function RenderedComponent({
       blueprintClass,
       selectedClass,
     ),
-    style: getComponentStyle(parentLayoutMode ?? undefined),
+    style: getComponentStyle(parentLayoutMode ?? undefined, parentPadding),
     onClick: handleClick,
     // Disable dragging if inside a button, so the button handles the drag
     draggable: !isLockedInParent && !component.isLocked,
@@ -858,6 +869,7 @@ export const RenderedComponent = memo(function RenderedComponent({
               parentId={component.id}
               parentType={component.type}
               parentLayoutMode={component.layoutMode}
+              parentPadding={component.padding}
             />
           ))}
         </>,
@@ -1197,6 +1209,7 @@ export const RenderedComponent = memo(function RenderedComponent({
               parentId={component.id}
               parentType={component.type}
               parentLayoutMode={component.layoutMode}
+              parentPadding={component.padding}
             />
           ))}
         </>,
@@ -1264,6 +1277,7 @@ export const RenderedComponent = memo(function RenderedComponent({
               parentId={component.id}
               parentType={component.type}
               parentLayoutMode={component.layoutMode}
+              parentPadding={component.padding}
             />
           ))}
         </>,
