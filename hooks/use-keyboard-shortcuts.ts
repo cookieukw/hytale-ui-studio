@@ -19,8 +19,6 @@ export function useKeyboardShortcuts() {
         toggleGrid,
         toggleSnap,
         setActiveDesktopTab,
-        fitToScreen,
-        setFitToScreen,
         exitProject,
       } = store;
 
@@ -107,6 +105,7 @@ export function useKeyboardShortcuts() {
       // Toggle Fit to Screen (Alt+F)
       if (e.altKey && !e.shiftKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
+        const { fitToScreen, setFitToScreen } = useEditorStore.getState();
         setFitToScreen(!fitToScreen);
         return;
       }
