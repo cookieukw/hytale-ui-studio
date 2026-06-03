@@ -244,10 +244,31 @@ export const RenderedComponent = memo(function RenderedComponent({
       style.width = "100%";
       style.height = "100%";
     }
+    
+    // Hytale anchors define content dimensions, padding expands the element's total size
+    style.boxSizing = "content-box";
 
     // ─── zIndex ───────────────────────────────────────────────────────────────
     if (component.zIndex !== undefined) {
       style.zIndex = component.zIndex;
+    }
+
+    // ─── Box Sizing ───────────────────────────────────────────────────────────
+    // We use border-box universally to prevent flex items from bleeding out when stretched.
+    // To match Hytale's additive padding on explicit anchors, we manually add the padding
+    // to the width and height properties below.
+    style.boxSizing = "border-box";
+
+    let paddingX = 0;
+    let paddingY = 0;
+    if (component.padding) {
+      if (typeof component.padding === "number") {
+        paddingX = component.padding * 2;
+        paddingY = component.padding * 2;
+      } else {
+        paddingX = (component.padding.left || 0) + (component.padding.right || 0) + (component.padding.full ? component.padding.full * 2 : 0);
+        paddingY = (component.padding.top || 0) + (component.padding.bottom || 0) + (component.padding.full ? component.padding.full * 2 : 0);
+      }
     }
 
     // ─── Anchor System ────────────────────────────────────────────────────────
@@ -306,11 +327,14 @@ export const RenderedComponent = memo(function RenderedComponent({
         if (hasLeft) style.left = `${a.left}px`;
         if (hasRight) style.right = `${a.right}px`;
         // Explicit size alongside edge pins
-        if (hasWidth)
-          style.width = typeof a.width === "string" ? a.width : `${a.width}px`;
-        if (hasHeight)
-          style.height =
-            typeof a.height === "string" ? a.height : `${a.height}px`;
+        if (hasWidth) {
+          const w = typeof a.width === "string" ? parseFloat(a.width) : (a.width || 0);
+          style.width = `${w + paddingX}px`;
+        }
+        if (hasHeight) {
+          const h = typeof a.height === "string" ? parseFloat(a.height) : (a.height || 0);
+          style.height = `${h + paddingY}px`;
+        }
         // Left+Right without Width → horizontal stretch
         if (hasLeft && hasRight && !hasWidth) delete style.width;
         // Top+Bottom without Height → vertical stretch
@@ -339,11 +363,28 @@ export const RenderedComponent = memo(function RenderedComponent({
       } else {
         // Widget-sized: only Width/Height, flows normally
         style.position = "relative";
-        if (hasWidth)
-          style.width = typeof a.width === "string" ? a.width : `${a.width}px`;
-        if (hasHeight)
-          style.height =
-            typeof a.height === "string" ? a.height : `${a.height}px`;
+        if (hasWidth) {
+          const w = typeof a.width === "string" ? parseFloat(a.width) : (a.width || 0);
+          style.width = `${w + paddingX}px`;
+          // In vertical layouts, fixed-width elements center horizontally by default
+          if (["Top", "Bottom", "TopScrolling"].includes(parentLayoutMode ?? "")) {
+            style.alignSelf = "center";
+          }
+        }
+        if (hasHeight) {
+          const h = typeof a.height === "string" ? parseFloat(a.height) : (a.height || 0);
+          style.height = `${h + paddingY}px`;
+          // In horizontal layouts, fixed-height elements center vertically by default
+          if (["Left", "Right", "LeftScrolling"].includes(parentLayoutMode ?? "")) {
+            style.alignSelf = "center";
+          }
+        }
+        
+        // Apply directional anchors as margins when they act as gaps in flow layouts
+        if (hasTop && isTopGap) style.marginTop = `${a.top}px`;
+        if (hasBottom && isBottomGap) style.marginBottom = `${a.bottom}px`;
+        if (hasLeft && isLeftGap) style.marginLeft = `${a.left}px`;
+        if (hasRight && isRightGap) style.marginRight = `${a.right}px`;
       }
     }
 
@@ -422,7 +463,7 @@ export const RenderedComponent = memo(function RenderedComponent({
     if (component.flexWeight !== undefined) {
       style.flexGrow = component.flexWeight;
       style.flexShrink = 1;
-      style.flexBasis = "auto";
+      style.flexBasis = "0%"; // 0% basis so space-between distributes gaps, matching Hytale's proportional layout
       style.minHeight = 0; // standard flexbox fix for flex children
       style.minWidth = 0;
     } else {
@@ -441,25 +482,21 @@ export const RenderedComponent = memo(function RenderedComponent({
       style.display = "flex";
       switch (component.layoutMode) {
         case "Top":
-          // Vertical stack top→bottom. Children fill full width (stretch).
           style.flexDirection = "column";
           style.alignItems = "stretch";
           style.justifyContent = "flex-start";
           break;
         case "Bottom":
-          // Vertical stack, children pinned to bottom.
           style.flexDirection = "column";
           style.alignItems = "stretch";
           style.justifyContent = "flex-end";
           break;
         case "Left":
-          // Horizontal stack left→right. Children fill full height (stretch).
           style.flexDirection = "row";
           style.alignItems = "stretch";
           style.justifyContent = "flex-start";
           break;
         case "Right":
-          // Horizontal stack, children pinned to right edge.
           style.flexDirection = "row";
           style.alignItems = "stretch";
           style.justifyContent = "flex-end";

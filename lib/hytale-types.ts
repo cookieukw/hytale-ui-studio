@@ -34,6 +34,7 @@ export interface Padding {
   bottom?: number;
   left?: number;
   right?: number;
+  full?: number;
 }
 
 export interface Margin {
