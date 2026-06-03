@@ -117,8 +117,12 @@ export function EditorToolbar() {
         pixelRatio: 1, // Keep 1:1 with Hytale native resolution (or 2 for high-res)
       });
       
+      const activeFile = currentProject?.files.find(f => f.id === currentProject.activeFileId);
+      const rawName = activeFile?.name || currentProject?.name || "hytale-layout";
+      const fileName = rawName.replace(/\.ui$/i, "");
+      
       const link = document.createElement("a");
-      link.download = `${currentProject?.name || "hytale-layout"}-preview.png`;
+      link.download = `${fileName}-exported.png`;
       link.href = dataUrl;
       link.click();
       
