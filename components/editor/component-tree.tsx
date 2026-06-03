@@ -45,7 +45,7 @@ import {
 import { useEditorStore } from "@/lib/editor-store";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
-import { findComponentLocation, isDescendant, isContainerType } from "@/lib/tree-utils";
+import { findComponentLocation, findComponentById, isDescendant, isContainerType } from "@/lib/tree-utils";
 
 const componentIcons: Record<
   ComponentType,
@@ -429,11 +429,10 @@ export function ComponentTree() {
           newIndex = targetLocation.index + 1;
         } else if (dropPosition === "inside") {
           newParentId = targetId;
-          const targetComponent = targetLocation.parentId === null 
-            ? components.find(c => c.id === targetId) 
-            : null; // Simplification, need actual component lookup if nested deeply
-          // Alternatively, we just append to the end of the children array
-          newIndex = 9999; 
+          // Use findComponentById to correctly look up the target container at any nesting level
+          const targetComponent = findComponentById(components, targetId);
+          // Append after all existing children
+          newIndex = targetComponent?.children?.length ?? 0;
         }
 
         moveComponent(draggedId, newParentId, newIndex);
