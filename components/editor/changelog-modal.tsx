@@ -255,6 +255,18 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                     </p>
                   </div>
 
+                  <Separator className="bg-border/50" />
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
+                      <h4 className="text-xs font-semibold text-white">CI Build Fix</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      Resolved a GitHub Actions build failure for Windows MSI targets by standardizing the `package.json` version string to comply with strict numeric SemVer requirements (`4.0.0`) expected by the Tauri bundler.
+                    </p>
+                  </div>
+
                   <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
                     <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
                       <Badge variant="outline" className="text-muted-foreground">v3.0.0</Badge>
