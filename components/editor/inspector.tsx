@@ -36,22 +36,7 @@ export function Inspector() {
   const components = useEditorStore((state) => state.components);
   const updateComponent = useEditorStore((state) => state.updateComponent);
 
-  // Find component by ID
-  const findById = (
-    comps: HytaleComponent[],
-    id: string,
-  ): HytaleComponent | null => {
-    for (const c of comps) {
-      if (c.id === id) return c;
-      if (c.children) {
-        const found = findById(c.children, id);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
-  const component = selectedId ? findById(components, selectedId) : null;
+  const component = selectedId ? findComponentById(components, selectedId) : null;
 
   if (!component) {
     return (
