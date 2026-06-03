@@ -45,7 +45,7 @@ import {
 import { useEditorStore } from "@/lib/editor-store";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
-import { findComponentLocation, isDescendant } from "@/lib/tree-utils";
+import { findComponentLocation, isDescendant, isContainerType } from "@/lib/tree-utils";
 
 const componentIcons: Record<
   ComponentType,
@@ -384,7 +384,7 @@ export function ComponentTree() {
     const height = rect.height;
 
     // Can this target accept children?
-    const isContainer = targetComponent.type === "Group" || targetComponent.type === "Panel";
+    const isContainer = isContainerType(targetComponent.type);
 
     // 35% top = before, 35% bottom = after, 30% middle = inside (if container)
     // This makes it much easier to drop elements above/below a container without accidentally dropping inside

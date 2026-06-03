@@ -10,6 +10,7 @@ import {
   updateComponentInTree,
   regenerateIds,
   collectAllNames,
+  isContainerType,
 } from "../tree-utils";
 import { COMPONENT_DEFINITIONS } from "../component-definitions";
 import type { HytaleComponent } from "../hytale-types";
@@ -218,7 +219,7 @@ export const createComponentSlice: StateCreator<
       const selectedComp = findComponentById(state.components, state.selectedId);
       if (selectedComp) {
         // If selected component can have children (Group, Panel), paste inside it at the end
-        if (selectedComp.type === "Group" || selectedComp.type === "Panel") {
+        if (isContainerType(selectedComp.type)) {
           targetParentId = selectedComp.id;
         } else {
           // Otherwise, paste as a sibling right after it
