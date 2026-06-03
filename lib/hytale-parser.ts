@@ -685,53 +685,79 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
       continue;
     }
 
-    if (key === "Padding" && typeof value === "object") {
+    if (key === "Padding") {
       if (!component.padding) component.padding = {};
-      if (value.Full !== undefined) {
-        const val = Number(value.Full);
-        component.padding = { top: val, bottom: val, left: val, right: val };
+      
+      // Handle primitive format (Padding: 10;)
+      if (typeof value === "number" || typeof value === "string") {
+        const val = Number(value);
+        if (!isNaN(val)) {
+          component.padding = { top: val, bottom: val, left: val, right: val };
+        }
+        continue;
       }
-      if (value.Horizontal !== undefined) {
-        const val = Number(value.Horizontal);
-        component.padding.left = val;
-        component.padding.right = val;
+
+      // Handle object format (Padding: (Full: 10))
+      if (typeof value === "object" && value !== null) {
+        if (value.Full !== undefined) {
+          const val = Number(value.Full);
+          component.padding = { top: val, bottom: val, left: val, right: val };
+        }
+        if (value.Horizontal !== undefined) {
+          const val = Number(value.Horizontal);
+          component.padding.left = val;
+          component.padding.right = val;
+        }
+        if (value.Vertical !== undefined) {
+          const val = Number(value.Vertical);
+          component.padding.top = val;
+          component.padding.bottom = val;
+        }
+        if (value.Top !== undefined) component.padding.top = Number(value.Top);
+        if (value.Bottom !== undefined)
+          component.padding.bottom = Number(value.Bottom);
+        if (value.Left !== undefined) component.padding.left = Number(value.Left);
+        if (value.Right !== undefined)
+          component.padding.right = Number(value.Right);
       }
-      if (value.Vertical !== undefined) {
-        const val = Number(value.Vertical);
-        component.padding.top = val;
-        component.padding.bottom = val;
-      }
-      if (value.Top !== undefined) component.padding.top = Number(value.Top);
-      if (value.Bottom !== undefined)
-        component.padding.bottom = Number(value.Bottom);
-      if (value.Left !== undefined) component.padding.left = Number(value.Left);
-      if (value.Right !== undefined)
-        component.padding.right = Number(value.Right);
       continue;
     }
 
-    if (key === "Margin" && typeof value === "object") {
+    if (key === "Margin") {
       if (!component.margin) component.margin = {};
-      if (value.Full !== undefined) {
-        const val = Number(value.Full);
-        component.margin = { top: val, bottom: val, left: val, right: val };
+      
+      // Handle primitive format (Margin: 10;)
+      if (typeof value === "number" || typeof value === "string") {
+        const val = Number(value);
+        if (!isNaN(val)) {
+          component.margin = { top: val, bottom: val, left: val, right: val };
+        }
+        continue;
       }
-      if (value.Horizontal !== undefined) {
-        const val = Number(value.Horizontal);
-        component.margin.left = val;
-        component.margin.right = val;
+
+      // Handle object format (Margin: (Full: 10))
+      if (typeof value === "object" && value !== null) {
+        if (value.Full !== undefined) {
+          const val = Number(value.Full);
+          component.margin = { top: val, bottom: val, left: val, right: val };
+        }
+        if (value.Horizontal !== undefined) {
+          const val = Number(value.Horizontal);
+          component.margin.left = val;
+          component.margin.right = val;
+        }
+        if (value.Vertical !== undefined) {
+          const val = Number(value.Vertical);
+          component.margin.top = val;
+          component.margin.bottom = val;
+        }
+        if (value.Top !== undefined) component.margin.top = Number(value.Top);
+        if (value.Bottom !== undefined)
+          component.margin.bottom = Number(value.Bottom);
+        if (value.Left !== undefined) component.margin.left = Number(value.Left);
+        if (value.Right !== undefined)
+          component.margin.right = Number(value.Right);
       }
-      if (value.Vertical !== undefined) {
-        const val = Number(value.Vertical);
-        component.margin.top = val;
-        component.margin.bottom = val;
-      }
-      if (value.Top !== undefined) component.margin.top = Number(value.Top);
-      if (value.Bottom !== undefined)
-        component.margin.bottom = Number(value.Bottom);
-      if (value.Left !== undefined) component.margin.left = Number(value.Left);
-      if (value.Right !== undefined)
-        component.margin.right = Number(value.Right);
       continue;
     }
 
