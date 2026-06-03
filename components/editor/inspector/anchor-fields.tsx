@@ -87,7 +87,7 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={!!disabled || !!isStackLayout}
+          disabled={!!disabled}
         />
       </FieldRow>
       <FieldRow label="Right">
@@ -100,7 +100,7 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={!!disabled || !!isStackLayout}
+          disabled={!!disabled}
         />
       </FieldRow>
       <FieldRow label="Top">
@@ -113,7 +113,7 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={!!disabled || !!isStackLayout}
+          disabled={!!disabled}
         />
       </FieldRow>
       <FieldRow label="Bottom">
@@ -126,14 +126,13 @@ export function AnchorFields({
           }}
           className="h-7 text-xs"
           placeholder="unset"
-          disabled={!!disabled || !!isStackLayout}
+          disabled={!!disabled}
         />
       </FieldRow>
 
       {isStackLayout && (
-        <div className="mt-2 rounded bg-amber-500/10 p-2 text-[10px] text-amber-500 border border-amber-500/20 leading-normal">
-          ⚠️ <strong>Absolute Anchors Locked:</strong> Parent Layout Mode is <strong>{parentLayoutMode}</strong> (stacking). 
-          To unlock Top/Bottom/Left/Right positioning, set parent Mode to <strong>Full</strong>.
+        <div className="mt-2 rounded bg-blue-500/10 p-2 text-[10px] text-blue-500 border border-blue-500/20 leading-normal">
+          ℹ️ <strong>Margin Behavior:</strong> In <strong>{parentLayoutMode}</strong> mode, Top/Bottom/Left/Right values act as layout margins/gaps instead of absolute positions.
         </div>
       )}
 

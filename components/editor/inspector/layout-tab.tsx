@@ -11,7 +11,7 @@ import { CollapsibleSection } from "./collapsible-section";
 import { FieldRow } from "./field-row";
 import { AnchorFields } from "./anchor-fields";
 import { PaddingFields } from "./padding-fields";
-import { MarginFields } from "./margin-fields";
+
 import { DropdownOptionsEditor } from "./dropdown-options-editor";
 
 interface LayoutTabProps {
@@ -56,10 +56,6 @@ export function LayoutTab({ component, onUpdate, isRoot, parentLayoutMode }: Lay
 
       <CollapsibleSection title="Padding">
         <PaddingFields component={component} onUpdate={onUpdate} />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Margin">
-        <MarginFields component={component} onUpdate={onUpdate} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Layout">
