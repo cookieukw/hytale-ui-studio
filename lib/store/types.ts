@@ -22,6 +22,12 @@ export interface EditorStore extends EditorState {
   activeMobileTab: MobileTab;
   setActiveMobileTab: (tab: MobileTab) => void;
 
+  activeDesktopTab: string;
+  setActiveDesktopTab: (tab: string) => void;
+
+  isCommandPaletteOpen: boolean;
+  setCommandPaletteOpen: (open: boolean) => void;
+
   fitToScreen: boolean;
   setFitToScreen: (fit: boolean) => void;
 

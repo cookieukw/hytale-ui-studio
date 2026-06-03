@@ -28,6 +28,10 @@ export const createViewSlice: StateCreator<
     | "setDraggingId"
     | "setShowFileExplorer"
     | "setActiveMobileTab"
+    | "activeDesktopTab"
+    | "setActiveDesktopTab"
+    | "isCommandPaletteOpen"
+    | "setCommandPaletteOpen"
   >
 > = (set) => ({
   selectedId: null,
@@ -40,7 +44,11 @@ export const createViewSlice: StateCreator<
   draggingId: null,
   showFileExplorer: true,
   activeMobileTab: "View",
+  activeDesktopTab: "workspace",
+  isCommandPaletteOpen: false,
 
+  setActiveDesktopTab: (tab) => set({ activeDesktopTab: tab }),
+  setCommandPaletteOpen: (open) => set({ isCommandPaletteOpen: open }),
   setShowFileExplorer: (show) => set({ showFileExplorer: show }),
   setSelectedId: (id) => set({ selectedId: id }),
   setViewMode: (mode) => set({ viewMode: mode }),

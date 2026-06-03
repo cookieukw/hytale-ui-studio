@@ -87,6 +87,47 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <div className="flex gap-3">
                     <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
                     <div>
+                      <h4 className="text-sm font-semibold text-white">Power User System & Command Palette</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added a new global Command Palette (Ctrl+K) for searching and running actions. Introduced advanced keyboard shortcuts for saving (Ctrl+S), duplicating (Ctrl+D), deleting (Del), toggling grid/snap natively, fit to screen (Alt+F), and exit project (Alt+Q).
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Accessibility & Tooltips Refactor</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Replaced raw HTML title attributes across the application with Radix UI Tooltips, bringing consistent theming (Abyss Space colors), 150ms delay handling, and better ARIA screen reader support.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Architecture & Hook Decoupling</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Extracted the global event listeners into a clean `useKeyboardShortcuts` hook, decoupled the `exportToImage` routine, and extended the Zustand store to handle tab session management globally.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v4.0.0</Badge>
+                      Previous Updates
+                    </h3>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
+                    <div>
                       <h4 className="text-sm font-semibold text-white">1:1 Hytale Engine Parity</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                         The visual editor now 100% replicates Hytale's native padding, stack anchoring, and margin behaviors. What you build in the visual canvas is mathematically guaranteed to render perfectly in the game client.
@@ -120,7 +161,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
 
                   <Separator className="bg-border/50" />
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 mb-4">
                     <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">4</div>
                     <div>
                       <h4 className="text-sm font-semibold text-white">Template Gallery</h4>
@@ -206,6 +247,19 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                     <h3 className="text-sm font-bold text-destructive flex items-center gap-2">
                       <Badge className="bg-destructive/20 text-destructive">v{packageJson.version}</Badge>
                       Critical Fixes
+                    </h3>
+                  </div>
+
+                  <div className="mb-4">
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      No critical fixes were required in this version. The codebase remains stable.
+                    </p>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v4.0.0</Badge>
+                      Previous Fixes
                     </h3>
                   </div>
 
@@ -367,6 +421,25 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                     <h3 className="text-sm font-bold text-emerald-500 flex items-center gap-2">
                       <Badge className="bg-emerald-500/20 text-emerald-500">v{packageJson.version}</Badge>
                       Quality Improvements
+                    </h3>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
+                      <RefreshCw className="h-3 w-3" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Event Hook Decoupling</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Extracted monolithic event listeners into isolated React hooks, improving render isolation and memory cleanup on unmount.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v4.0.0</Badge>
+                      Previous Updates
                     </h3>
                   </div>
 

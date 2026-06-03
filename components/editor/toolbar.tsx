@@ -22,9 +22,10 @@ import {
   Layers,
   ZoomIn,
   ZoomOut,
-  Maximize2,
   HelpCircle,
   Camera,
+  Search,
+  Maximize2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -45,9 +46,9 @@ import { useEditorStore } from "@/lib/editor-store";
 import type { ViewMode, DevicePreview } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
 import { ChangelogModal } from "./changelog-modal";
-import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import packageJson from "@/package.json";
+import { handleExportImage } from "@/lib/export-utils";
 
 
 
@@ -98,40 +99,7 @@ export function EditorToolbar() {
     }
   };
 
-  const handleExportImage = async () => {
-    const node = document.getElementById("exportable-canvas");
-    if (!node) {
-      toast.error("Canvas not found!");
-      return;
-    }
-    
-    const toastId = toast.loading("Capturing layout image...");
-    
-    try {
-      // Capture the original resolution, overriding the zoom scale
-      const dataUrl = await toPng(node, {
-        style: {
-          transform: "scale(1)",
-          transformOrigin: "top left",
-        },
-        pixelRatio: 1, // Keep 1:1 with Hytale native resolution (or 2 for high-res)
-      });
-      
-      const activeFile = currentProject?.files.find(f => f.id === currentProject.activeFileId);
-      const rawName = activeFile?.name || currentProject?.name || "hytale-layout";
-      const fileName = rawName.replace(/\.ui$/i, "");
-      
-      const link = document.createElement("a");
-      link.download = `${fileName}-exported.png`;
-      link.href = dataUrl;
-      link.click();
-      
-      toast.success("Image exported successfully!", { id: toastId });
-    } catch (err) {
-      console.error("Failed to export image", err);
-      toast.error("Failed to export image. Check console for details.", { id: toastId });
-    }
-  };
+
 
   const viewModeOptions: {
     value: ViewMode;
@@ -233,10 +201,28 @@ export function EditorToolbar() {
             </TooltipTrigger>
             <TooltipContent>Redo</TooltipContent>
           </Tooltip>
-
           <Separator orientation="vertical" className="mx-2 h-6" />
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => useEditorStore.getState().setCommandPaletteOpen(true)}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Command Palette
+              <kbd className="ml-2 inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </TooltipContent>
+          </Tooltip>
 
+          <Separator orientation="vertical" className="mx-2 h-6" />
 
           <Tooltip>
             <TooltipTrigger asChild>

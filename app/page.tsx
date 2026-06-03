@@ -29,6 +29,8 @@ import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/editor/mobile-nav";
 import { LoadingScreen } from "@/components/loading-screen";
 import { StartScreen } from "@/components/editor/start-screen";
+import { EditorCommandPalette } from "@/components/editor/command-palette";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 import { useEffect, useState } from "react";
 
@@ -41,46 +43,12 @@ export default function HytaleUIStudio() {
   const currentProjectId = useEditorStore((state) => state.currentProjectId);
   const importProject = useEditorStore((state) => state.importProject);
   const exportProject = useEditorStore((state) => state.exportProject);
+  const activeDesktopTab = useEditorStore((state) => state.activeDesktopTab);
+  const setActiveDesktopTab = useEditorStore((state) => state.setActiveDesktopTab);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Delete" || e.key === "Backspace") {
-        const activeTag = document.activeElement?.tagName;
-        const isInputActive =
-          activeTag === "INPUT" ||
-          activeTag === "TEXTAREA" ||
-          (document.activeElement as HTMLElement)?.isContentEditable;
-
-        if (!isInputActive && selectedId) {
-          e.preventDefault(); // Prevent back navigation on some browsers
-          removeComponent(selectedId);
-        }
-      }
-
-      // Undo / Redo
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        !e.shiftKey &&
-        e.key.toLowerCase() === "z"
-      ) {
-        e.preventDefault();
-        useEditorStore.getState().undo();
-      }
-
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        ((e.shiftKey && e.key.toLowerCase() === "z") ||
-          e.key.toLowerCase() === "y")
-      ) {
-        e.preventDefault();
-        useEditorStore.getState().redo();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedId, removeComponent]);
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
 
   // Sync code on initial load / rehydration
   useEffect(() => {
@@ -120,7 +88,7 @@ export default function HytaleUIStudio() {
             collapsible
             collapsedSize={0}
           >
-            <Tabs defaultValue="workspace" className="flex h-full flex-col">
+            <Tabs value={activeDesktopTab} onValueChange={setActiveDesktopTab} className="flex h-full flex-col">
               <div className="flex shrink-0 items-center border-b border-border bg-panel px-2 py-1.5">
                 <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1">
                   <Tooltip delayDuration={150}>
@@ -330,6 +298,7 @@ export default function HytaleUIStudio() {
           </div>
         </div>
       </div>
+      <EditorCommandPalette />
     </div>
   );
 }
