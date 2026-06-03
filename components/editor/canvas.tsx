@@ -116,7 +116,7 @@ export function EditorCanvas() {
     observer.observe(containerRef.current);
 
     return () => observer.disconnect();
-  }, [fitToScreen, deviceSize, zoom, setZoom]); // depend on zoom to check diff, but be careful
+  }, [fitToScreen, deviceSize, zoom, setCalculatedZoom]);
 
   // Wheel zoom and pan logic
   useEffect(() => {
