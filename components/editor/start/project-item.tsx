@@ -27,6 +27,13 @@ interface ProjectItemProps {
   onDuplicate: () => void;
 }
 
+function countAllComponents(components?: any[]): number {
+  if (!components || !Array.isArray(components)) return 0;
+  return components.reduce((acc, comp) => {
+    return acc + 1 + countAllComponents(comp.children);
+  }, 0);
+}
+
 export function ProjectItem({
   project,
   onOpen,
@@ -45,6 +52,11 @@ export function ProjectItem({
       setIsEditing(false);
     }
   };
+
+  const totalComponents = project.files?.reduce(
+    (acc: number, file: any) => acc + countAllComponents(file.components),
+    0
+  ) || 0;
 
   return (
     <div
@@ -84,7 +96,7 @@ export function ProjectItem({
             </span>
             <span className="flex items-center gap-1">
               <Layers className="h-3 w-3" />
-              {project.components?.length || 0} components
+              {totalComponents} components
             </span>
           </div>
         </div>
