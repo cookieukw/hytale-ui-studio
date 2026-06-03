@@ -4,6 +4,8 @@ import { Slider } from "@/components/ui/slider";
 import { HytaleComponent } from "@/lib/hytale-types";
 import { CollapsibleSection } from "./collapsible-section";
 import { FieldRow } from "./field-row";
+import { DebouncedColorPicker } from "../debounced-color-picker";
+import { DebouncedInput } from "../debounced-input";
 
 interface StatesTabProps {
   component: HytaleComponent;
@@ -25,10 +27,9 @@ export function StatesTab({ component, onUpdate }: StatesTabProps) {
       <CollapsibleSection title="Hovered">
         <FieldRow label="BG Color">
           <div className="flex gap-2">
-            <Input
-              type="color"
+            <DebouncedColorPicker
               value={component.states?.hovered?.background?.color || "#5aafff"}
-              onChange={(e) =>
+              onChange={(val) =>
                 onUpdate({
                   states: {
                     ...component.states,
@@ -36,18 +37,18 @@ export function StatesTab({ component, onUpdate }: StatesTabProps) {
                       ...component.states?.hovered,
                       background: {
                         ...component.states?.hovered?.background,
-                        color: e.target.value,
+                        color: val,
                       },
                     },
                   },
                 })
               }
-              className="h-7 w-10 cursor-pointer p-1"
+              className="h-7 w-10"
             />
-            <Input
+            <DebouncedInput
               type="text"
               value={component.states?.hovered?.background?.color || ""}
-              onChange={(e) =>
+              onChange={(val) =>
                 onUpdate({
                   states: {
                     ...component.states,
@@ -55,7 +56,7 @@ export function StatesTab({ component, onUpdate }: StatesTabProps) {
                       ...component.states?.hovered,
                       background: {
                         ...component.states?.hovered?.background,
-                        color: e.target.value,
+                        color: String(val),
                       },
                     },
                   },
@@ -71,10 +72,9 @@ export function StatesTab({ component, onUpdate }: StatesTabProps) {
       <CollapsibleSection title="Pressed">
         <FieldRow label="BG Color">
           <div className="flex gap-2">
-            <Input
-              type="color"
+            <DebouncedColorPicker
               value={component.states?.pressed?.background?.color || "#3a8eef"}
-              onChange={(e) =>
+              onChange={(val) =>
                 onUpdate({
                   states: {
                     ...component.states,
@@ -82,18 +82,18 @@ export function StatesTab({ component, onUpdate }: StatesTabProps) {
                       ...component.states?.pressed,
                       background: {
                         ...component.states?.pressed?.background,
-                        color: e.target.value,
+                        color: val,
                       },
                     },
                   },
                 })
               }
-              className="h-7 w-10 cursor-pointer p-1"
+              className="h-7 w-10"
             />
-            <Input
+            <DebouncedInput
               type="text"
               value={component.states?.pressed?.background?.color || ""}
-              onChange={(e) =>
+              onChange={(val) =>
                 onUpdate({
                   states: {
                     ...component.states,
@@ -101,7 +101,7 @@ export function StatesTab({ component, onUpdate }: StatesTabProps) {
                       ...component.states?.pressed,
                       background: {
                         ...component.states?.pressed?.background,
-                        color: e.target.value,
+                        color: String(val),
                       },
                     },
                   },
