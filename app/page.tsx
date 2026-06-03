@@ -11,6 +11,7 @@ import {
   FileCode,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ComponentPalette } from "@/components/editor/component-palette";
 import { ComponentTree } from "@/components/editor/component-tree";
 import { EditorCanvas } from "@/components/editor/canvas";
@@ -122,18 +123,38 @@ export default function HytaleUIStudio() {
             <Tabs defaultValue="workspace" className="flex h-full flex-col">
               <div className="flex shrink-0 items-center border-b border-border bg-panel px-2 py-1.5">
                 <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1">
-                  <TabsTrigger value="workspace" title="Workspace" className="px-0">
-                    <FolderCode className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="components" title="Components" className="px-0">
-                    <Layers className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="tree" title="Component Tree" className="px-0">
-                    <ListTree className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="code" title="UI Code" className="px-0">
-                    <FileCode className="h-4 w-4" />
-                  </TabsTrigger>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="workspace" className="px-0">
+                        <FolderCode className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Workspace</TooltipContent>
+                  </Tooltip>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="components" className="px-0">
+                        <Layers className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Components</TooltipContent>
+                  </Tooltip>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="tree" className="px-0">
+                        <ListTree className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Component Tree</TooltipContent>
+                  </Tooltip>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="code" className="px-0">
+                        <FileCode className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">UI Code</TooltipContent>
+                  </Tooltip>
                 </TabsList>
               </div>
 
