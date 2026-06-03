@@ -254,6 +254,7 @@ export interface Project {
 export interface HistoryEntry {
   components: HytaleComponent[];
   imports: string[];
+  actionName?: string;
 }
 
 export interface EditorState {

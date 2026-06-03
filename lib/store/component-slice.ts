@@ -101,7 +101,7 @@ export const createComponentSlice: StateCreator<
       };
     });
 
-    get().saveToHistory();
+    get().saveToHistory("Add Component");
     get().syncCodeFromComponents();
     return id;
   },
@@ -122,7 +122,7 @@ export const createComponentSlice: StateCreator<
         ),
       };
     });
-    get().saveToHistory();
+    get().saveToHistory("Update Component");
     get().syncCodeFromComponents();
   },
 
@@ -151,7 +151,7 @@ export const createComponentSlice: StateCreator<
       };
     });
 
-    get().saveToHistory();
+    get().saveToHistory("Delete Component");
     get().syncCodeFromComponents();
   },
 
@@ -187,7 +187,7 @@ export const createComponentSlice: StateCreator<
         };
       });
 
-      get().saveToHistory();
+      get().saveToHistory("Duplicate Component");
       get().syncCodeFromComponents();
     }
   },
@@ -253,7 +253,7 @@ export const createComponentSlice: StateCreator<
       };
     });
 
-    get().saveToHistory();
+    get().saveToHistory("Paste Component");
     get().syncCodeFromComponents();
   },
 
@@ -292,7 +292,7 @@ export const createComponentSlice: StateCreator<
       ),
     }));
 
-    get().saveToHistory();
+    get().saveToHistory("Move Component");
     get().syncCodeFromComponents();
   },
 

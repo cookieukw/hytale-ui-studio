@@ -12,51 +12,26 @@ export const createHistorySlice: StateCreator<
     | "undo"
     | "redo"
     | "saveToHistory"
+    | "jumpToHistory"
   >
 > = (set, get) => ({
-  history: [{ components: [], imports: [] }],
+  history: [{ components: [], imports: [], actionName: "Initial State" }],
   historyIndex: 0,
 
   undo: () => {
-    const state = get();
-    if (state.historyIndex > 0) {
-      const newIndex = state.historyIndex - 1;
-      // Capture entry outside set() to avoid closure over stale state
-      const entry = state.history[newIndex];
-      set((state) => ({
-        historyIndex: newIndex,
-        components: entry.components,
-        imports: entry.imports,
-        projects: state.projects.map((p) =>
-          p.id === state.currentProjectId
-            ? {
-                ...p,
-                files: p.files.map((f) =>
-                  f.id === state.currentFileId
-                    ? {
-                        ...f,
-                        components: entry.components,
-                        imports: entry.imports,
-                        lastModified: Date.now(),
-                      }
-                    : f,
-                ),
-                lastModified: Date.now(),
-              }
-            : p,
-        ),
-      }));
-      get().syncCodeFromComponents();
-    }
+    get().jumpToHistory(get().historyIndex - 1);
   },
 
   redo: () => {
+    get().jumpToHistory(get().historyIndex + 1);
+  },
+
+  jumpToHistory: (index: number) => {
     const state = get();
-    if (state.historyIndex < state.history.length - 1) {
-      const newIndex = state.historyIndex + 1;
-      const entry = state.history[newIndex];
+    if (index >= 0 && index < state.history.length && index !== state.historyIndex) {
+      const entry = state.history[index];
       set((state) => ({
-        historyIndex: newIndex,
+        historyIndex: index,
         components: entry.components,
         imports: entry.imports,
         projects: state.projects.map((p) =>
@@ -82,13 +57,14 @@ export const createHistorySlice: StateCreator<
     }
   },
 
-  saveToHistory: () => {
+  saveToHistory: (actionName?: string) => {
     const state = get();
     const newHistory = state.history.slice(0, state.historyIndex + 1);
     // Deep-copy components, shallow-copy imports (strings are immutable)
     newHistory.push({
       components: JSON.parse(JSON.stringify(state.components)),
       imports: [...state.imports],
+      actionName: actionName || "State Change",
     });
 
     // Cap at 50 entries to avoid unbounded memory growth

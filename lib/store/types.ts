@@ -73,7 +73,8 @@ export interface EditorStore extends EditorState {
   // History
   undo: () => void;
   redo: () => void;
-  saveToHistory: () => void;
+  saveToHistory: (actionName?: string) => void;
+  jumpToHistory: (index: number) => void;
 
   // Code
   setCode: (code: string) => void;

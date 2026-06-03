@@ -49,6 +49,7 @@ import { ChangelogModal } from "./changelog-modal";
 import { toast } from "sonner";
 import packageJson from "@/package.json";
 import { handleExportImage } from "@/lib/export-utils";
+import { HistoryPopover } from "./history-popover";
 
 
 
@@ -201,6 +202,7 @@ export function EditorToolbar() {
             </TooltipTrigger>
             <TooltipContent>Redo</TooltipContent>
           </Tooltip>
+          <HistoryPopover />
           <Separator orientation="vertical" className="mx-2 h-6" />
 
           <Tooltip>
