@@ -43,7 +43,6 @@ export function EditorCanvas() {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const setDevicePreview = useEditorStore((state) => state.setDevicePreview);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -51,13 +50,13 @@ export function EditorCanvas() {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       if (mobile) {
-        setDevicePreview("Mobile");
+        useEditorStore.getState().setDevicePreview("Mobile");
       }
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, [setDevicePreview]);
+  }, []);
 
   const deviceSize = React.useMemo(() => {
     // Force mobile preview size on mobile devices, ignoring desktop preview setting
