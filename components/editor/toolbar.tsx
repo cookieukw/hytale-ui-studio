@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { ChangelogModal } from "./changelog-modal";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
+import packageJson from "../../package.json";
 
 
 
@@ -173,9 +174,16 @@ export function EditorToolbar() {
                   size="icon" 
                   className="h-8 w-8 text-muted-foreground hover:text-foreground"
                   onClick={exitProject}
+                  title="Home"
                 >
                   <Home className="h-4 w-4" />
                 </Button>
+                
+                <div className="flex items-center">
+                  <span className="text-[10px] font-bold text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded ml-1">
+                    v{packageJson.version}
+                  </span>
+                </div>
                 
                 {currentProject && (
                   <>

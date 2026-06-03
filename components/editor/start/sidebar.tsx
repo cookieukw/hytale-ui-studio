@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { NavButton } from "./nav-button";
 import { StartTab } from "./types";
 import { ChangelogModal } from "../changelog-modal";
+import packageJson from "../../../package.json";
 
 interface SidebarProps {
   activeTab: StartTab;
@@ -29,7 +30,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
               className="text-[10px] text-primary hover:text-primary/80 font-semibold cursor-pointer hover:underline flex items-center gap-1 mt-0.5"
               title="Click to see Changelog"
             >
-              Version 3.0 Beta ✨
+              Version {packageJson.version} ✨
             </span>
           </div>
         </div>

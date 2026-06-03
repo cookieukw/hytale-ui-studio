@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import packageJson from "../../package.json";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,11 +36,11 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
               <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
                 Release Notes
                 <Badge variant="default" className="bg-primary/20 text-primary border border-primary/30 text-[10px] font-bold px-2 py-0.5 uppercase tracking-wide">
-                  v3.0.0 Beta
+                  v{packageJson.version}
                 </Badge>
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-1">
-                Explore all premium features, architecture improvements, and bug fixes introduced in Hytale UI Studio v3.0.0.
+                Explore all premium features, architecture improvements, and bug fixes introduced in Hytale UI Studio v{packageJson.version}.
               </DialogDescription>
             </div>
           </div>
@@ -76,6 +77,54 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
             <TabsContent value="features" className="h-full m-0 p-0">
               <ScrollArea className="h-full p-6">
                 <div className="space-y-5 pr-3">
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-primary flex items-center gap-2">
+                      <Badge className="bg-primary/20 text-primary">v{packageJson.version}</Badge>
+                      New Features
+                    </h3>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Full CSS Padding & Margin Parity</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        The visual editor now 100% replicates Hytale's native padding and margin behaviors. Nested components are properly pushed inwards, preserving background color edges just like the in-game UI.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Advanced Primitive Properties Parser</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added support for primitive number parsing of layout properties (e.g. `Padding: 10;`). The system now intelligently scales values to `Top/Bottom/Left/Right` automatically!
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Quality of Life Improvements</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added a new "Export as Image" feature to easily share your layouts. We also implemented resizable panels for better workspace organization, fixed mouse-wheel scrolling in the canvas, and set the default zoom to 35% with the engine locked to Hytale.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v3.0.0</Badge>
+                      Previous Updates
+                    </h3>
+                  </div>
+
                   <div className="flex gap-3">
                     <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
                     <div>
@@ -141,6 +190,42 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
             <TabsContent value="bugs" className="h-full m-0 p-0">
               <ScrollArea className="h-full p-6">
                 <div className="space-y-4 pr-3">
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-destructive flex items-center gap-2">
+                      <Badge className="bg-destructive/20 text-destructive">v{packageJson.version}</Badge>
+                      Critical Fixes
+                    </h3>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
+                      <h4 className="text-xs font-semibold text-white">Cross-Axis Stretch (Anchor Full: 1)</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      Fixed an issue where `Anchor: (Full: 1)` failed to stretch containers correctly when placed inside `Top` or `Bottom` Vertical flex layouts. Elements now expand their height/width natively.
+                    </p>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
+                      <h4 className="text-xs font-semibold text-white">CenterMiddle Layout Flow</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      `MiddleCenter` layouts now correctly stack components vertically, rather than misaligning them as horizontal blocks, ensuring parity with the engine.
+                    </p>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v3.0.0</Badge>
+                      Previous Fixes
+                    </h3>
+                  </div>
+
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
@@ -230,6 +315,32 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
             <TabsContent value="quality" className="h-full m-0 p-0">
               <ScrollArea className="h-full p-6">
                 <div className="space-y-5 pr-3">
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-emerald-500 flex items-center gap-2">
+                      <Badge className="bg-emerald-500/20 text-emerald-500">v{packageJson.version}</Badge>
+                      Quality Improvements
+                    </h3>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
+                      <RefreshCw className="h-3 w-3" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Parser Precision Upgrade</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Extensively decoupled strict object type checks from the parser to gracefully read shorthand properties like `Padding: 15;` avoiding silent node drops.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v3.0.0</Badge>
+                      Previous Updates
+                    </h3>
+                  </div>
+
                   <div className="flex items-start gap-3">
                     <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
                       <RefreshCw className="h-3 w-3" />
