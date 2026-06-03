@@ -37,13 +37,8 @@ import { useEffect, useState } from "react";
 
 export default function HytaleUIStudio() {
   const viewMode = useEditorStore((state) => state.viewMode);
-  const devicePreview = useEditorStore((state) => state.devicePreview);
   const activeMobileTab = useEditorStore((state) => state.activeMobileTab);
-  const selectedId = useEditorStore((state) => state.selectedId);
-  const removeComponent = useEditorStore((state) => state.removeComponent);
   const currentProjectId = useEditorStore((state) => state.currentProjectId);
-  const importProject = useEditorStore((state) => state.importProject);
-  const exportProject = useEditorStore((state) => state.exportProject);
   const activeDesktopTab = useEditorStore((state) => state.activeDesktopTab);
   const setActiveDesktopTab = useEditorStore((state) => state.setActiveDesktopTab);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -229,9 +224,7 @@ export default function HytaleUIStudio() {
             </button>
             <div className="w-px h-6 bg-border mx-1" />
             <button
-              onClick={() => {
-                exportProject();
-              }}
+              onClick={() => useEditorStore.getState().exportProject()}
               className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted"
             >
               <Download className="h-4 w-4" />
@@ -244,7 +237,7 @@ export default function HytaleUIStudio() {
                 input.onchange = async (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (file) {
-                    importProject(file);
+                    useEditorStore.getState().importProject(file);
                   }
                 };
                 input.click();
