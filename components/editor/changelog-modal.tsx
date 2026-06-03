@@ -91,6 +91,20 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                         Added a new global Command Palette (Ctrl+K) for searching and running actions. Introduced advanced keyboard shortcuts for saving (Ctrl+S), duplicating (Ctrl+D), deleting (Del), toggling grid/snap natively, fit to screen (Alt+F), and exit project (Alt+Q).
                       </p>
+                      <ul className="mt-2 text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                        <li>Added global keyboard shortcuts mapping: <br/>
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Ctrl+C</code> / <code className="bg-muted px-1 py-0.5 rounded text-xs">Ctrl+V</code> para Copiar e Colar<br/>
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Ctrl+K</code> (Command Palette)<br/>
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Alt+1~4</code> (Troca de abas)<br/>
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Ctrl+S</code> (Salvar e Exportar)<br/>
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Ctrl+Shift+E</code> (Exportar Imagem)<br/>
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Alt+F</code> (Toggle Fit Screen)<br/>
+                          <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Alt+Q</code> (Exit Project)
+                        </li>
+                        <li>Added <strong>Context Menus (Right-Click)</strong> no Canvas e na Árvore de Componentes com opções de Copiar, Colar, Duplicar e Deletar.</li>
+                        <li>Added <strong>Status Bar</strong> para feedback visual de salvamento em tempo real.</li>
+                        <li>Centralized Command Palette actions to cover nearly all IDE functions.</li>
+                      </ul>
                     </div>
                   </div>
 

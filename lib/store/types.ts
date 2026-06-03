@@ -65,6 +65,11 @@ export interface EditorStore extends EditorState {
   ) => void;
   getSelectedComponent: () => HytaleComponent | null;
 
+  // Clipboard
+  clipboardComponent: HytaleComponent | null;
+  copyComponent: (id: string) => void;
+  pasteComponent: () => void;
+
   // History
   undo: () => void;
   redo: () => void;

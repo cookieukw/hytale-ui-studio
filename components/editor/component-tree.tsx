@@ -37,6 +37,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { useEditorStore } from "@/lib/editor-store";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
@@ -81,6 +88,9 @@ interface TreeNodeProps {
   onUpdate: (id: string, updates: Partial<HytaleComponent>) => void;
   onRemove: (id: string) => void;
   onDuplicate: (id: string) => void;
+  onCopy: (id: string) => void;
+  onPaste: () => void;
+  hasClipboard: boolean;
   parentVisible?: boolean;
 }
 
@@ -92,6 +102,9 @@ const TreeNode = memo(function TreeNode({
   onUpdate,
   onRemove,
   onDuplicate,
+  onCopy,
+  onPaste,
+  hasClipboard,
   parentVisible = true,
 }: TreeNodeProps) {
   const isSelected = selectedId === component.id;
@@ -124,16 +137,19 @@ const TreeNode = memo(function TreeNode({
   };
 
   return (
-    <div>
-      <div
-        className={cn(
-          "group flex cursor-pointer items-center gap-1 py-1 pr-2 text-xs transition-colors hover:bg-hover",
-          isSelected && "bg-selection text-foreground",
-          !isVisible && "opacity-50",
-        )}
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-        onClick={() => onSelect(component.id)}
-      >
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div>
+          <div
+            className={cn(
+              "group flex cursor-pointer items-center gap-1 py-1 pr-2 text-xs transition-colors hover:bg-hover",
+              isSelected && "bg-selection text-foreground",
+              !isVisible && "opacity-50",
+            )}
+            style={{ paddingLeft: `${depth * 12 + 8}px` }}
+            onClick={() => onSelect(component.id)}
+            onContextMenu={() => onSelect(component.id)} // Select on right click
+          >
         <button
           type="button"
           className={cn(
@@ -227,12 +243,50 @@ const TreeNode = memo(function TreeNode({
               onUpdate={onUpdate}
               onRemove={onRemove}
               onDuplicate={onDuplicate}
+              onCopy={onCopy}
+              onPaste={onPaste}
+              hasClipboard={hasClipboard}
               parentVisible={isVisible} // Pass effective visibility to children
             />
           ))}
         </div>
       )}
     </div>
+      </ContextMenuTrigger>
+      
+      <ContextMenuContent className="w-48">
+        <ContextMenuItem onClick={() => onCopy(component.id)}>
+          <Copy className="mr-2 h-4 w-4" />
+          <span>Copy</span>
+          <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+C</span>
+        </ContextMenuItem>
+        <ContextMenuItem onClick={onPaste} disabled={!hasClipboard}>
+          <ScrollText className="mr-2 h-4 w-4" />
+          <span>Paste</span>
+          <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+V</span>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={() => onDuplicate(component.id)}>
+          <Copy className="mr-2 h-4 w-4" />
+          <span>Duplicate</span>
+          <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+D</span>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          onClick={
+            component.isDeletable === false
+              ? undefined
+              : () => onRemove(component.id)
+          }
+          disabled={component.isDeletable === false}
+          className={component.isDeletable !== false ? "text-destructive focus:text-destructive" : ""}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          <span>Delete</span>
+          <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Del</span>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 });
 
@@ -242,9 +296,10 @@ export function ComponentTree() {
   const setSelectedId = useEditorStore((state) => state.setSelectedId);
   const updateComponent = useEditorStore((state) => state.updateComponent);
   const removeComponent = useEditorStore((state) => state.removeComponent);
-  const duplicateComponent = useEditorStore(
-    (state) => state.duplicateComponent,
-  );
+  const duplicateComponent = useEditorStore((state) => state.duplicateComponent);
+  const copyComponent = useEditorStore((state) => state.copyComponent);
+  const pasteComponent = useEditorStore((state) => state.pasteComponent);
+  const hasClipboard = useEditorStore((state) => !!state.clipboardComponent);
 
   const handleSelect = useCallback(
     (id: string) => {
@@ -298,6 +353,9 @@ export function ComponentTree() {
                 onUpdate={handleUpdate}
                 onRemove={handleRemove}
                 onDuplicate={handleDuplicate}
+                onCopy={copyComponent}
+                onPaste={pasteComponent}
+                hasClipboard={hasClipboard}
               />
             ))}
           </div>

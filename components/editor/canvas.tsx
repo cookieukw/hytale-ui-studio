@@ -5,6 +5,14 @@ import { useEditorStore } from "@/lib/editor-store";
 import { COMPONENT_DEFINITIONS } from "@/lib/component-definitions";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Copy, ScrollText, Trash2 } from "lucide-react";
 
 interface RenderedComponentProps {
   component: HytaleComponent;
@@ -29,6 +37,11 @@ export function EditorCanvas() {
   const zoom = useEditorStore((state) => state.zoom);
   const addComponent = useEditorStore((state) => state.addComponent);
   const moveComponent = useEditorStore((state) => state.moveComponent);
+  const removeComponent = useEditorStore((state) => state.removeComponent);
+  const duplicateComponent = useEditorStore((state) => state.duplicateComponent);
+  const copyComponent = useEditorStore((state) => state.copyComponent);
+  const pasteComponent = useEditorStore((state) => state.pasteComponent);
+  const hasClipboard = useEditorStore((state) => !!state.clipboardComponent);
   const setSelectedId = useEditorStore((state) => state.setSelectedId);
   const selectedId = useEditorStore((state) => state.selectedId);
   const fitToScreen = useEditorStore((state) => state.fitToScreen);
@@ -324,9 +337,11 @@ export function EditorCanvas() {
             position: "relative",
           }}
         >
-          <div
-            id="exportable-canvas"
-            ref={canvasRef}
+          <ContextMenu>
+            <ContextMenuTrigger asChild>
+              <div
+                id="exportable-canvas"
+                ref={canvasRef}
             className={cn(
               "absolute top-0 left-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
               isDragOver && "border-primary border-dashed",
@@ -382,8 +397,38 @@ export function EditorCanvas() {
               </div>
             )}
           </div>
-        </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent className="w-48">
+            <ContextMenuItem onClick={() => { if (selectedId) copyComponent(selectedId); }} disabled={!selectedId}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>Copy</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+C</span>
+            </ContextMenuItem>
+            <ContextMenuItem onClick={pasteComponent} disabled={!hasClipboard}>
+              <ScrollText className="mr-2 h-4 w-4" />
+              <span>Paste</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+V</span>
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={() => { if (selectedId) duplicateComponent(selectedId); }} disabled={!selectedId}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>Duplicate</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+D</span>
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              onClick={() => { if (selectedId) removeComponent(selectedId); }}
+              disabled={!selectedId}
+              className={selectedId ? "text-destructive focus:text-destructive" : ""}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Delete</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Del</span>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       </div>
+    </div>
 
       <div className="flex shrink-0 items-center justify-center border-t border-border bg-panel-header px-4 py-1">
         <span className="text-xs text-muted-foreground">

@@ -9,6 +9,8 @@ export function useKeyboardShortcuts() {
       const { 
         selectedId, 
         removeComponent, 
+        copyComponent,
+        pasteComponent,
         undo, 
         redo, 
         setCommandPaletteOpen,
@@ -22,52 +24,60 @@ export function useKeyboardShortcuts() {
         exitProject,
       } = store;
 
+      const isCtrl = (e: KeyboardEvent) => e.ctrlKey || e.metaKey;
+
       const activeTag = document.activeElement?.tagName;
       const isInputActive =
         activeTag === "INPUT" ||
         activeTag === "TEXTAREA" ||
         (document.activeElement as HTMLElement)?.isContentEditable;
 
-      // Delete Component (Delete / Backspace)
+      // Command Palette (Ctrl+K or Cmd+K)
+      if (isCtrl(e) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+        return;
+      }
+
+      // Undo/Redo
+      if (isCtrl(e) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
+        return;
+      }
+      if (isCtrl(e) && e.key.toLowerCase() === "y") {
+        e.preventDefault();
+        redo();
+        return;
+      }
+
+      // Copy / Paste / Delete
+      if (isCtrl(e) && e.key.toLowerCase() === "c" && selectedId) {
+        e.preventDefault();
+        copyComponent(selectedId);
+        return;
+      }
+      if (isCtrl(e) && e.key.toLowerCase() === "v") {
+        e.preventDefault();
+        pasteComponent();
+        return;
+      }
       if ((e.key === "Delete" || e.key === "Backspace") && !isInputActive && selectedId) {
         e.preventDefault();
         removeComponent(selectedId);
         return;
       }
 
-      // Command Palette (Ctrl+K or Cmd+K)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setCommandPaletteOpen(true);
-        return;
-      }
-
-      // Undo (Ctrl+Z)
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z") {
-        e.preventDefault();
-        undo();
-        return;
-      }
-
-      // Redo (Ctrl+Y or Ctrl+Shift+Z)
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        ((e.shiftKey && e.key.toLowerCase() === "z") || e.key.toLowerCase() === "y")
-      ) {
-        e.preventDefault();
-        redo();
-        return;
-      }
-
       // Save/Export Project (Ctrl+S)
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "s") {
+      if (isCtrl(e) && !e.shiftKey && e.key.toLowerCase() === "s") {
         e.preventDefault();
         exportProject();
         return;
       }
 
       // Duplicate Component (Ctrl+D)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d" && !isInputActive && selectedId) {
+      if (isCtrl(e) && e.key.toLowerCase() === "d" && !isInputActive && selectedId) {
         e.preventDefault();
         duplicateComponent(selectedId);
         return;
@@ -88,7 +98,7 @@ export function useKeyboardShortcuts() {
       }
 
       // Export Image (Ctrl+Shift+E)
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "e") {
+      if (isCtrl(e) && e.shiftKey && e.key.toLowerCase() === "e") {
         e.preventDefault();
         handleExportImage();
         return;
