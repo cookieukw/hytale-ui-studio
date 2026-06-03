@@ -246,30 +246,27 @@ export const RenderedComponent = memo(function RenderedComponent({
     if (component.anchor && parentId) {
       const a = component.anchor;
 
+      // Expand 'Full' into 4 edges early so it acts like setting top/bottom/left/right
+      if (a.full !== undefined) {
+        if (a.top === undefined) a.top = a.full === true ? 0 : Number(a.full);
+        if (a.bottom === undefined) a.bottom = a.full === true ? 0 : Number(a.full);
+        if (a.left === undefined) a.left = a.full === true ? 0 : Number(a.full);
+        if (a.right === undefined) a.right = a.full === true ? 0 : Number(a.full);
+      }
+
       const hasTop = a.top !== undefined;
       const hasBottom = a.bottom !== undefined;
       const hasLeft = a.left !== undefined;
       const hasRight = a.right !== undefined;
       const hasWidth = a.width !== undefined;
       const hasHeight = a.height !== undefined;
-      const hasFull = a.full === true;
 
       // Identify edges that act purely as gaps in the current stacking mode
-      const isTopGap = parentLayoutMode === "Bottom" && hasTop;
-      const isBottomGap =
-        (parentLayoutMode === "Top" ||
-          parentLayoutMode === "TopScrolling" ||
-          parentLayoutMode === "MiddleCenter") &&
-        hasBottom;
-      const isLeftGap = parentLayoutMode === "Right" && hasLeft;
-      const isRightGap =
-        (parentLayoutMode === "Left" ||
-          parentLayoutMode === "LeftScrolling" ||
-          parentLayoutMode === "CenterMiddle" ||
-          parentLayoutMode === "LeftCenterWrap") &&
-        hasRight;
+      const isTopGap = ["Bottom", "Top", "TopScrolling", "MiddleCenter"].includes(parentLayoutMode);
+      const isBottomGap = ["Top", "Bottom", "TopScrolling", "MiddleCenter"].includes(parentLayoutMode);
+      const isLeftGap = ["Right", "Left", "LeftScrolling", "CenterMiddle", "Center", "LeftCenterWrap"].includes(parentLayoutMode);
+      const isRightGap = ["Left", "Right", "LeftScrolling", "CenterMiddle", "Center", "LeftCenterWrap"].includes(parentLayoutMode);
 
-      // An edge causes absolute positioning ONLY if it's not the gap edge for the current stack
       const hasAbsoluteTop = hasTop && !isTopGap;
       const hasAbsoluteBottom = hasBottom && !isBottomGap;
       const hasAbsoluteLeft = hasLeft && !isLeftGap;
@@ -286,26 +283,9 @@ export const RenderedComponent = memo(function RenderedComponent({
       const isCollapsingStackAbsolute =
         hasAnyAbsoluteEdge && parentLayoutMode && parentLayoutMode !== "Full";
 
-      if (hasFull) {
-        // Anchor: (Full: N) — fill parent with no margins
-        style.position = "absolute";
-        style.top = 0;
-        style.bottom = 0;
-        style.left = 0;
-        style.right = 0;
-        // If size is also specified, honour it (rare but valid per spec)
-        if (hasWidth) {
-          style.width = typeof a.width === "string" ? a.width : `${a.width}px`;
-          delete style.left;
-          delete style.right;
-        }
-        if (hasHeight) {
-          style.height =
-            typeof a.height === "string" ? a.height : `${a.height}px`;
-          delete style.top;
-          delete style.bottom;
-        }
-      } else if (isAbsolute) {
+      // No hardcoded hasFull block here.
+      // We rely on isAbsolute and isCollapsingStackAbsolute below.
+      if (isAbsolute) {
         style.position = "absolute";
         if (hasTop) style.top = `${a.top}px`;
         if (hasBottom) style.bottom = `${a.bottom}px`;
@@ -328,14 +308,20 @@ export const RenderedComponent = memo(function RenderedComponent({
           style.transform = "translateX(-50%)";
         }
       } else if (isCollapsingStackAbsolute) {
-        // Inside a stacking layout, children with absolute anchors collapse and overlap in Hytale
-        style.position = "absolute";
-        if (hasWidth)
-          style.width = typeof a.width === "string" ? a.width : `${a.width}px`;
-        else style.width = "auto"; // prevent zero-width collapse
-        if (hasHeight)
-          style.height =
-            typeof a.height === "string" ? a.height : `${a.height}px`;
+        // In stack layouts, cross-axis anchors (e.g. Top/Bottom in a horizontal stack)
+        // cause the element to stretch along that cross axis, keeping it in flow.
+        if (hasAbsoluteTop && hasAbsoluteBottom && !hasHeight) {
+          style.height = `calc(100% - ${a.top + a.bottom}px)`;
+          style.marginTop = `${a.top}px`;
+          style.marginBottom = `${a.bottom}px`;
+          style.alignSelf = "stretch";
+        }
+        if (hasAbsoluteLeft && hasAbsoluteRight && !hasWidth) {
+          style.width = `calc(100% - ${a.left + a.right}px)`;
+          style.marginLeft = `${a.left}px`;
+          style.marginRight = `${a.right}px`;
+          style.alignSelf = "stretch";
+        }
       } else {
         // Widget-sized: only Width/Height, flows normally
         style.position = "relative";
@@ -371,35 +357,21 @@ export const RenderedComponent = memo(function RenderedComponent({
         style.marginRight = `${component.margin.right}px`;
     }
 
-    // ─── Gap via opposite-edge anchor ────────────────────────────────────────
-    // Applied AFTER margin so the layout gap takes precedence over explicit margins.
-    // In Hytale stack layouts the "trailing" anchor edge acts as a gap:
-    //   Top/MiddleCenter mode  → anchor.bottom = marginBottom
-    //   Bottom mode            → anchor.top    = marginTop
-    //   Left/CenterMiddle mode → anchor.right  = marginRight
-    //   Right mode             → anchor.left   = marginLeft
+    // In Hytale stack layouts, main-axis anchors act as margins (gaps).
+    // For vertical stacks (Top, Bottom, MiddleCenter), top/bottom are margins.
+    // For horizontal stacks (Left, Right, CenterMiddle, Center, LeftCenterWrap), left/right are margins.
     if (component.anchor && parentId && parentLayoutMode) {
       const a = component.anchor;
-      if (
-        parentLayoutMode === "Top" ||
-        parentLayoutMode === "TopScrolling" ||
-        parentLayoutMode === "MiddleCenter"
-      ) {
+      const isVerticalStack = ["Top", "Bottom", "TopScrolling", "MiddleCenter"].includes(parentLayoutMode);
+      const isHorizontalStack = ["Left", "Right", "LeftScrolling", "CenterMiddle", "Center", "LeftCenterWrap"].includes(parentLayoutMode);
+
+      if (isVerticalStack) {
+        if (a.top !== undefined) style.marginTop = `${a.top}px`;
         if (a.bottom !== undefined) style.marginBottom = `${a.bottom}px`;
       }
-      if (parentLayoutMode === "Bottom") {
-        if (a.top !== undefined) style.marginTop = `${a.top}px`;
-      }
-      if (
-        parentLayoutMode === "Left" ||
-        parentLayoutMode === "LeftScrolling" ||
-        parentLayoutMode === "CenterMiddle" ||
-        parentLayoutMode === "LeftCenterWrap"
-      ) {
-        if (a.right !== undefined) style.marginRight = `${a.right}px`;
-      }
-      if (parentLayoutMode === "Right") {
+      if (isHorizontalStack) {
         if (a.left !== undefined) style.marginLeft = `${a.left}px`;
+        if (a.right !== undefined) style.marginRight = `${a.right}px`;
       }
     }
 
@@ -426,10 +398,14 @@ export const RenderedComponent = memo(function RenderedComponent({
     }
 
     // ─── FlexWeight ───────────────────────────────────────────────────────────
-    if (component.flexWeight) {
+    if (component.flexWeight !== undefined) {
       style.flexGrow = component.flexWeight;
       style.flexShrink = 1;
-      style.flexBasis = "0%";
+      style.flexBasis = "auto";
+      style.minHeight = 0; // standard flexbox fix for flex children
+      style.minWidth = 0;
+    } else {
+      style.flexShrink = 0;
     }
 
     // ─── Direction (legacy) ───────────────────────────────────────────────────
