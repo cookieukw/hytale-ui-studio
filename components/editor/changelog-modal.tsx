@@ -212,6 +212,18 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
+                      <h4 className="text-xs font-semibold text-white">Export Filename Resolution</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      Exported image files previously defaulted to the generic project name, causing files to overwrite each other. The exporter now automatically detects the currently active `.ui` file and uses its name for the export.
+                    </p>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
                       <h4 className="text-xs font-semibold text-white">Recursive Component Counter</h4>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed pl-1">
