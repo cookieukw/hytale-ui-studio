@@ -68,6 +68,19 @@ When you drag and drop a component in Hytale UI Studio, what you see is mathemat
 
 ---
 
+## 🖼️ From Studio to Game
+
+Because Hytale UI Studio accurately simulates the game's layout engine, whatever you build in the editor will appear exactly the same inside Hytale. Here is a side-by-side comparison of templates built in the Studio versus how they look when rendered in the Hytale game client via mods:
+
+| Hytale UI Studio (Editor) | Hytale Client (In-Game) |
+|:---:|:---:|
+| **NPC Interaction System** <br> ![NPC Editor](/public/screenshots/npc-editor.png) | <br> ![NPC In-Game](/public/screenshots/npc-ingame.png) |
+| **RPG Inventory** <br> ![Inventory Editor](/public/screenshots/inventory-editor.png) | <br> ![Inventory In-Game](/public/screenshots/inventory-ingame.png) |
+| **Guild Manager** <br> ![Guild Editor](/public/screenshots/guild-editor.png) | <br> ![Guild In-Game](/public/screenshots/guild-ingame.png) |
+| **Skill Tree** <br> ![Skills Editor](/public/screenshots/skills-editor.png) | <br> ![Skills In-Game](/public/screenshots/skills-ingame.png) |
+
+---
+
 ## 🛠️ Built With
 
 | Technology | Purpose |

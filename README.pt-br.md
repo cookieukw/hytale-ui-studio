@@ -68,6 +68,19 @@ Quando você arrasta e solta um componente no Hytale UI Studio, o que você vê 
 
 ---
 
+## 🖼️ Do Studio para o Jogo
+
+Como o Hytale UI Studio simula com precisão a engine de layout do jogo, tudo o que você construir no editor aparecerá exatamente igual dentro do Hytale. Abaixo está uma comparação lado a lado dos templates construídos no Studio e como eles se parecem quando renderizados nativamente no cliente do jogo através de mods:
+
+| Hytale UI Studio (Editor) | Hytale Client (No Jogo) |
+|:---:|:---:|
+| **Sistema de Interação com NPC** <br> ![NPC Editor](/public/screenshots/npc-editor.png) | <br> ![NPC In-Game](/public/screenshots/npc-ingame.png) |
+| **Inventário RPG** <br> ![Inventory Editor](/public/screenshots/inventory-editor.png) | <br> ![Inventory In-Game](/public/screenshots/inventory-ingame.png) |
+| **Gerenciador de Guildas** <br> ![Guild Editor](/public/screenshots/guild-editor.png) | <br> ![Guild In-Game](/public/screenshots/guild-ingame.png) |
+| **Árvore de Habilidades** <br> ![Skills Editor](/public/screenshots/skills-editor.png) | <br> ![Skills In-Game](/public/screenshots/skills-ingame.png) |
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 | Tecnologia | Uso |
