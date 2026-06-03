@@ -14,15 +14,6 @@ import {
 } from "@/components/ui/context-menu";
 import { Copy, ScrollText, Trash2 } from "lucide-react";
 
-interface RenderedComponentProps {
-  component: HytaleComponent;
-  isBlueprint: boolean;
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-  index?: number;
-  parentId?: string | null;
-  parentType?: ComponentType | null;
-}
 
 import { RenderedComponent } from "./rendered-component";
 
