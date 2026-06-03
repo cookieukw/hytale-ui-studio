@@ -101,7 +101,8 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                           <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Alt+F</code> (Toggle Fit Screen)<br/>
                           <code className="bg-muted px-1 py-0.5 rounded text-xs ml-4">Alt+Q</code> (Exit Project)
                         </li>
-                        <li>Added <strong>Context Menus (Right-Click)</strong> no Canvas e na Árvore de Componentes com opções de Copiar, Colar, Duplicar e Deletar.</li>
+                        <li>Added <strong>Context Menus (Right-Click)</strong> no Canvas e na Árvore de Componentes.</li>
+                        <li>Added <strong>Drag & Drop</strong> nativo na Árvore de Componentes para reordenar e aninhar elementos facilmente com indicadores visuais!</li>
                         <li>Added <strong>Status Bar</strong> para feedback visual de salvamento em tempo real.</li>
                         <li>Centralized Command Palette actions to cover nearly all IDE functions.</li>
                       </ul>
