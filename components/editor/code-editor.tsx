@@ -8,7 +8,7 @@ import { useEditorStore } from "@/lib/editor-store";
 import { useSettings } from "./hooks/use-settings";
 import { cn } from "@/lib/utils";
 
-function SyntaxHighlightLine({ text }: { text: string }) {
+export function SyntaxHighlightLine({ text }: { text: string }) {
   if (!text.trim()) return <span>{text}</span>;
 
   // Split out strings, IDs, booleans, numbers, and punctuation

@@ -13,10 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Monitor, Code, Image as ImageIcon, Save, SlidersHorizontal, Settings2, Paintbrush, Plug } from "lucide-react";
 import { PluginManager } from "@/lib/plugin-sandbox";
+import { SyntaxHighlightLine } from "../code-editor";
 
 export function CustomizeTab() {
   const settings = useSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const preRef = useRef<HTMLDivElement>(null);
   const [pluginCode, setPluginCode] = React.useState("");
   const [pluginId, setPluginId] = React.useState("dev_plugin_1");
 
@@ -304,12 +306,40 @@ export function CustomizeTab() {
                     Unload
                   </Button>
                 </div>
-                <Textarea 
-                  value={pluginCode}
-                  onChange={(e) => setPluginCode(e.target.value)}
-                  placeholder={'window.HytaleStudio.plugins.registerComponent("HealthBar", {\n  category: "RPG", icon: "Heart", defaultProps: { Health: 50 },\n  template: { \n    type: "Panel", anchor: { width: "100%", height: "10px" }, background: { color: "#555" }, \n    children: [ { type: "Panel", anchor: { width: "{Health}%", height: "100%" }, background: { color: "#ff2222" } } ] \n  } \n});'}
-                  className="font-mono text-xs min-h-[150px] bg-background border-border"
-                />
+                <div className="relative font-mono text-xs min-h-[150px] bg-background border border-border rounded-md overflow-hidden flex focus-within:ring-1 focus-within:ring-ring">
+                  {/* Highlighted text layer */}
+                  <div 
+                    ref={preRef}
+                    className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-all overflow-hidden pointer-events-none opacity-100"
+                    aria-hidden="true"
+                  >
+                    {pluginCode ? (
+                      pluginCode.split('\n').map((line, i) => (
+                        <div key={i} className="min-h-[1rem]">
+                          <SyntaxHighlightLine text={line} />
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground/50 whitespace-pre-wrap">
+                        {'window.HytaleStudio.plugins.registerComponent("HealthBar", {\n  category: "RPG", icon: "Heart", defaultProps: { Health: 50 },\n  template: { \n    type: "Panel", anchor: { width: "100%", height: "10px" }, background: { color: "#555" }, \n    children: [ { type: "Panel", anchor: { width: "{Health}%", height: "100%" }, background: { color: "#ff2222" } } ] \n  } \n});'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Editable textarea layer */}
+                  <Textarea 
+                    value={pluginCode}
+                    onChange={(e) => setPluginCode(e.target.value)}
+                    onScroll={(e) => {
+                      if (preRef.current) {
+                        preRef.current.scrollTop = e.currentTarget.scrollTop;
+                        preRef.current.scrollLeft = e.currentTarget.scrollLeft;
+                      }
+                    }}
+                    spellCheck={false}
+                    className="w-full h-[150px] min-h-[150px] px-3 py-2 resize-y bg-transparent text-transparent caret-foreground border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 whitespace-pre-wrap break-all"
+                  />
+                </div>
               </CardContent>
             </Card>
 
