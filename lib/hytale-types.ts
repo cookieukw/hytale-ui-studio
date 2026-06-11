@@ -173,11 +173,22 @@ export interface HytaleComponent {
   maskTexturePath?: string;
   outlineColor?: string;
 
+  // TextField specific behavior
+  passwordChar?: string;
+  autoFocus?: boolean;
+  autoSelectAll?: boolean;
+  maxLength?: number;
+
   outlineSize?: number;
   overscroll?: boolean;
   // Events
   valueChanged?: string;
   dropdownToggled?: string;
+  rightClicking?: string;
+  validating?: string;
+  dismissing?: string;
+  focusLost?: string;
+  focusGained?: string;
   // States
   states?: ComponentState;
   // Hierarchy
