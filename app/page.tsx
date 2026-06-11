@@ -32,6 +32,7 @@ import { StartScreen } from "@/components/editor/start-screen";
 import { EditorCommandPalette } from "@/components/editor/command-palette";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { StatusBar } from "@/components/editor/status-bar";
+import { useSettings } from "@/components/editor/hooks/use-settings";
 
 import { useEffect, useState } from "react";
 
@@ -42,9 +43,20 @@ export default function HytaleUIStudio() {
   const activeDesktopTab = useEditorStore((state) => state.activeDesktopTab);
   const setActiveDesktopTab = useEditorStore((state) => state.setActiveDesktopTab);
   const [isLoaded, setIsLoaded] = useState(false);
+  const appTheme = useSettings((state) => state.appTheme);
 
   // Initialize keyboard shortcuts
   useKeyboardShortcuts();
+
+  // Apply Theme
+  useEffect(() => {
+    const html = document.documentElement;
+    // Remove previous theme classes safely
+    const classesToRemove = Array.from(html.classList).filter((cls) => cls.startsWith("theme-"));
+    classesToRemove.forEach((cls) => html.classList.remove(cls));
+    // Add current theme
+    html.classList.add(`theme-${appTheme}`);
+  }, [appTheme]);
 
   // Sync code on initial load / rehydration
   useEffect(() => {

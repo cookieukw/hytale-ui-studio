@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Monitor, Code, Image as ImageIcon, Save, SlidersHorizontal, Settings2 } from "lucide-react";
+import { Monitor, Code, Image as ImageIcon, Save, SlidersHorizontal, Settings2, Paintbrush } from "lucide-react";
 
 export function CustomizeTab() {
   const settings = useSettings();
@@ -228,6 +228,38 @@ export function CustomizeTab() {
                     checked={!!settings.autoSaveEnabled}
                     onCheckedChange={(val) => settings.updateSetting("autoSaveEnabled", val)}
                   />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Studio Preferences */}
+            <Card className="bg-panel border-border shadow-md md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Paintbrush className="w-5 h-5 text-indigo-400" />
+                  <CardTitle>Studio Preferences</CardTitle>
+                </div>
+                <CardDescription>Global settings for the engine.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>Studio Theme</Label>
+                  <Select 
+                    value={settings.appTheme} 
+                    onValueChange={(val: any) => settings.updateSetting("appTheme", val)}
+                  >
+                    <SelectTrigger className="w-full bg-background border-border">
+                      <SelectValue placeholder="Select a theme..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Default (Dark)</SelectItem>
+                      <SelectItem value="dracula">Dracula</SelectItem>
+                      <SelectItem value="monokai">Monokai</SelectItem>
+                      <SelectItem value="oceanic">Oceanic</SelectItem>
+                      <SelectItem value="hytale">Hytale Gold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">Change the global interface colors for Hytale UI Studio.</p>
                 </div>
               </CardContent>
             </Card>

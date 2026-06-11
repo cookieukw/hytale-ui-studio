@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type CanvasBackgroundType = "transparent" | "solid" | "image";
+export type AppTheme = "default" | "dracula" | "monokai" | "oceanic" | "hytale";
 
 export interface SettingsState {
   // Editor
@@ -18,6 +19,9 @@ export interface SettingsState {
   // Project
   defaultAuthorName: string;
   autoSaveEnabled: boolean;
+
+  // Global
+  appTheme: AppTheme;
 
   // Actions
   updateSetting: <K extends keyof Omit<SettingsState, "updateSetting">>(
@@ -41,6 +45,8 @@ export const useSettings = create<SettingsState>()(
       
       defaultAuthorName: "Hytale Modder",
       autoSaveEnabled: true,
+
+      appTheme: "default",
 
       updateSetting: (key, value) => set((state) => ({ ...state, [key]: value })),
     }),
