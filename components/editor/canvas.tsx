@@ -44,6 +44,8 @@ export function EditorCanvas() {
   const setDraggingId = useEditorStore((state) => state.setDraggingId);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const panContainerRef = useRef<HTMLDivElement>(null);
+  const panRef = useRef({ x: 0, y: 0 });
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -128,8 +130,8 @@ export function EditorCanvas() {
     let isPanning = false;
     let startX = 0;
     let startY = 0;
-    let startScrollLeft = 0;
-    let startScrollTop = 0;
+    let startPanX = 0;
+    let startPanY = 0;
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault(); // Always prevent default scroll
@@ -148,8 +150,8 @@ export function EditorCanvas() {
         isPanning = true;
         startX = e.clientX;
         startY = e.clientY;
-        startScrollLeft = container.scrollLeft;
-        startScrollTop = container.scrollTop;
+        startPanX = panRef.current.x;
+        startPanY = panRef.current.y;
         container.style.cursor = 'grabbing';
         e.preventDefault();
       }
@@ -158,8 +160,15 @@ export function EditorCanvas() {
     const handlePointerMove = (e: PointerEvent) => {
       if (!isPanning) return;
       e.preventDefault();
-      container.scrollLeft = startScrollLeft - (e.clientX - startX);
-      container.scrollTop = startScrollTop - (e.clientY - startY);
+      
+      const newX = startPanX + (e.clientX - startX);
+      const newY = startPanY + (e.clientY - startY);
+      panRef.current = { x: newX, y: newY };
+
+      if (panContainerRef.current) {
+        panContainerRef.current.style.transform = `translate(${newX}px, ${newY}px)`;
+      }
+      container.style.backgroundPosition = `${newX}px ${newY}px`;
     };
 
     const handlePointerUp = () => {
@@ -314,21 +323,28 @@ export function EditorCanvas() {
                linear-gradient(to bottom, var(--canvas-grid) 1px, transparent 1px)`
             : undefined,
           backgroundSize: showGrid ? "20px 20px" : undefined,
+          backgroundPosition: `${panRef.current.x}px ${panRef.current.y}px`
         }}
       >
-        {/*
-          Outer wrapper: sized to the scaled device resolution so the scroll
-          container knows how much space to reserve. The inner canvas is
-          rendered at its true pixel dimensions and scaled via CSS transform.
-        */}
         <div
+          ref={panContainerRef}
           style={{
-            width: deviceSize.width * scale,
-            height: deviceSize.height * scale,
-            flexShrink: 0,
-            position: "relative",
+            transform: `translate(${panRef.current.x}px, ${panRef.current.y}px)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: "100%"
           }}
         >
+          <div
+            style={{
+              width: deviceSize.width * scale,
+              height: deviceSize.height * scale,
+              flexShrink: 0,
+              position: "relative",
+            }}
+          >
           <ContextMenu>
             <ContextMenuTrigger asChild>
               <div
@@ -428,6 +444,7 @@ export function EditorCanvas() {
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+        </div>
       </div>
     </div>
 
