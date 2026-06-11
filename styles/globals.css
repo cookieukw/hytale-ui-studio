@@ -134,6 +134,6 @@
 }
 
 .debug-bounding-boxes div {
-  outline: 1px dashed rgba(255, 0, 0, 0.4);
-  outline-offset: -1px;
+  outline: 1px dashed rgba(255, 0, 0, 0.8) !important;
+  outline-offset: -1px !important;
 }
