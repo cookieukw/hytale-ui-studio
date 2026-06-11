@@ -92,4 +92,8 @@ export interface EditorStore extends EditorState {
 
   showFileExplorer: boolean;
   setShowFileExplorer: (show: boolean) => void;
+
+  // Plugins
+  registerPluginComponent: (def: import("../hytale-types").PluginComponentDefinition) => void;
+  clearPluginComponents: (pluginId?: string) => void;
 }

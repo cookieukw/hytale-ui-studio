@@ -7,6 +7,7 @@ import { SpriteRenderer } from "./renderers/sprite-renderer";
 import { getTextStyle } from "./utils/style-mapper";
 import { FileJson } from "lucide-react";
 import type { ComponentContentRendererProps } from "./types";
+// Removed DOMPurify and escapeHtml for secure AST rendering
 
 export function ComponentContentRenderer({
   component,
@@ -21,6 +22,65 @@ export function ComponentContentRenderer({
   const isSelected = selectedId === component.id;
   const currentProjectId = useEditorStore((state) => state.currentProjectId);
   const projects = useEditorStore((state) => state.projects);
+  const pluginComponents = useEditorStore((state) => state.pluginComponents);
+
+  // 1. Check if this is a Plugin Component
+  const pluginDef = pluginComponents[component.type];
+  if (pluginDef && pluginDef.isPlugin && pluginDef.template) {
+    // 1. Resolve variables in the AST template
+    const resolveTemplate = (node: any): any => {
+      if (typeof node === "string") {
+        return node.replace(/{([^}]+)}/g, (match, propName) => {
+          if (component[propName] !== undefined) {
+            return String(component[propName]);
+          }
+          return match;
+        });
+      }
+      if (Array.isArray(node)) {
+        return node.map(resolveTemplate);
+      }
+      if (typeof node === "object" && node !== null) {
+        const resolved: any = {};
+        for (const [key, value] of Object.entries(node)) {
+          resolved[key] = resolveTemplate(value);
+        }
+        return resolved;
+      }
+      return node;
+    };
+
+    let idCounter = 0;
+    const assignIdsAndLock = (node: any): any => {
+      const newNode = { 
+        ...node, 
+        id: `${component.id}-inner-${idCounter++}`,
+        isLocked: true, // Prevent direct dragging of the inner macro structure
+        hitTestVisible: false, // Ensure clicks pass through to parent
+      };
+      if (newNode.children && Array.isArray(newNode.children)) {
+        newNode.children = newNode.children.map(assignIdsAndLock);
+      }
+      return newNode;
+    };
+
+    const resolvedComponent = assignIdsAndLock(resolveTemplate(pluginDef.template));
+
+    return renderWithIndicators(
+      <RenderedComponent
+        component={resolvedComponent as HytaleComponent}
+        isBlueprint={isBlueprint}
+        selectedId={selectedId} // Inner nodes won't match parent's selection ID
+        onSelect={() => {}} // Ignore internal selects, handled by parent wrapper
+        parentId={component.id}
+        parentType={component.type}
+      />,
+      "pointer-events-none", // Ensure the whole inner tree doesn't intercept clicks
+      { overflow: "hidden", display: "flex", flex: 1, width: "100%", height: "100%" }
+    );
+  }
+
+  // 2. Standard Built-in Components
   switch (component.type) {
     case "Label": {
       // Labels should always center their content; override any fixed height to prevent clipping on large fonts
@@ -208,9 +268,6 @@ export function ComponentContentRenderer({
       const isDisabled = component.disabled;
       const readOnly = component.isReadOnly;
 
-      // Dropdown Style Implementation
-      // Merge base text styles and specific dropdown styles
-      // Dropdown Style Implementation
       // Dropdown Style Implementation
       // Merge base text styles and specific dropdown styles
       // const [isDropdownOpen, setIsDropdownOpen] = React.useState(false); // MOVED TO TOP

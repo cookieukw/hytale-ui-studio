@@ -17,6 +17,7 @@ import { ComponentTree } from "@/components/editor/component-tree";
 import { EditorCanvas } from "@/components/editor/canvas";
 import { Inspector } from "@/components/editor/inspector";
 import { CodeEditor } from "@/components/editor/code-editor";
+import { PluginManager } from "@/lib/plugin-sandbox";
 import { FileExplorer } from "@/components/editor/file-explorer";
 import { useEditorStore } from "@/lib/editor-store";
 import {
@@ -60,6 +61,9 @@ export default function HytaleUIStudio() {
 
   // Sync code on initial load / rehydration
   useEffect(() => {
+    // Initialize Plugin Listener
+    PluginManager.initListener();
+
     // 1.5s delay to ensure hydration AND give visual feedback (user requested "better loading")
     setTimeout(() => {
       // Refresh definitions (aliases) from code to fix stale cache

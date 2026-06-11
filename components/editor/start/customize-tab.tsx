@@ -10,11 +10,15 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Monitor, Code, Image as ImageIcon, Save, SlidersHorizontal, Settings2, Paintbrush } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Monitor, Code, Image as ImageIcon, Save, SlidersHorizontal, Settings2, Paintbrush, Plug } from "lucide-react";
+import { PluginManager } from "@/lib/plugin-sandbox";
 
 export function CustomizeTab() {
   const settings = useSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pluginCode, setPluginCode] = React.useState("");
+  const [pluginId, setPluginId] = React.useState("dev_plugin_1");
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -261,6 +265,51 @@ export function CustomizeTab() {
                   </Select>
                   <p className="text-xs text-muted-foreground">Change the global interface colors for Hytale UI Studio.</p>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Plugins (Dev) */}
+            <Card className="bg-panel border-border shadow-md md:col-span-2 lg:col-span-2">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Plug className="w-5 h-5 text-pink-400" />
+                  <CardTitle>Plugins (Dev)</CardTitle>
+                </div>
+                <CardDescription>Test and develop your own components via Iframe Sandbox.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input 
+                    value={pluginId}
+                    onChange={(e) => setPluginId(e.target.value)}
+                    placeholder="Plugin ID (e.g. my_custom_plugin)"
+                    className="w-48 bg-background border-border"
+                  />
+                  <Button 
+                    onClick={() => {
+                      if (!pluginCode.trim()) return;
+                      PluginManager.loadPlugin(pluginId, pluginCode);
+                    }}
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                  >
+                    Load Plugin
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      PluginManager.unloadPlugin(pluginId);
+                    }}
+                    className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                  >
+                    Unload
+                  </Button>
+                </div>
+                <Textarea 
+                  value={pluginCode}
+                  onChange={(e) => setPluginCode(e.target.value)}
+                  placeholder={'window.HytaleStudio.plugins.registerComponent("HealthBar", {\n  category: "RPG", icon: "Heart", defaultProps: { Health: 50 },\n  template: { \n    type: "Panel", anchor: { width: "100%", height: "10px" }, background: { color: "#555" }, \n    children: [ { type: "Panel", anchor: { width: "{Health}%", height: "100%" }, background: { color: "#ff2222" } } ] \n  } \n});'}
+                  className="font-mono text-xs min-h-[150px] bg-background border-border"
+                />
               </CardContent>
             </Card>
 
