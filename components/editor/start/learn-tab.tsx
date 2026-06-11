@@ -10,15 +10,16 @@ const LEARN_TOPICS = [
   {
     id: "getting-started",
     icon: <MonitorPlay className="w-8 h-8 text-primary mb-2" />,
-    title: "Getting Started",
-    description: "A quick introduction to the Hytale UI Studio interface and basic concepts.",
-    shortDesc: "Learn how to navigate the workspace, use the component palette, and preview your UI in real-time.",
+    title: "Getting Started & Core Concepts",
+    description: "Deep dive into Hytale UI Studio's editor philosophy and workflow.",
+    shortDesc: "Learn about the architecture of UI documents, state management, and real-time syncing.",
     content: (
-      <div className="space-y-4 text-sm text-muted-foreground mt-4">
-        <p><strong className="text-foreground">1. Workspace & Files:</strong> On the left sidebar, the Workspace tab shows all your `.ui` files. You can create, rename, duplicate, or import files.</p>
-        <p><strong className="text-foreground">2. Component Palette:</strong> Drag and drop components from the Palette directly into the canvas or the Tree view.</p>
-        <p><strong className="text-foreground">3. Canvas & Tree:</strong> The center Canvas shows a live preview of your Hytale UI. The Component Tree lets you reorder and nest elements cleanly.</p>
-        <p><strong className="text-foreground">4. Inspector:</strong> Select any component to view its properties on the right. You can change LayoutMode, Anchors, Styles, and Data bindings.</p>
+      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
+        <p><strong className="text-foreground">1. The DOM vs Hytale UI:</strong> Hytale's UI is not HTML/CSS. It's a custom rendering engine based on nested Groups and strictly defined properties. The Studio bridges this by parsing your `.ui` XML-like syntax into a structured AST and rendering an HTML approximation on the Canvas.</p>
+        
+        <p><strong className="text-foreground">2. Component Properties:</strong> Elements in Hytale support specific rendering properties instead of generic CSS. For example, Text elements use <code className="text-primary bg-primary/10 px-1 rounded">Style: (FontSize: 22, TextColor: #FFFFFF)</code> instead of standalone fonts, and containers use <code className="text-primary bg-primary/10 px-1 rounded">Background</code> or <code className="text-primary bg-primary/10 px-1 rounded">Image</code> properties.</p>
+
+        <p><strong className="text-foreground">3. Real-time Parser:</strong> The Code Editor tab uses a custom Lexer and Parser built specifically for Hytale UI syntax. If you make a syntax error (e.g., missing a semicolon or a closing bracket), the AST will freeze at its last valid state until the syntax is corrected. Always check the browser console if your code changes aren't reflecting!</p>
       </div>
     )
   },
@@ -26,22 +27,23 @@ const LEARN_TOPICS = [
     id: "component-reference",
     icon: <BookOpen className="w-8 h-8 text-blue-400 mb-2" />,
     title: "Component Reference",
-    description: "Detailed documentation for UI concepts like LayoutMode and Anchors.",
-    shortDesc: "Understand LayoutModes, Anchors, and styling properties like a pro to build complex structures.",
+    description: "Advanced documentation on Hytale-specific properties and quirks.",
+    shortDesc: "Deep dive into Anchors, HitTestVisible, Sprites, Dropdowns, and padding/margin syntax.",
     content: (
-      <div className="space-y-4 text-sm text-muted-foreground mt-4">
-        <p><strong className="text-foreground">LayoutMode:</strong> Determines how children are arranged.</p>
-        <ul className="list-disc ml-5 mt-1 space-y-1">
-          <li><code className="text-primary bg-primary/10 px-1 rounded">Top / Bottom / Left / Right</code>: Stacks children in that direction.</li>
-          <li><code className="text-primary bg-primary/10 px-1 rounded">Center / Middle</code>: Centers children but shrinks to fit their content.</li>
-          <li><code className="text-primary bg-primary/10 px-1 rounded">CenterMiddle</code>: Centers children perfectly in both axes.</li>
-        </ul>
-        <p className="mt-4"><strong className="text-foreground">Anchors:</strong> Used to define size and position.</p>
-        <ul className="list-disc ml-5 mt-1 space-y-1">
-          <li><code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> stretches the element to fill the parent container (does NOT work well if parent is Center LayoutMode).</li>
-          <li>Use <code className="text-primary bg-primary/10 px-1 rounded">Width / Height</code> for fixed sizes.</li>
-          <li>Use <code className="text-primary bg-primary/10 px-1 rounded">Top / Bottom / Left / Right</code> to add spacing/margins relative to the layout direction.</li>
-        </ul>
+      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
+        <p><strong className="text-foreground">Advanced Anchors & Layout Modes:</strong>
+          <ul className="list-disc ml-5 mt-2 space-y-2">
+            <li><code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> vs <code className="text-primary bg-primary/10 px-1 rounded">LayoutMode: Center</code>: <code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> attempts to take 100% of the parent's layout bounds. However, if the parent has <code className="text-primary bg-primary/10 px-1 rounded">LayoutMode: Center</code>, the layout bounds shrink to wrap the children, causing <code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> to collapse to 0 width/height. Always use fixed Width/Height if the parent is Centered.</li>
+          </ul>
+        </p>
+        
+        <p><strong className="text-foreground">Padding and Margin Rules:</strong>
+          <ul className="list-disc ml-5 mt-2 space-y-2">
+            <li>Padding controls the internal spacing of a Group, while Margin pushes elements away from their neighbors in flow layouts like <code className="text-primary bg-primary/10 px-1 rounded">Left</code> or <code className="text-primary bg-primary/10 px-1 rounded">Top</code>.</li>
+            <li>You can define them explicitly: <code className="text-primary bg-primary/10 px-1 rounded">Padding: (Left: 10, Right: 10)</code>.</li>
+            <li>Unlike HTML, if a container has no explicit dimensions, its size is entirely determined by its children plus padding.</li>
+          </ul>
+        </p>
       </div>
     )
   },
@@ -88,30 +90,33 @@ const LEARN_TOPICS = [
   {
     id: "import-export",
     icon: <Code className="w-8 h-8 text-purple-400 mb-2" />,
-    title: "XML Import & Export",
-    description: "Seamlessly integrate with your Hytale mods.",
-    shortDesc: "Learn how to export your project to `.ui` files and import existing code effortlessly.",
+    title: "XML Parser & Mod Integration",
+    description: "How Hytale UI Studio interprets your code and manages project structure.",
+    shortDesc: "Understand alias resolution, translation keys, and AST hydration during imports.",
     content: (
-      <div className="space-y-4 text-sm text-muted-foreground mt-4">
-        <p><strong className="text-foreground">Exporting:</strong> Click the Download icon in the top toolbar to export your entire project as a `.zip` file containing all your `.ui` documents.</p>
-        <p><strong className="text-foreground">Importing files:</strong> You can drag and drop a `.ui` file into the Workspace sidebar, or use the Upload icon to import a full project `.zip`.</p>
-        <p><strong className="text-foreground">The Code Tab:</strong> You can edit the UI XML directly in the Code Editor tab. Changes made there will sync instantly with the visual Canvas!</p>
-        <div className="bg-primary/10 p-3 rounded-md border border-primary/20 mt-4">
-          <p className="text-xs text-primary font-medium">Note: Hytale UI Studio automatically fixes missing syntax and regenerates duplicate IDs upon importing.</p>
-        </div>
+      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
+        <p><strong className="text-foreground">Project Serialization:</strong> When you export to `.zip`, the Studio recursively converts your visual hierarchy back into valid Hytale `.ui` syntax. Properties like `FlexWeight` are formatted to match the parser's expected casing, and JSZip handles packaging the files exactly as they appear in the workspace.</p>
+        
+        <p><strong className="text-foreground">Text Properties & Formatting:</strong> Hytale's UI engine renders text directly. Use the <code className="text-primary bg-primary/10 px-1 rounded">Text: "My String"</code> property on Labels. Make sure any quotes within strings are properly escaped to avoid breaking the parser.</p>
+        
+        <p><strong className="text-foreground">AST Hydration & Duplicate Resolution:</strong> 
+          If you import a ZIP file containing multiple `.ui` files with identical filenames, Hytale UI Studio automatically appends numeric suffixes like `(1).ui` to prevent JSZip from overwriting them during your next export, keeping your project safe.
+        </p>
       </div>
     )
   },
   {
     id: "advanced",
     icon: <Compass className="w-8 h-8 text-orange-400 mb-2" />,
-    title: "Advanced Layouts",
-    description: "Master nested Groups and Flex weights.",
-    shortDesc: "Discover the secrets behind Hytale's responsive UI engine and how to replicate standard game menus.",
+    title: "Advanced Engine Layouts",
+    description: "Mastering the quirks of Hytale's Box Model and rendering engine.",
+    shortDesc: "Learn how to use Mixins (...), nested Groups, Flex weights, and alias overrides.",
     content: (
-      <div className="space-y-4 text-sm text-muted-foreground mt-4">
-        <p><strong className="text-foreground">FlexWeight:</strong> Use FlexWeight to create proportional layouts. If a parent has LayoutMode Left, and two children have FlexWeight 1 and 2, they will take 33% and 66% of the available space respectively.</p>
-        <p><strong className="text-foreground">Aliases and Overlays:</strong> Hytale frequently uses variables like <code className="text-primary bg-primary/10 px-1 rounded">$C = "Common.ui";</code> and elements like <code className="text-primary bg-primary/10 px-1 rounded">$C.@PageOverlay</code> to wrap content. You can manually type these in the Code Editor tab to link your components to global styles.</p>
+      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
+        <p><strong className="text-foreground">FlexWeight Mechanics:</strong> FlexWeight only operates on the axis defined by the parent's `LayoutMode`. If a parent is `LayoutMode: Left`, FlexWeight distributes width. The available space is calculated as: <code className="text-primary bg-primary/10 px-1 rounded">ParentWidth - (Sum of Fixed Width Children) - (Padding/Margins)</code>. The remainder is divided proportionally among elements with `FlexWeight`. If you use `FlexWeight` inside `LayoutMode: CenterMiddle`, it will **not** work as expected, because `CenterMiddle` has no explicit axis direction for expansion.</p>
+        
+        <p><strong className="text-foreground">Z-Index & Overlays:</strong> Hytale renders UI tree depth-first. Elements defined later in the XML are generally rendered on top. It's often necessary to structure your files carefully to ensure background overlays appear behind modals rather than over them.</p>
+
         <p><strong className="text-foreground">Nesting Groups:</strong> The key to complex Hytale UIs is liberal use of `Group` components. If things don't align, wrap them in a Group with a dedicated LayoutMode.</p>
       </div>
     )
@@ -119,14 +124,16 @@ const LEARN_TOPICS = [
   {
     id: "best-practices",
     icon: <GraduationCap className="w-8 h-8 text-yellow-400 mb-2" />,
-    title: "Best Practices",
-    description: "Design clean and performant UI files.",
-    shortDesc: "Tips on structuring your UI files, managing component depth, and naming conventions.",
+    title: "Hytale UI Best Practices",
+    description: "Architecting UI files for performance, mod compatibility, and maintainability.",
+    shortDesc: "Design patterns for Common.ui usage, avoiding deeply nested hierarchies, and ID naming.",
     content: (
-      <div className="space-y-4 text-sm text-muted-foreground mt-4">
-        <p><strong className="text-foreground">1. Keep it flat:</strong> Avoid unnecessary deeply nested groups as it can complicate your layout logic and reduce performance.</p>
-        <p><strong className="text-foreground">2. Name your IDs:</strong> Use clear, descriptive IDs (e.g. <code className="text-primary bg-primary/10 px-1 rounded">#BtnSubmit</code> instead of <code className="text-primary bg-primary/10 px-1 rounded">#Group12</code>). This makes referencing them in Java code much easier.</p>
-        <p><strong className="text-foreground">3. Use Common.ui:</strong> Rely on shared styles like <code className="text-primary bg-primary/10 px-1 rounded">$C.@Title</code> or <code className="text-primary bg-primary/10 px-1 rounded">$C.@DefaultLabelStyle</code> instead of manually styling every Text element. It ensures your mod feels native to Hytale.</p>
+      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
+        <p><strong className="text-foreground">1. Component Depth vs Performance:</strong> The Hytale UI engine recalculates layouts recursively. Extremely deep nesting (e.g., <code className="text-primary bg-primary/10 px-1 rounded">&lt;Group&gt;</code> inside <code className="text-primary bg-primary/10 px-1 rounded">&lt;Group&gt;</code> inside <code className="text-primary bg-primary/10 px-1 rounded">&lt;Group&gt;</code> for over 10 levels) can cause lag spikes when layouts are toggled via Java. Flatten your layouts using explicit `Anchor` positioning where possible instead of stacking endless wrappers.</p>
+        
+        <p><strong className="text-foreground">2. ID Naming Conventions:</strong> Treat UI IDs like Java variable names. Use PascalCase or camelCase with a prefix designating the type (e.g. <code className="text-primary bg-primary/10 px-1 rounded">#BtnSubmit</code> instead of <code className="text-primary bg-primary/10 px-1 rounded">#Group12</code>). Never use identical IDs within the same `.ui` file, as the Java backend will typically grab the first match it finds, leading to unpredictable bug reports.</p>
+        
+        <p><strong className="text-foreground">3. Reusable UI:</strong> Whenever possible, structure your interfaces into reusable blocks. Copy-pasting the same `Group` block 10 times in your code will make it very hard to maintain if you ever want to change a padding or background color.</p>
       </div>
     )
   }
