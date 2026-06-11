@@ -8,6 +8,60 @@ import { useEditorStore } from "@/lib/editor-store";
 import { useSettings } from "./hooks/use-settings";
 import { cn } from "@/lib/utils";
 
+function SyntaxHighlightLine({ text }: { text: string }) {
+  if (!text.trim()) return <span>{text}</span>;
+
+  // Split out strings, IDs, booleans, numbers, and punctuation
+  const tokens = text.split(/(".*?"|#[a-zA-Z0-9_-]+|\btrue\b|\bfalse\b|-?\b\d+(?:\.\d+)?\b|[{}:;,()])/);
+
+  return (
+    <>
+      {tokens.map((token, i) => {
+        if (!token) return null;
+        let colorClass = "";
+
+        if (token.startsWith('"') && token.endsWith('"')) colorClass = "text-green-400";
+        else if (token.startsWith("#")) colorClass = "text-blue-400 font-semibold";
+        else if (token === "true" || token === "false") colorClass = "text-purple-400";
+        else if (/^-?\d+(?:\.\d+)?$/.test(token)) colorClass = "text-orange-400";
+        else if (/^[{}:;,()]$/.test(token)) colorClass = "text-muted-foreground/50";
+        else {
+          // Token is a mix of spaces and unquoted words. Split by words.
+          const subTokens = token.split(/([a-zA-Z0-9_]+)/);
+          return (
+            <span key={i}>
+              {subTokens.map((sub, j) => {
+                if (!sub) return null;
+                let subClass = "text-foreground";
+                if (/^[a-zA-Z0-9_]+$/.test(sub)) {
+                  if (text.includes(`${sub}:`) || text.includes(`${sub} :`)) {
+                    subClass = "text-cyan-300"; // Property Key
+                  } else if (text.trim().startsWith(sub) && text.includes("{")) {
+                    subClass = "text-pink-400 font-semibold"; // Node Type
+                  } else {
+                    subClass = "text-yellow-200"; // Enum value
+                  }
+                }
+                return (
+                  <span key={`${i}-${j}`} className={subClass}>
+                    {sub}
+                  </span>
+                );
+              })}
+            </span>
+          );
+        }
+
+        return (
+          <span key={i} className={colorClass}>
+            {token}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function CodeEditor() {
   const settings = useSettings();
   const code = useEditorStore((state) => state.code);
@@ -156,8 +210,8 @@ export function CodeEditor() {
                   <span className="inline-block w-6 text-right mr-4 text-muted-foreground/30 select-none">
                     {index + 1}
                   </span>
-                  <span className={isHighlighted ? "text-foreground" : ""}>
-                    {line}
+                  <span className={isHighlighted ? "opacity-100" : "opacity-80 transition-opacity"}>
+                    <SyntaxHighlightLine text={line} />
                   </span>
                 </div>
               );
