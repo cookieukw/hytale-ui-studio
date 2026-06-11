@@ -5,6 +5,7 @@ import { parseAndMapCode } from "../hytale-parser";
 import JSZip from "jszip";
 import type { UIFile } from "../hytale-types";
 import { isTauri } from "../tauri-utils";
+import { getUniqueFileName } from "../utils";
 
 export const createProjectSlice: StateCreator<
   EditorStore,
@@ -237,19 +238,32 @@ export const createProjectSlice: StateCreator<
         }
       });
 
-      const files: UIFile[] = await Promise.all(
+      const parsedFiles = await Promise.all(
         zipEntries.map(async ([relativePath, zipFile]) => {
           const content = await zipFile.async("string");
           const { components, imports } = parseAndMapCode(content);
           return {
-            id: generateId(),
             name: relativePath.split("/").pop() || "unnamed.ui",
             components,
             imports,
-            lastModified: Date.now(),
           };
         }),
       );
+
+      const files: UIFile[] = [];
+      const existingNames: string[] = [];
+
+      for (const pf of parsedFiles) {
+        const uniqueName = getUniqueFileName(existingNames, pf.name);
+        existingNames.push(uniqueName);
+        files.push({
+          id: generateId(),
+          name: uniqueName,
+          components: pf.components,
+          imports: pf.imports,
+          lastModified: Date.now(),
+        });
+      }
 
       if (files.length > 0) {
         const projectId = generateId();

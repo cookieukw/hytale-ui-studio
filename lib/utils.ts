@@ -18,3 +18,15 @@ export function hexToRgba(hex: string, alpha: number): string {
   }
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+export function getUniqueFileName(existingNames: string[], baseName: string): string {
+  let name = baseName.endsWith(".ui") ? baseName : `${baseName}.ui`;
+  if (!existingNames.includes(name)) return name;
+
+  const nameWithoutExt = name.slice(0, -3);
+  let counter = 1;
+  while (existingNames.includes(`${nameWithoutExt} (${counter}).ui`)) {
+    counter++;
+  }
+  return `${nameWithoutExt} (${counter}).ui`;
+}
