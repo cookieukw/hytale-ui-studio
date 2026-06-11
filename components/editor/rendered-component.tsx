@@ -75,7 +75,7 @@ export const RenderedComponent = React.memo(function RenderedComponent({
   };
 
   const blueprintClass = isBlueprint
-    ? "border border-dashed border-primary/50 bg-primary/5"
+    ? "outline outline-1 outline-dashed outline-primary/50 bg-primary/5 -outline-offset-1"
     : "";
 
   const selectedClass = isSelected
