@@ -34,6 +34,7 @@ const LEARN_TOPICS = [
         <p><strong className="text-foreground">Advanced Anchors & Layout Modes:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-2">
             <li><code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> vs <code className="text-primary bg-primary/10 px-1 rounded">LayoutMode: Center</code>: <code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> attempts to take 100% of the parent's layout bounds. However, if the parent has <code className="text-primary bg-primary/10 px-1 rounded">LayoutMode: Center</code>, the layout bounds shrink to wrap the children, causing <code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> to collapse to 0 width/height. Always use fixed Width/Height if the parent is Centered.</li>
+            <li><strong className="text-foreground">Scrolling Layouts:</strong> Modes like <code className="text-primary bg-primary/10 px-1 rounded">TopScrolling</code> and <code className="text-primary bg-primary/10 px-1 rounded">BottomScrolling</code> enable vertical scrolling functionality for containers with overflowing content.</li>
           </ul>
         </p>
         
@@ -113,7 +114,7 @@ const LEARN_TOPICS = [
     shortDesc: "Learn how to use Mixins (...), nested Groups, Flex weights, and alias overrides.",
     content: (
       <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
-        <p><strong className="text-foreground">FlexWeight Mechanics:</strong> FlexWeight only operates on the axis defined by the parent's `LayoutMode`. If a parent is `LayoutMode: Left`, FlexWeight distributes width. The available space is calculated as: <code className="text-primary bg-primary/10 px-1 rounded">ParentWidth - (Sum of Fixed Width Children) - (Padding/Margins)</code>. The remainder is divided proportionally among elements with `FlexWeight`. If you use `FlexWeight` inside `LayoutMode: CenterMiddle`, it will **not** work as expected, because `CenterMiddle` has no explicit axis direction for expansion.</p>
+        <p><strong className="text-foreground">FlexWeight Mechanics:</strong> FlexWeight distributes remaining space similarly to CSS flex. It operates on the axis defined by the parent's `LayoutMode` (e.g., `Left` or `Top`). The available space is calculated as: <code className="text-primary bg-primary/10 px-1 rounded">ParentWidth - (Fixed Children) - (Padding/Margins)</code>. The remainder is divided proportionally among elements based on their `FlexWeight` values. If you use `FlexWeight` inside `LayoutMode: CenterMiddle`, it will **not** work as expected, because `CenterMiddle` has no explicit axis direction for expansion.</p>
         
         <p><strong className="text-foreground">Z-Index & Overlays:</strong> Hytale renders UI tree depth-first. Elements defined later in the XML are generally rendered on top. It's often necessary to structure your files carefully to ensure background overlays appear behind modals rather than over them.</p>
 
