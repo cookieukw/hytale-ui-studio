@@ -130,42 +130,59 @@ export function CodeEditor() {
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 bg-[#1e1e1e]">
-        <div
-          ref={(el) => {
-            scrollAreaRef.current = el;
-          }}
-          className="min-h-full p-0 font-mono leading-5"
-          style={{ fontSize: `${settings.editorFontSize}px` }}
-        >
-          {lines.map((line, index) => {
-            const isHighlighted =
-              highlightRange &&
-              index >= highlightRange.start &&
-              index <= highlightRange.end;
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "px-4 hover:bg-white/5 select-text",
-                  settings.editorWordWrap ? "whitespace-pre-wrap break-all" : "whitespace-pre",
-                  isHighlighted ? "bg-primary/20" : "text-muted-foreground",
-                )}
-              >
-                <span className="inline-block w-6 text-right mr-4 text-muted-foreground/30 select-none">
-                  {index + 1}
-                </span>
-                <span className={isHighlighted ? "text-foreground" : ""}>
-                  {line}
-                </span>
-              </div>
-            );
-          })}
-          {!code && (
-            <div className="p-4 text-muted-foreground">No components yet</div>
-          )}
-        </div>
-      </ScrollArea>
+      <div className="flex flex-1 min-h-0 relative">
+        <ScrollArea className="flex-1 bg-[#1e1e1e]">
+          <div
+            ref={(el) => {
+              scrollAreaRef.current = el;
+            }}
+            className="min-h-full p-0 font-mono leading-5 pb-8"
+            style={{ fontSize: `${settings.editorFontSize}px` }}
+          >
+            {lines.map((line, index) => {
+              const isHighlighted =
+                highlightRange &&
+                index >= highlightRange.start &&
+                index <= highlightRange.end;
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    "px-4 hover:bg-white/5 select-text",
+                    settings.editorWordWrap ? "whitespace-pre-wrap break-all" : "whitespace-pre",
+                    isHighlighted ? "bg-primary/20" : "text-muted-foreground",
+                  )}
+                >
+                  <span className="inline-block w-6 text-right mr-4 text-muted-foreground/30 select-none">
+                    {index + 1}
+                  </span>
+                  <span className={isHighlighted ? "text-foreground" : ""}>
+                    {line}
+                  </span>
+                </div>
+              );
+            })}
+            {!code && (
+              <div className="p-4 text-muted-foreground">No components yet</div>
+            )}
+          </div>
+        </ScrollArea>
+        
+        {settings.editorMinimap && code && (
+          <div className="w-12 shrink-0 bg-[#1a1a1a] border-l border-white/5 overflow-hidden p-1 opacity-50 select-none">
+            <div className="font-mono text-[2px] leading-[3px] text-muted-foreground whitespace-pre">
+              {lines.map((line, index) => {
+                const isHighlighted = highlightRange && index >= highlightRange.start && index <= highlightRange.end;
+                return (
+                  <div key={index} className={isHighlighted ? "bg-primary/30 text-white" : ""}>
+                    {line || " "}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="flex shrink-0 items-center justify-between border-t border-border bg-panel px-3 py-1">
         <span className="text-[10px] text-muted-foreground">
