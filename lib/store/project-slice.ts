@@ -166,8 +166,15 @@ export const createProjectSlice: StateCreator<
     const project = state.projects.find((p) => p.id === state.currentProjectId);
     if (!project) return;
 
+    // Dynamically import the settings store to read preferences
+    const { useSettings } = await import("../../components/editor/hooks/use-settings");
+    const settings = useSettings.getState();
+    const authorPrefix = settings.defaultAuthorName ? `${settings.defaultAuthorName.replace(/[^a-zA-Z0-9_-]/g, '')}_` : "";
+    const safeProjectName = project.name.replace(/[^a-zA-Z0-9_-]/g, '');
+    const exportName = `${authorPrefix}${safeProjectName}`;
+
     const zip = new JSZip();
-    const projectFolder = zip.folder(project.name);
+    const projectFolder = zip.folder(exportName);
 
     project.files.forEach((file) => {
       const code = componentsToCode(file.components, 0, file.imports);
@@ -181,7 +188,7 @@ export const createProjectSlice: StateCreator<
         const { save } = await import("@tauri-apps/plugin-dialog");
         const { writeFile } = await import("@tauri-apps/plugin-fs");
         const filePath = await save({
-          defaultPath: `${project.name}.zip`,
+          defaultPath: `${exportName}.zip`,
           filters: [{ name: "ZIP Archive", extensions: ["zip"] }],
         });
 
@@ -196,7 +203,7 @@ export const createProjectSlice: StateCreator<
       const url = URL.createObjectURL(content);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${project.name}.zip`;
+      link.download = `${exportName}.zip`;
       link.click();
       URL.revokeObjectURL(url);
     }
