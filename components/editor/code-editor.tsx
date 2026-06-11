@@ -5,9 +5,11 @@ import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorStore } from "@/lib/editor-store";
+import { useSettings } from "./hooks/use-settings";
 import { cn } from "@/lib/utils";
 
 export function CodeEditor() {
+  const settings = useSettings();
   const code = useEditorStore((state) => state.code);
   const components = useEditorStore((state) => state.components);
   const selectedId = useEditorStore((state) => state.selectedId);
@@ -133,7 +135,8 @@ export function CodeEditor() {
           ref={(el) => {
             scrollAreaRef.current = el;
           }}
-          className="min-h-full p-0 font-mono text-[11px] leading-5"
+          className="min-h-full p-0 font-mono leading-5"
+          style={{ fontSize: `${settings.editorFontSize}px` }}
         >
           {lines.map((line, index) => {
             const isHighlighted =
@@ -144,7 +147,8 @@ export function CodeEditor() {
               <div
                 key={index}
                 className={cn(
-                  "px-4 whitespace-pre hover:bg-white/5 select-text",
+                  "px-4 hover:bg-white/5 select-text",
+                  settings.editorWordWrap ? "whitespace-pre-wrap break-all" : "whitespace-pre",
                   isHighlighted ? "bg-primary/20" : "text-muted-foreground",
                 )}
               >

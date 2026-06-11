@@ -16,8 +16,10 @@ import { Copy, ScrollText, Trash2 } from "lucide-react";
 
 
 import { RenderedComponent } from "./rendered-component";
+import { useSettings } from "./hooks/use-settings";
 
 export function EditorCanvas() {
+  const settings = useSettings();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -333,14 +335,23 @@ export function EditorCanvas() {
                 id="exportable-canvas"
                 ref={canvasRef}
             className={cn(
-              "absolute top-0 left-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
+              "absolute top-0 left-0 overflow-hidden rounded-lg border shadow-2xl transition-colors",
               isDragOver && "border-primary border-dashed",
+              settings.showBoundingBoxes && "debug-bounding-boxes",
+              settings.canvasBackgroundType === "transparent" ? "border-border" : "border-transparent"
             )}
             style={{
               width: deviceSize.width,
               height: deviceSize.height,
               transformOrigin: "top left",
               transform: `scale(${scale})`,
+              ...(settings.canvasBackgroundType === "solid" ? { backgroundColor: settings.canvasBackgroundColor } : {}),
+              ...(settings.canvasBackgroundType === "image" && settings.canvasBackgroundImage ? { 
+                backgroundImage: `url(${settings.canvasBackgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+               } : {}),
+               ...(settings.canvasBackgroundType === "transparent" ? { backgroundColor: "#0a0a14" } : {})
             }}
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
