@@ -132,3 +132,8 @@
   -ms-user-select: none;       /* Internet Explorer/Edge */
   user-select: none;           /* Standard property */
 }
+
+.debug-bounding-boxes div {
+  outline: 1px dashed rgba(255, 0, 0, 0.4);
+  outline-offset: -1px;
+}
