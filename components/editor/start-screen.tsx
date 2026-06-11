@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Sidebar } from "./start/sidebar";
 import { ProjectsTab } from "./start/projects-tab";
 import { TemplatesTab } from "./start/templates-tab";
+import { LearnTab } from "./start/learn-tab";
 import { StartTab } from "./start/types";
 
 export function StartScreen() {
@@ -19,6 +20,8 @@ export function StartScreen() {
           <ProjectsTab />
         ) : activeTab === "Templates" ? (
           <TemplatesTab />
+        ) : activeTab === "Learn" ? (
+          <LearnTab />
         ) : (
           <div className="p-12 flex flex-col items-center justify-center h-full">
             <div className="text-center">
