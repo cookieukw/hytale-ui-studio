@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { ComponentType, HytaleComponent, Padding } from "@/lib/hytale-types";
 import { useEditorStore } from "@/lib/editor-store";
+import { useSettings } from "./hooks/use-settings";
 import { useComponentDnD } from "./hooks/use-component-dnd";
 import { getComponentStyle } from "./utils/style-mapper";
 import { ComponentContentRenderer } from "./component-content-renderer";
@@ -30,6 +31,7 @@ export const RenderedComponent = React.memo(function RenderedComponent({
   isBlueprint,
 }: RenderedComponentProps) {
   const currentProjectId = useEditorStore((state) => state.currentProjectId);
+  const showBoundingBoxes = useSettings((state) => state.showBoundingBoxes);
 
   const isSelected = selectedId === component.id;
   const isVisible = component.isVisible ?? true;
@@ -89,6 +91,7 @@ export const RenderedComponent = React.memo(function RenderedComponent({
       isLockedInParent ? "pointer-events-none" : "cursor-pointer",
       blueprintClass,
       selectedClass,
+      showBoundingBoxes && "outline outline-1 outline-dashed outline-red-500/80 outline-offset-[-1px]"
     ),
     style: getComponentStyle(
       component,

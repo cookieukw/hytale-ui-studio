@@ -72,22 +72,24 @@ export function CustomizeTab() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Word Wrap</Label>
+                    <Label htmlFor="switch-word-wrap">Word Wrap</Label>
                     <p className="text-xs text-muted-foreground">Wrap long lines of XML.</p>
                   </div>
                   <Switch
-                    checked={settings.editorWordWrap}
+                    id="switch-word-wrap"
+                    checked={!!settings.editorWordWrap}
                     onCheckedChange={(val) => settings.updateSetting("editorWordWrap", val)}
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Minimap</Label>
+                    <Label htmlFor="switch-minimap">Minimap</Label>
                     <p className="text-xs text-muted-foreground">Show code overview on the right.</p>
                   </div>
                   <Switch
-                    checked={settings.editorMinimap}
+                    id="switch-minimap"
+                    checked={!!settings.editorMinimap}
                     onCheckedChange={(val) => settings.updateSetting("editorMinimap", val)}
                   />
                 </div>
@@ -180,14 +182,15 @@ export function CustomizeTab() {
 
                 <div className="flex items-center justify-between pt-2">
                   <div className="space-y-0.5">
-                    <Label className="flex items-center gap-1 text-red-400">
+                    <Label htmlFor="switch-bounding" className="flex items-center gap-1 text-red-400">
                       <SlidersHorizontal className="w-3.5 h-3.5" />
                       Debug Bounding Boxes
                     </Label>
                     <p className="text-xs text-muted-foreground">Draw outlines around all UI Groups.</p>
                   </div>
                   <Switch
-                    checked={settings.showBoundingBoxes}
+                    id="switch-bounding"
+                    checked={!!settings.showBoundingBoxes}
                     onCheckedChange={(val) => settings.updateSetting("showBoundingBoxes", val)}
                   />
                 </div>
@@ -217,11 +220,12 @@ export function CustomizeTab() {
 
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
                   <div className="space-y-0.5">
-                    <Label>Auto-save workspace</Label>
+                    <Label htmlFor="switch-autosave">Auto-save workspace</Label>
                     <p className="text-xs text-muted-foreground">Automatically save changes to your browser.</p>
                   </div>
                   <Switch
-                    checked={settings.autoSaveEnabled}
+                    id="switch-autosave"
+                    checked={!!settings.autoSaveEnabled}
                     onCheckedChange={(val) => settings.updateSetting("autoSaveEnabled", val)}
                   />
                 </div>
