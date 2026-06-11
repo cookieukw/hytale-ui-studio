@@ -186,7 +186,7 @@ export function CustomizeTab() {
                       <SlidersHorizontal className="w-3.5 h-3.5" />
                       Debug Bounding Boxes
                     </Label>
-                    <p className="text-xs text-muted-foreground">Draw outlines around all UI elements.</p>
+                    <p className="text-xs text-muted-foreground">Draw outlines around all elements, and show DevTools box-model colors on the selected element.</p>
                   </div>
                   <Switch
                     id="switch-bounding"
