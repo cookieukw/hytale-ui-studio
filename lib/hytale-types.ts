@@ -94,7 +94,8 @@ export type ComponentType =
   | "ProgressBar"
   | "DropdownBox"
   | "DropdownEntry"
-  | "ImportedUI";
+  | "ImportedUI"
+  | (string & {}); // Allow custom plugin types
 
 export interface SpriteFrame {
   width: number;
@@ -172,11 +173,22 @@ export interface HytaleComponent {
   maskTexturePath?: string;
   outlineColor?: string;
 
+  // TextField specific behavior
+  passwordChar?: string;
+  autoFocus?: boolean;
+  autoSelectAll?: boolean;
+  maxLength?: number;
+
   outlineSize?: number;
   overscroll?: boolean;
   // Events
   valueChanged?: string;
   dropdownToggled?: string;
+  rightClicking?: string;
+  validating?: string;
+  dismissing?: string;
+  focusLost?: string;
+  focusGained?: string;
   // States
   states?: ComponentState;
   // Hierarchy
@@ -190,6 +202,9 @@ export interface HytaleComponent {
   alias?: string;
   importPath?: string; // For UI Nesting ($C.@Title)
   isImported?: boolean; // If this component is a placeholder for another UI file
+
+  // Plugins
+  [key: string]: any;
 }
 
 export type PresetType =
@@ -218,9 +233,15 @@ export interface ComponentDefinition {
   type: ComponentType;
   label: string;
   icon: string;
-  category: "Layout" | "Input" | "Display";
+  category: "Layout" | "Input" | "Display" | string;
   defaultProps?: Partial<HytaleComponent>;
   create?: () => HytaleComponent;
+}
+
+export interface PluginComponentDefinition extends ComponentDefinition {
+  isPlugin: true;
+  pluginId: string;
+  template: Record<string, any>; // The Hytale UI JSON AST with {VarName} placeholders
 }
 
 export interface PresetDefinition {
@@ -254,6 +275,7 @@ export interface Project {
 export interface HistoryEntry {
   components: HytaleComponent[];
   imports: string[];
+  actionName?: string;
 }
 
 export interface EditorState {
@@ -272,5 +294,7 @@ export interface EditorState {
   history: HistoryEntry[];
   historyIndex: number;
   imports: string[];
+  // Plugins state
+  pluginComponents: Record<string, PluginComponentDefinition>;
 }
 

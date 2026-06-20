@@ -22,6 +22,12 @@ export interface EditorStore extends EditorState {
   activeMobileTab: MobileTab;
   setActiveMobileTab: (tab: MobileTab) => void;
 
+  activeDesktopTab: string;
+  setActiveDesktopTab: (tab: string) => void;
+
+  isCommandPaletteOpen: boolean;
+  setCommandPaletteOpen: (open: boolean) => void;
+
   fitToScreen: boolean;
   setFitToScreen: (fit: boolean) => void;
 
@@ -59,10 +65,16 @@ export interface EditorStore extends EditorState {
   ) => void;
   getSelectedComponent: () => HytaleComponent | null;
 
+  // Clipboard
+  clipboardComponent: HytaleComponent | null;
+  copyComponent: (id: string) => void;
+  pasteComponent: () => void;
+
   // History
   undo: () => void;
   redo: () => void;
-  saveToHistory: () => void;
+  saveToHistory: (actionName?: string) => void;
+  jumpToHistory: (index: number) => void;
 
   // Code
   setCode: (code: string) => void;
@@ -80,4 +92,8 @@ export interface EditorStore extends EditorState {
 
   showFileExplorer: boolean;
   setShowFileExplorer: (show: boolean) => void;
+
+  // Plugins
+  registerPluginComponent: (def: import("../hytale-types").PluginComponentDefinition) => void;
+  clearPluginComponents: (pluginId?: string) => void;
 }

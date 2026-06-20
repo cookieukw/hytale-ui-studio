@@ -25,6 +25,11 @@ import {
   ChevronRight,
   ScrollText,
   SlidersHorizontal,
+  Box,
+  Heart,
+  Shield,
+  Swords,
+  Star,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -50,6 +55,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bell,
   Search,
   SlidersHorizontal,
+  Box,
+  Heart,
+  Shield,
+  Swords,
+  Star,
 };
 
 interface CategorySectionProps {
@@ -155,9 +165,44 @@ export function ComponentPalette() {
     );
   };
 
-  const layoutComponents = filterItems(getComponentsByCategory("Layout"));
-  const inputComponents = filterItems(getComponentsByCategory("Input"));
-  const displayComponents = filterItems(getComponentsByCategory("Display"));
+  const pluginComponents = useEditorStore((state) => state.pluginComponents);
+  const allPluginDefs = Object.values(pluginComponents);
+
+  const layoutComponents = filterItems([
+    ...getComponentsByCategory("Layout"),
+    ...allPluginDefs.filter((p) => p.category === "Layout"),
+  ]);
+  const inputComponents = filterItems([
+    ...getComponentsByCategory("Input"),
+    ...allPluginDefs.filter((p) => p.category === "Input"),
+  ]);
+  const displayComponents = filterItems([
+    ...getComponentsByCategory("Display"),
+    ...allPluginDefs.filter((p) => p.category === "Display"),
+  ]);
+
+  const customCategories = Array.from(
+    new Set(
+      allPluginDefs
+        .map((p) => p.category)
+        .filter((c) => c !== "Layout" && c !== "Input" && c !== "Display")
+    )
+  );
+
+  // Initialize expanded state for custom categories if not present
+  React.useEffect(() => {
+    let changed = false;
+    const updates: Record<string, boolean> = {};
+    for (const cat of customCategories) {
+      if (expandedSections[cat] === undefined) {
+        updates[cat] = true;
+        changed = true;
+      }
+    }
+    if (changed) {
+      setExpandedSections((prev) => ({ ...prev, ...updates }));
+    }
+  }, [customCategories, expandedSections]);
 
   return (
     <div className="flex h-full flex-col border-r border-border bg-panel">
@@ -196,6 +241,19 @@ export function ComponentPalette() {
             expanded={expandedSections.Display}
             onToggle={() => toggleSection("Display")}
           />
+          {customCategories.map((cat) => {
+            const catItems = filterItems(allPluginDefs.filter((p) => p.category === cat));
+            if (catItems.length === 0) return null;
+            return (
+              <CategorySection
+                key={cat}
+                title={cat}
+                items={catItems}
+                expanded={expandedSections[cat] ?? true}
+                onToggle={() => toggleSection(cat)}
+              />
+            );
+          })}
         </div>
       </ScrollArea>
     </div>

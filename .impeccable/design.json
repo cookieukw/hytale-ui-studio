@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-03T20:45:00Z",
+  "title": "Design System: Hytale UI Studio",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Principal Teal", "canonical": "oklch(0.65 0.18 200)", "tonalRamp": [] },
+      "background": { "role": "neutral", "displayName": "Abyss Space", "canonical": "oklch(0.13 0.005 260)", "tonalRamp": [] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headlines only." },
+      "label": { "displayName": "Label", "purpose": "Property names, numeric inputs, code views." }
+    },
+    "shadows": [
+      { "name": "modal-lift", "value": "0 10px 15px -3px rgb(0 0 0 / 0.5)", "purpose": "Lift transient surfaces." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action button, utilitarian.",
+      "html": "<button class=\"ds-btn-primary\">Save Layout</button>",
+      "css": ".ds-btn-primary { background: oklch(0.65 0.18 200); color: oklch(0.98 0 0); padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; } .ds-btn-primary:hover { opacity: 0.9; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary/Ghost button.",
+      "html": "<button class=\"ds-btn-outline\">Cancel</button>",
+      "css": ".ds-btn-outline { background: transparent; color: oklch(0.93 0.01 260); padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; border: 1px solid oklch(0.25 0.005 260); border-radius: 6px; cursor: pointer; transition: background 0.2s; } .ds-btn-outline:hover { background: oklch(0.25 0.005 260); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Precision Sandbox",
+    "overview": "This system focuses on giving the user exact, mathematical tools in a clean canvas. The studio is a native-feeling, highly precise editing environment designed for building 1:1 Hytale UI structures. The interface remains out of the way, serving only as the scaffolding for the user's work. It explicitly rejects glassmorphism, neon colors, and bloated UI trends.",
+    "keyCharacteristics": [
+      "Utilitarian and unobtrusive",
+      "Dark-mode native (Abyss Space theme)",
+      "Mathematically precise layout emulation",
+      "Driven by a sharp Principal Teal accent"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "The Principal Teal accent is used on ≤10% of any given screen. Its rarity is the point.", "section": "colors" },
+      { "name": "The Utility First Rule", "body": "Typography is never decorative. It exists purely to label, inform, and structure the interface.", "section": "typography" },
+      { "name": "The Subtle Layering Rule", "body": "Flat by default. Shadows appear only to lift transient surfaces (modals, tooltips, dropdowns) above the permanent studio scaffolding.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Principal Teal strictly for active states and primary actions.",
+      "Do rely on JetBrains Mono for technical properties.",
+      "Do ensure contrast across the dark Abyss Space backgrounds."
+    ],
+    "donts": [
+      "Don't use glassmorphism (blurs, transparent frosted glass).",
+      "Don't use neon, heavy glows, or excessive drop shadows on permanent panels.",
+      "Don't use colors that deviate significantly from Hytale's original aesthetic.",
+      "Don't clutter the interface with decorative typography or excessive whitespace."
+    ]
+  }
+}

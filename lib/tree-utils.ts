@@ -1,4 +1,13 @@
-import type { HytaleComponent } from "./hytale-types";
+import type { HytaleComponent, ComponentType } from "./hytale-types";
+
+/** Tipos de componente que podem ter filhos (containers). */
+const CONTAINER_TYPES = new Set<ComponentType>(["Group", "Panel"]);
+
+/** Retorna true se o tipo de componente aceita filhos. */
+export function isContainerType(type: ComponentType): boolean {
+  return CONTAINER_TYPES.has(type);
+}
+
 
 // Helper to find parent and index (0-based)
 export function findComponentLocation(
@@ -20,6 +29,18 @@ export function findComponentLocation(
     }
   }
   return null;
+}
+
+export function isDescendant(
+  components: HytaleComponent[],
+  parentId: string,
+  childId: string,
+): boolean {
+  const parent = findComponentById(components, parentId);
+  if (!parent || !parent.children) return false;
+  
+  // Recursively check if childId exists inside parent.children
+  return !!findComponentById(parent.children, childId);
 }
 
 export function generateId(): string {

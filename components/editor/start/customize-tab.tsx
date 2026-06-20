@@ -1,0 +1,351 @@
+"use client";
+
+import React, { useRef } from "react";
+import { useSettings } from "../hooks/use-settings";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Monitor, Code, Image as ImageIcon, Save, SlidersHorizontal, Settings2, Paintbrush, Plug } from "lucide-react";
+import { PluginManager } from "@/lib/plugin-sandbox";
+import { SyntaxHighlightLine } from "../code-editor";
+
+export function CustomizeTab() {
+  const settings = useSettings();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const preRef = useRef<HTMLDivElement>(null);
+  const [pluginCode, setPluginCode] = React.useState("");
+  const [pluginId, setPluginId] = React.useState("dev_plugin_1");
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        settings.updateSetting("canvasBackgroundImage", reader.result as string);
+        settings.updateSetting("canvasBackgroundType", "image");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <>
+      <div className="p-8 pb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            <Settings2 className="w-6 h-6 text-primary" />
+            Customize Studio
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Configure your editor, preview canvas, and project defaults.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col px-8 pb-8 overflow-hidden">
+        <ScrollArea className="flex-1 -mx-2 px-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
+            
+            {/* Editor Settings */}
+            <Card className="bg-panel border-border shadow-md">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Code className="w-5 h-5 text-blue-400" />
+                  <CardTitle>Code Editor</CardTitle>
+                </div>
+                <CardDescription>Preferences for the Monaco XML Editor.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Font Size: {settings.editorFontSize}px</Label>
+                  </div>
+                  <Slider
+                    min={10}
+                    max={24}
+                    step={1}
+                    value={[settings.editorFontSize]}
+                    onValueChange={(val) => settings.updateSetting("editorFontSize", val[0])}
+                    className="py-2"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="switch-word-wrap">Word Wrap</Label>
+                    <p className="text-xs text-muted-foreground">Wrap long lines of XML.</p>
+                  </div>
+                  <Switch
+                    id="switch-word-wrap"
+                    checked={!!settings.editorWordWrap}
+                    onCheckedChange={(val) => settings.updateSetting("editorWordWrap", val)}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="switch-minimap">Minimap</Label>
+                    <p className="text-xs text-muted-foreground">Show code overview on the right.</p>
+                  </div>
+                  <Switch
+                    id="switch-minimap"
+                    checked={!!settings.editorMinimap}
+                    onCheckedChange={(val) => settings.updateSetting("editorMinimap", val)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Canvas Settings */}
+            <Card className="bg-panel border-border shadow-md">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Monitor className="w-5 h-5 text-orange-400" />
+                  <CardTitle>Canvas Preview</CardTitle>
+                </div>
+                <CardDescription>How the visual UI is rendered.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>Background Type</Label>
+                  <Select
+                    value={settings.canvasBackgroundType}
+                    onValueChange={(val: any) => settings.updateSetting("canvasBackgroundType", val)}
+                  >
+                    <SelectTrigger className="w-full bg-background border-border">
+                      <SelectValue placeholder="Select background" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="transparent">Transparent Grid</SelectItem>
+                      <SelectItem value="solid">Solid Color</SelectItem>
+                      <SelectItem value="image">Custom Image (Hytale Screenshot)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {settings.canvasBackgroundType === "solid" && (
+                  <div className="space-y-3">
+                    <Label>Solid Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={settings.canvasBackgroundColor}
+                        onChange={(e) => settings.updateSetting("canvasBackgroundColor", e.target.value)}
+                        className="w-12 p-1 h-9 cursor-pointer"
+                      />
+                      <Input
+                        value={settings.canvasBackgroundColor}
+                        onChange={(e) => settings.updateSetting("canvasBackgroundColor", e.target.value)}
+                        className="flex-1 font-mono bg-background border-border"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {settings.canvasBackgroundType === "image" && (
+                  <div className="space-y-3">
+                    <Label>Background Image</Label>
+                    {settings.canvasBackgroundImage ? (
+                      <div className="space-y-2">
+                        <div 
+                          className="w-full h-24 rounded-md border border-border bg-cover bg-center"
+                          style={{ backgroundImage: `url(${settings.canvasBackgroundImage})` }}
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Change Image
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-dashed"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Upload Hytale Screenshot
+                      </Button>
+                    )}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="switch-bounding" className="flex items-center gap-1 text-red-400">
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      Debug Bounding Boxes
+                    </Label>
+                    <p className="text-xs text-muted-foreground">Draw outlines around all elements, and show DevTools box-model colors on the selected element.</p>
+                  </div>
+                  <Switch
+                    id="switch-bounding"
+                    checked={!!settings.showBoundingBoxes}
+                    onCheckedChange={(val) => settings.updateSetting("showBoundingBoxes", val)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Project Settings */}
+            <Card className="bg-panel border-border shadow-md md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Save className="w-5 h-5 text-green-400" />
+                  <CardTitle>Project Preferences</CardTitle>
+                </div>
+                <CardDescription>Defaults for saving and exporting.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>Default Author Name</Label>
+                  <Input 
+                    value={settings.defaultAuthorName}
+                    onChange={(e) => settings.updateSetting("defaultAuthorName", e.target.value)}
+                    placeholder="e.g., MyMod"
+                    className="bg-background border-border"
+                  />
+                  <p className="text-xs text-muted-foreground">Used as the default author/mod prefix when exporting UI to a .zip file.</p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="switch-autosave">Auto-save workspace</Label>
+                    <p className="text-xs text-muted-foreground">Automatically save changes to your browser.</p>
+                  </div>
+                  <Switch
+                    id="switch-autosave"
+                    checked={!!settings.autoSaveEnabled}
+                    onCheckedChange={(val) => settings.updateSetting("autoSaveEnabled", val)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Studio Preferences */}
+            <Card className="bg-panel border-border shadow-md md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Paintbrush className="w-5 h-5 text-indigo-400" />
+                  <CardTitle>Studio Preferences</CardTitle>
+                </div>
+                <CardDescription>Global settings for the engine.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>Studio Theme</Label>
+                  <Select 
+                    value={settings.appTheme} 
+                    onValueChange={(val: any) => settings.updateSetting("appTheme", val)}
+                  >
+                    <SelectTrigger className="w-full bg-background border-border">
+                      <SelectValue placeholder="Select a theme..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Default (Dark)</SelectItem>
+                      <SelectItem value="dracula">Dracula</SelectItem>
+                      <SelectItem value="monokai">Monokai</SelectItem>
+                      <SelectItem value="oceanic">Oceanic</SelectItem>
+                      <SelectItem value="hytale">Hytale Gold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">Change the global interface colors for Hytale UI Studio.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Plugins (Dev) */}
+            <Card className="bg-panel border-border shadow-md md:col-span-2 lg:col-span-2">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Plug className="w-5 h-5 text-pink-400" />
+                  <CardTitle>Plugins (Dev)</CardTitle>
+                </div>
+                <CardDescription>Test and develop your own components via Iframe Sandbox.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input 
+                    value={pluginId}
+                    onChange={(e) => setPluginId(e.target.value)}
+                    placeholder="Plugin ID (e.g. my_custom_plugin)"
+                    className="w-48 bg-background border-border"
+                  />
+                  <Button 
+                    onClick={() => {
+                      if (!pluginCode.trim()) return;
+                      PluginManager.loadPlugin(pluginId, pluginCode);
+                    }}
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                  >
+                    Load Plugin
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      PluginManager.unloadPlugin(pluginId);
+                    }}
+                    className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                  >
+                    Unload
+                  </Button>
+                </div>
+                <div className="relative font-mono text-xs min-h-[150px] bg-background border border-border rounded-md overflow-hidden flex focus-within:ring-1 focus-within:ring-ring">
+                  {/* Highlighted text layer */}
+                  <div 
+                    ref={preRef}
+                    className="absolute inset-0 px-3 py-2 whitespace-pre-wrap break-all overflow-hidden pointer-events-none opacity-100"
+                    aria-hidden="true"
+                  >
+                    {pluginCode ? (
+                      pluginCode.split('\n').map((line, i) => (
+                        <div key={i} className="min-h-[1rem]">
+                          <SyntaxHighlightLine text={line} />
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground/50 whitespace-pre-wrap">
+                        {'window.HytaleStudio.plugins.registerComponent("HealthBar", {\n  category: "RPG", icon: "Heart", defaultProps: { Health: 50 },\n  template: { \n    type: "Panel", anchor: { width: "100%", height: "10px" }, background: { color: "#555" }, \n    children: [ { type: "Panel", anchor: { width: "{Health}%", height: "100%" }, background: { color: "#ff2222" } } ] \n  } \n});'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Editable textarea layer */}
+                  <Textarea 
+                    value={pluginCode}
+                    onChange={(e) => setPluginCode(e.target.value)}
+                    onScroll={(e) => {
+                      if (preRef.current) {
+                        preRef.current.scrollTop = e.currentTarget.scrollTop;
+                        preRef.current.scrollLeft = e.currentTarget.scrollLeft;
+                      }
+                    }}
+                    spellCheck={false}
+                    className="w-full h-[150px] min-h-[150px] px-3 py-2 resize-y bg-transparent text-transparent caret-foreground border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 whitespace-pre-wrap break-all"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+          </div>
+        </ScrollArea>
+      </div>
+    </>
+  );
+}

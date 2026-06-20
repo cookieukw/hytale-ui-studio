@@ -95,7 +95,7 @@ export function ProjectsTab() {
         <div className="flex items-center gap-2">
           <Button
             onClick={() => setIsCreating(true)}
-            className="h-9 px-4 font-bold shadow-md shadow-primary/40"
+            className="h-9 px-4 font-bold shadow-sm"
           >
             <Plus className="h-4 w-4 mr-2" />
             New Project
@@ -124,7 +124,7 @@ export function ProjectsTab() {
         </div>
 
         {isCreating && (
-          <div className="mb-6 p-4 rounded-lg bg-panel border border-primary/40 animate-in fade-in slide-in-from-top-2 shadow-xl shadow-primary/5">
+          <div className="mb-6 p-4 rounded-lg bg-panel border border-border animate-in fade-in slide-in-from-top-2 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <Input

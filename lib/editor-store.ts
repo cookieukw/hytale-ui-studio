@@ -10,6 +10,7 @@ import { createFileSlice } from "./store/file-slice";
 import { createComponentSlice } from "./store/component-slice";
 import { createHistorySlice } from "./store/history-slice";
 import { createCodeSlice } from "./store/code-slice";
+import { createPluginSlice } from "./store/plugin-slice";
 import { componentsToCode } from "./tree-utils";
 
 export const useEditorStore = create<EditorStore>()(
@@ -21,6 +22,7 @@ export const useEditorStore = create<EditorStore>()(
       ...createComponentSlice(set, get, store),
       ...createHistorySlice(set, get, store),
       ...createCodeSlice(set, get, store),
+      ...createPluginSlice(set, get, store),
     }),
     {
       name: "hytale-ui-studio-storage",

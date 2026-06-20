@@ -5,20 +5,21 @@ import { useEditorStore } from "@/lib/editor-store";
 import { COMPONENT_DEFINITIONS } from "@/lib/component-definitions";
 import type { HytaleComponent, ComponentType } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Copy, ScrollText, Trash2 } from "lucide-react";
 
-interface RenderedComponentProps {
-  component: HytaleComponent;
-  isBlueprint: boolean;
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-  index?: number;
-  parentId?: string | null;
-  parentType?: ComponentType | null;
-}
 
 import { RenderedComponent } from "./rendered-component";
+import { useSettings } from "./hooks/use-settings";
 
 export function EditorCanvas() {
+  const settings = useSettings();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -29,6 +30,11 @@ export function EditorCanvas() {
   const zoom = useEditorStore((state) => state.zoom);
   const addComponent = useEditorStore((state) => state.addComponent);
   const moveComponent = useEditorStore((state) => state.moveComponent);
+  const removeComponent = useEditorStore((state) => state.removeComponent);
+  const duplicateComponent = useEditorStore((state) => state.duplicateComponent);
+  const copyComponent = useEditorStore((state) => state.copyComponent);
+  const pasteComponent = useEditorStore((state) => state.pasteComponent);
+  const hasClipboard = useEditorStore((state) => !!state.clipboardComponent);
   const setSelectedId = useEditorStore((state) => state.setSelectedId);
   const selectedId = useEditorStore((state) => state.selectedId);
   const fitToScreen = useEditorStore((state) => state.fitToScreen);
@@ -38,8 +44,9 @@ export function EditorCanvas() {
   const setDraggingId = useEditorStore((state) => state.setDraggingId);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const panContainerRef = useRef<HTMLDivElement>(null);
+  const panRef = useRef({ x: 0, y: 0 });
 
-  const setDevicePreview = useEditorStore((state) => state.setDevicePreview);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -47,13 +54,13 @@ export function EditorCanvas() {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       if (mobile) {
-        setDevicePreview("Mobile");
+        useEditorStore.getState().setDevicePreview("Mobile");
       }
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, [setDevicePreview]);
+  }, []);
 
   const deviceSize = React.useMemo(() => {
     // Force mobile preview size on mobile devices, ignoring desktop preview setting
@@ -113,7 +120,7 @@ export function EditorCanvas() {
     observer.observe(containerRef.current);
 
     return () => observer.disconnect();
-  }, [fitToScreen, deviceSize, zoom, setZoom]); // depend on zoom to check diff, but be careful
+  }, [fitToScreen, deviceSize, zoom, setCalculatedZoom]);
 
   // Wheel zoom and pan logic
   useEffect(() => {
@@ -123,8 +130,8 @@ export function EditorCanvas() {
     let isPanning = false;
     let startX = 0;
     let startY = 0;
-    let startScrollLeft = 0;
-    let startScrollTop = 0;
+    let startPanX = 0;
+    let startPanY = 0;
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault(); // Always prevent default scroll
@@ -143,8 +150,8 @@ export function EditorCanvas() {
         isPanning = true;
         startX = e.clientX;
         startY = e.clientY;
-        startScrollLeft = container.scrollLeft;
-        startScrollTop = container.scrollTop;
+        startPanX = panRef.current.x;
+        startPanY = panRef.current.y;
         container.style.cursor = 'grabbing';
         e.preventDefault();
       }
@@ -153,8 +160,15 @@ export function EditorCanvas() {
     const handlePointerMove = (e: PointerEvent) => {
       if (!isPanning) return;
       e.preventDefault();
-      container.scrollLeft = startScrollLeft - (e.clientX - startX);
-      container.scrollTop = startScrollTop - (e.clientY - startY);
+      
+      const newX = startPanX + (e.clientX - startX);
+      const newY = startPanY + (e.clientY - startY);
+      panRef.current = { x: newX, y: newY };
+
+      if (panContainerRef.current) {
+        panContainerRef.current.style.transform = `translate(${newX}px, ${newY}px)`;
+      }
+      container.style.backgroundPosition = `${newX}px ${newY}px`;
     };
 
     const handlePointerUp = () => {
@@ -309,33 +323,51 @@ export function EditorCanvas() {
                linear-gradient(to bottom, var(--canvas-grid) 1px, transparent 1px)`
             : undefined,
           backgroundSize: showGrid ? "20px 20px" : undefined,
+          backgroundPosition: `${panRef.current.x}px ${panRef.current.y}px`
         }}
       >
-        {/*
-          Outer wrapper: sized to the scaled device resolution so the scroll
-          container knows how much space to reserve. The inner canvas is
-          rendered at its true pixel dimensions and scaled via CSS transform.
-        */}
         <div
+          ref={panContainerRef}
           style={{
-            width: deviceSize.width * scale,
-            height: deviceSize.height * scale,
-            flexShrink: 0,
-            position: "relative",
+            transform: `translate(${panRef.current.x}px, ${panRef.current.y}px)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            height: "100%"
           }}
         >
           <div
-            id="exportable-canvas"
-            ref={canvasRef}
+            style={{
+              width: deviceSize.width * scale,
+              height: deviceSize.height * scale,
+              flexShrink: 0,
+              position: "relative",
+            }}
+          >
+          <ContextMenu>
+            <ContextMenuTrigger asChild>
+              <div
+                id="exportable-canvas"
+                ref={canvasRef}
             className={cn(
-              "absolute top-0 left-0 overflow-hidden rounded-lg border border-border bg-[#0a0a14] shadow-2xl transition-colors",
+              "absolute top-0 left-0 overflow-hidden rounded-lg border shadow-2xl transition-colors",
               isDragOver && "border-primary border-dashed",
+              settings.showBoundingBoxes && "debug-bounding-boxes",
+              settings.canvasBackgroundType === "transparent" ? "border-border" : "border-transparent"
             )}
             style={{
               width: deviceSize.width,
               height: deviceSize.height,
               transformOrigin: "top left",
               transform: `scale(${scale})`,
+              ...(settings.canvasBackgroundType === "solid" ? { backgroundColor: settings.canvasBackgroundColor } : {}),
+              ...(settings.canvasBackgroundType === "image" && settings.canvasBackgroundImage ? { 
+                backgroundImage: `url(${settings.canvasBackgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+               } : {}),
+               ...(settings.canvasBackgroundType === "transparent" ? { backgroundColor: "#0a0a14" } : {})
             }}
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
@@ -382,8 +414,39 @@ export function EditorCanvas() {
               </div>
             )}
           </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent className="w-48">
+            <ContextMenuItem onClick={() => { if (selectedId) copyComponent(selectedId); }} disabled={!selectedId}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>Copy</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+C</span>
+            </ContextMenuItem>
+            <ContextMenuItem onClick={pasteComponent} disabled={!hasClipboard}>
+              <ScrollText className="mr-2 h-4 w-4" />
+              <span>Paste</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+V</span>
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={() => { if (selectedId) duplicateComponent(selectedId); }} disabled={!selectedId}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>Duplicate</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Ctrl+D</span>
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              onClick={() => { if (selectedId) removeComponent(selectedId); }}
+              disabled={!selectedId}
+              className={selectedId ? "text-destructive focus:text-destructive" : ""}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Delete</span>
+              <span className="ml-auto text-[10px] tracking-widest text-muted-foreground">Del</span>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
         </div>
       </div>
+    </div>
 
       <div className="flex shrink-0 items-center justify-center border-t border-border bg-panel-header px-4 py-1">
         <span className="text-xs text-muted-foreground">

@@ -17,7 +17,7 @@ export function NavButton({ active, onClick, icon, label }: NavButtonProps) {
       className={cn(
         "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
         active
-          ? "bg-primary text-white shadow-lg shadow-primary/20"
+          ? "bg-primary text-primary-foreground shadow-sm"
           : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
       )}
     >

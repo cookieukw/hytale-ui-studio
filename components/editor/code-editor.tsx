@@ -5,9 +5,65 @@ import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorStore } from "@/lib/editor-store";
+import { useSettings } from "./hooks/use-settings";
 import { cn } from "@/lib/utils";
 
+export function SyntaxHighlightLine({ text }: { text: string }) {
+  if (!text.trim()) return <span>{text}</span>;
+
+  // Split out strings, IDs, booleans, numbers, and punctuation
+  const tokens = text.split(/(".*?"|#[a-zA-Z0-9_-]+|\btrue\b|\bfalse\b|-?\b\d+(?:\.\d+)?\b|[{}:;,()])/);
+
+  return (
+    <>
+      {tokens.map((token, i) => {
+        if (!token) return null;
+        let colorClass = "";
+
+        if (token.startsWith('"') && token.endsWith('"')) colorClass = "text-green-400";
+        else if (token.startsWith("#")) colorClass = "text-blue-400 font-semibold";
+        else if (token === "true" || token === "false") colorClass = "text-purple-400";
+        else if (/^-?\d+(?:\.\d+)?$/.test(token)) colorClass = "text-orange-400";
+        else if (/^[{}:;,()]$/.test(token)) colorClass = "text-muted-foreground/50";
+        else {
+          // Token is a mix of spaces and unquoted words. Split by words.
+          const subTokens = token.split(/([a-zA-Z0-9_]+)/);
+          return (
+            <span key={i}>
+              {subTokens.map((sub, j) => {
+                if (!sub) return null;
+                let subClass = "text-foreground";
+                if (/^[a-zA-Z0-9_]+$/.test(sub)) {
+                  if (text.includes(`${sub}:`) || text.includes(`${sub} :`)) {
+                    subClass = "text-cyan-300"; // Property Key
+                  } else if (text.trim().startsWith(sub) && text.includes("{")) {
+                    subClass = "text-pink-400 font-semibold"; // Node Type
+                  } else {
+                    subClass = "text-yellow-200"; // Enum value
+                  }
+                }
+                return (
+                  <span key={`${i}-${j}`} className={subClass}>
+                    {sub}
+                  </span>
+                );
+              })}
+            </span>
+          );
+        }
+
+        return (
+          <span key={i} className={colorClass}>
+            {token}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function CodeEditor() {
+  const settings = useSettings();
   const code = useEditorStore((state) => state.code);
   const components = useEditorStore((state) => state.components);
   const selectedId = useEditorStore((state) => state.selectedId);
@@ -23,38 +79,7 @@ export function CodeEditor() {
   const highlightRange = useMemo(() => {
     if (!selectedId || !code) return null;
 
-    // 1. Find the component and its "header signature"
-    let targetComponent: any = null;
-    let matchCount = 0;
-    let targetMatchIndex = -1;
-
-    const findTarget = (list: any[]) => {
-      for (const comp of list) {
-        // Construct header signature logic matching componentsToCode
-        const idPart =
-          comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
-        const header = `${comp.type}${idPart}`;
-
-        // If we haven't found target yet, track matching signatures
-        if (!targetComponent) {
-          if (comp.id === selectedId) {
-            targetComponent = comp;
-            targetMatchIndex = matchCount;
-            return; // Found it
-          }
-        }
-
-        // Count generic matches for this header to disambiguate
-        // Wait, checking *after* finding target is tricky if we don't know the signature yet.
-        // Better: Traverse once to find target and its signature.
-        // Then traverse again (or simultaneous?)
-        // Actually, we need to know "This is the 3rd 'Label {' in the file".
-        // But 'Label {' might appear nested. The file generated is flat-ish but recursive.
-        // Let's rely on exact pre-order traversal sequence matching the code generation sequence.
-      }
-    };
-
-    // Better strategy: Generate a flat list of "Headers" in pre-order
+    // Generate a flat list of "Headers" in pre-order, matching the code generation order
     const flatHeaders: { id: string; header: string }[] = [];
     const traverse = (list: any[]) => {
       for (const comp of list) {
@@ -159,40 +184,59 @@ export function CodeEditor() {
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 bg-[#1e1e1e]">
-        <div
-          ref={(el) => {
-            scrollAreaRef.current = el;
-          }}
-          className="min-h-full p-0 font-mono text-[11px] leading-5"
-        >
-          {lines.map((line, index) => {
-            const isHighlighted =
-              highlightRange &&
-              index >= highlightRange.start &&
-              index <= highlightRange.end;
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "px-4 whitespace-pre hover:bg-white/5 select-text",
-                  isHighlighted ? "bg-primary/20" : "text-muted-foreground",
-                )}
-              >
-                <span className="inline-block w-6 text-right mr-4 text-muted-foreground/30 select-none">
-                  {index + 1}
-                </span>
-                <span className={isHighlighted ? "text-foreground" : ""}>
-                  {line}
-                </span>
-              </div>
-            );
-          })}
-          {!code && (
-            <div className="p-4 text-muted-foreground">No components yet</div>
-          )}
-        </div>
-      </ScrollArea>
+      <div className="flex flex-1 min-h-0 relative">
+        <ScrollArea className="flex-1 bg-[#1e1e1e]">
+          <div
+            ref={(el) => {
+              scrollAreaRef.current = el;
+            }}
+            className="min-h-full p-0 font-mono leading-5 pb-8"
+            style={{ fontSize: `${settings.editorFontSize}px` }}
+          >
+            {lines.map((line, index) => {
+              const isHighlighted =
+                highlightRange &&
+                index >= highlightRange.start &&
+                index <= highlightRange.end;
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    "px-4 hover:bg-white/5 select-text",
+                    settings.editorWordWrap ? "whitespace-pre-wrap break-all" : "whitespace-pre",
+                    isHighlighted ? "bg-primary/20" : "text-muted-foreground",
+                  )}
+                >
+                  <span className="inline-block w-6 text-right mr-4 text-muted-foreground/30 select-none">
+                    {index + 1}
+                  </span>
+                  <span className={isHighlighted ? "opacity-100" : "opacity-80 transition-opacity"}>
+                    <SyntaxHighlightLine text={line} />
+                  </span>
+                </div>
+              );
+            })}
+            {!code && (
+              <div className="p-4 text-muted-foreground">No components yet</div>
+            )}
+          </div>
+        </ScrollArea>
+        
+        {settings.editorMinimap && code && (
+          <div className="w-12 shrink-0 bg-[#1a1a1a] border-l border-white/5 overflow-hidden p-1 opacity-50 select-none">
+            <div className="font-mono text-[2px] leading-[3px] text-muted-foreground whitespace-pre">
+              {lines.map((line, index) => {
+                const isHighlighted = highlightRange && index >= highlightRange.start && index <= highlightRange.end;
+                return (
+                  <div key={index} className={isHighlighted ? "bg-primary/30 text-white" : ""}>
+                    {line || " "}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="flex shrink-0 items-center justify-between border-t border-border bg-panel px-3 py-1">
         <span className="text-[10px] text-muted-foreground">

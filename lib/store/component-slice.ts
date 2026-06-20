@@ -10,6 +10,7 @@ import {
   updateComponentInTree,
   regenerateIds,
   collectAllNames,
+  isContainerType,
 } from "../tree-utils";
 import { COMPONENT_DEFINITIONS } from "../component-definitions";
 import type { HytaleComponent } from "../hytale-types";
@@ -28,11 +29,15 @@ export const createComponentSlice: StateCreator<
     | "duplicateComponent"
     | "moveComponent"
     | "getSelectedComponent"
+    | "clipboardComponent"
+    | "copyComponent"
+    | "pasteComponent"
     | "refreshDefinitions"
   >
 > = (set, get) => ({
   components: [],
   imports: [],
+  clipboardComponent: null,
 
   addComponent: (component, parentId = null, index) => {
     const tempComponent = {
@@ -97,7 +102,7 @@ export const createComponentSlice: StateCreator<
       };
     });
 
-    get().saveToHistory();
+    get().saveToHistory("Add Component");
     get().syncCodeFromComponents();
     return id;
   },
@@ -118,7 +123,7 @@ export const createComponentSlice: StateCreator<
         ),
       };
     });
-    get().saveToHistory();
+    get().saveToHistory("Update Component");
     get().syncCodeFromComponents();
   },
 
@@ -147,7 +152,7 @@ export const createComponentSlice: StateCreator<
       };
     });
 
-    get().saveToHistory();
+    get().saveToHistory("Delete Component");
     get().syncCodeFromComponents();
   },
 
@@ -183,9 +188,74 @@ export const createComponentSlice: StateCreator<
         };
       });
 
-      get().saveToHistory();
+      get().saveToHistory("Duplicate Component");
       get().syncCodeFromComponents();
     }
+  },
+
+  copyComponent: (id) => {
+    const state = get();
+    const comp = findComponentById(state.components, id);
+    if (!comp) return;
+
+    // Deep clone the component to put it in clipboard, ensuring we don't hold references
+    const clone = JSON.parse(JSON.stringify(comp));
+    set({ clipboardComponent: clone });
+  },
+
+  pasteComponent: () => {
+    const state = get();
+    if (!state.clipboardComponent) return;
+
+    const existingNames = collectAllNames(state.components);
+    // Duplicate the clipboard component to get fresh IDs and unique names
+    const duplicate = duplicateComponentUtil(state.clipboardComponent, existingNames);
+    
+    // Determine where to paste
+    let targetParentId: string | null = null;
+    let targetIndex: number | undefined = undefined;
+
+    if (state.selectedId) {
+      const selectedComp = findComponentById(state.components, state.selectedId);
+      if (selectedComp) {
+        // If selected component can have children (Group, Panel), paste inside it at the end
+        if (isContainerType(selectedComp.type)) {
+          targetParentId = selectedComp.id;
+        } else {
+          // Otherwise, paste as a sibling right after it
+          const location = findComponentLocation(state.components, state.selectedId);
+          if (location) {
+            targetParentId = location.parentId;
+            targetIndex = location.index + 1;
+          }
+        }
+      }
+    }
+
+    set((state) => {
+      const newComponents = addComponentToParent(
+        state.components,
+        targetParentId,
+        duplicate,
+        targetIndex,
+      );
+      return {
+        components: newComponents,
+        selectedId: duplicate.id, // Select the newly pasted component
+        projects: state.projects.map((p) =>
+          p.id === state.currentProjectId
+            ? {
+                ...p,
+                files: p.files.map(f => f.id === state.currentFileId ? { ...f, components: newComponents, lastModified: Date.now() } : f),
+                lastModified: Date.now(),
+              }
+            : p,
+        ),
+      };
+    });
+
+    get().saveToHistory("Paste Component");
+    get().syncCodeFromComponents();
   },
 
   moveComponent: (id, newParentId, index) => {
@@ -223,7 +293,7 @@ export const createComponentSlice: StateCreator<
       ),
     }));
 
-    get().saveToHistory();
+    get().saveToHistory("Move Component");
     get().syncCodeFromComponents();
   },
 

@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -75,8 +75,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -126,9 +126,46 @@
 
 * {
   -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none;   /* Safari */
-  -khtml-user-select: none;    /* Konqueror HTML */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* Internet Explorer/Edge */
-  user-select: none;           /* Standard property */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Standard property */
+}
+
+/* THEMES */
+.theme-default {
+  /* Inherits from .dark by default */
+}
+
+.theme-dracula {
+  --background: oklch(0.2 0.05 280) --foreground: oklch(0.95 0.05 280)
+    --card: oklch(0.25 0.05 280) --popover: oklch(0.25 0.05 280)
+    --primary: oklch(0.7 0.15 300) --primary-foreground: oklch(0.1 0.05 280)
+    --secondary: oklch(0.3 0.05 280) --muted: oklch(0.3 0.05 280)
+    --border: oklch(0.3 0.05 280) --input: oklch(0.3 0.05 280);
+}
+
+.theme-monokai {
+  --background: oklch(0.2 0.02 100) --foreground: oklch(0.95 0.05 100)
+    --card: oklch(0.25 0.02 100) --popover: oklch(0.25 0.02 100)
+    --primary: oklch(0.8 0.15 140) --primary-foreground: oklch(0.1 0.02 100)
+    --secondary: oklch(0.3 0.02 100) --muted: oklch(0.3 0.02 100)
+    --border: oklch(0.3 0.02 100) --input: oklch(0.3 0.02 100);
+}
+
+.theme-oceanic {
+  --background: oklch(0.25 0.05 240) --foreground: oklch(0.95 0.05 240)
+    --card: oklch(0.3 0.05 240) --popover: oklch(0.3 0.05 240)
+    --primary: oklch(0.75 0.15 200) --primary-foreground: oklch(0.1 0.05 240)
+    --secondary: oklch(0.35 0.05 240) --muted: oklch(0.35 0.05 240)
+    --border: oklch(0.35 0.05 240) --input: oklch(0.35 0.05 240);
+}
+
+.theme-hytale {
+  --background: oklch(0.18 0.05 60) --foreground: oklch(0.95 0.1 80)
+    --card: oklch(0.22 0.06 60) --popover: oklch(0.22 0.06 60)
+    --primary: oklch(0.65 0.2 60) --primary-foreground: oklch(0.1 0.05 60)
+    --secondary: oklch(0.28 0.08 60) --muted: oklch(0.28 0.08 60)
+    --border: oklch(0.3 0.1 60) --input: oklch(0.3 0.1 60);
 }

@@ -1,6 +1,7 @@
 import { StateCreator } from "zustand";
 import { EditorStore } from "./types";
 import { generateId, regenerateIds } from "../tree-utils";
+import { getUniqueFileName } from "../utils";
 
 export const createFileSlice: StateCreator<
   EditorStore,
@@ -21,11 +22,14 @@ export const createFileSlice: StateCreator<
   createFile: (name) => {
       const state = get();
       if (!state.currentProjectId) return;
+      const project = state.projects.find(p => p.id === state.currentProjectId);
+      const existingNames = project ? project.files.map(f => f.name) : [];
+      const uniqueName = getUniqueFileName(existingNames, name);
 
       const fileId = generateId();
       const newFile = {
           id: fileId,
-          name: name.endsWith(".ui") ? name : `${name}.ui`,
+          name: uniqueName,
           components: [],
           imports: [],
           lastModified: Date.now(),
@@ -41,7 +45,7 @@ export const createFileSlice: StateCreator<
           components: [],
           imports: [],
           selectedId: null,
-          history: [{ components: [], imports: [] }],
+          history: [{ components: [], imports: [], actionName: "Initial State" }],
           historyIndex: 0,
           code: "",
       }));
@@ -63,7 +67,7 @@ export const createFileSlice: StateCreator<
           components: file.components,
           imports: file.imports,
           selectedId: null,
-          history: [{ components: file.components, imports: file.imports }],
+          history: [{ components: file.components, imports: file.imports, actionName: "Initial State" }],
           historyIndex: 0,
       }));
       get().syncCodeFromComponents();
@@ -91,7 +95,7 @@ export const createFileSlice: StateCreator<
               components: activeFile.components,
               imports: activeFile.imports,
               selectedId: null,
-              history: [{ components: activeFile.components, imports: activeFile.imports }],
+              history: [{ components: activeFile.components, imports: activeFile.imports, actionName: "Initial State" }],
               historyIndex: 0,
           };
       });
@@ -99,14 +103,21 @@ export const createFileSlice: StateCreator<
   },
 
   renameFile: (id, name) => {
-      const newName = name.endsWith(".ui") ? name : `${name}.ui`;
-      set((state) => ({
-          projects: state.projects.map(p => 
-              p.id === state.currentProjectId 
-              ? { ...p, files: p.files.map(f => f.id === id ? { ...f, name: newName, lastModified: Date.now() } : f) }
-              : p
-          ),
-      }));
+      set((state) => {
+          const project = state.projects.find(p => p.id === state.currentProjectId);
+          if (!project) return state;
+
+          const existingNames = project.files.filter(f => f.id !== id).map(f => f.name);
+          const uniqueName = getUniqueFileName(existingNames, name);
+
+          return {
+              projects: state.projects.map(p => 
+                  p.id === state.currentProjectId 
+                  ? { ...p, files: p.files.map(f => f.id === id ? { ...f, name: uniqueName, lastModified: Date.now() } : f) }
+                  : p
+              ),
+          };
+      });
   },
 
   duplicateFile: (id) => {
@@ -118,10 +129,13 @@ export const createFileSlice: StateCreator<
       if (!file) return;
 
       const newId = generateId();
+      const existingNames = project.files.map(f => f.name);
+      const uniqueName = getUniqueFileName(existingNames, file.name.replace(".ui", " (Copy).ui"));
+
       const newFile = {
           ...file,
           id: newId,
-          name: file.name.replace(".ui", " (Copy).ui"),
+          name: uniqueName,
           // Regenerate all component IDs to prevent collisions within the same project
           components: file.components.map((c) => regenerateIds(c, new Set())),
           lastModified: Date.now(),

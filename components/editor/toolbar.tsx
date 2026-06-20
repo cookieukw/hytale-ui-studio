@@ -8,12 +8,8 @@ import {
   Redo2,
   Grid3X3,
   Magnet,
-  Monitor,
-  Tablet,
-  Smartphone,
   Columns2,
   Eye,
-  Home,
   ChevronRight,
   FolderCode,
   FileCode,
@@ -22,9 +18,10 @@ import {
   Layers,
   ZoomIn,
   ZoomOut,
-  Maximize2,
   HelpCircle,
   Camera,
+  Search,
+  Maximize2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,20 +39,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useEditorStore } from "@/lib/editor-store";
-import type { ViewMode, DevicePreview } from "@/lib/hytale-types";
+import type { ViewMode } from "@/lib/hytale-types";
 import { cn } from "@/lib/utils";
 import { ChangelogModal } from "./changelog-modal";
-import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import packageJson from "@/package.json";
+import { handleExportImage } from "@/lib/export-utils";
+import { HistoryPopover } from "./history-popover";
 
 
 
 export function EditorToolbar() {
   const viewMode = useEditorStore((s) => s.viewMode);
   const setViewMode = useEditorStore((s) => s.setViewMode);
-  const devicePreview = useEditorStore((s) => s.devicePreview);
-  const setDevicePreview = useEditorStore((s) => s.setDevicePreview);
   const showGrid = useEditorStore((s) => s.showGrid);
   const toggleGrid = useEditorStore((s) => s.toggleGrid);
   const snapToGrid = useEditorStore((s) => s.snapToGrid);
@@ -98,40 +94,7 @@ export function EditorToolbar() {
     }
   };
 
-  const handleExportImage = async () => {
-    const node = document.getElementById("exportable-canvas");
-    if (!node) {
-      toast.error("Canvas not found!");
-      return;
-    }
-    
-    const toastId = toast.loading("Capturing layout image...");
-    
-    try {
-      // Capture the original resolution, overriding the zoom scale
-      const dataUrl = await toPng(node, {
-        style: {
-          transform: "scale(1)",
-          transformOrigin: "top left",
-        },
-        pixelRatio: 1, // Keep 1:1 with Hytale native resolution (or 2 for high-res)
-      });
-      
-      const activeFile = currentProject?.files.find(f => f.id === currentProject.activeFileId);
-      const rawName = activeFile?.name || currentProject?.name || "hytale-layout";
-      const fileName = rawName.replace(/\.ui$/i, "");
-      
-      const link = document.createElement("a");
-      link.download = `${fileName}-exported.png`;
-      link.href = dataUrl;
-      link.click();
-      
-      toast.success("Image exported successfully!", { id: toastId });
-    } catch (err) {
-      console.error("Failed to export image", err);
-      toast.error("Failed to export image. Check console for details.", { id: toastId });
-    }
-  };
+
 
   const viewModeOptions: {
     value: ViewMode;
@@ -147,12 +110,6 @@ export function EditorToolbar() {
     { value: "Split", label: "Split", icon: <Columns2 className="h-4 w-4" /> },
   ];
 
-  const deviceOptions: { value: DevicePreview; icon: React.ReactNode }[] = [
-    { value: "Desktop", icon: <Monitor className="h-4 w-4" /> },
-    { value: "Hytale", icon: <Maximize2 className="h-4 w-4" /> },
-    { value: "Tablet", icon: <Tablet className="h-4 w-4" /> },
-    { value: "Mobile", icon: <Smartphone className="h-4 w-4" /> },
-  ];
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -172,18 +129,8 @@ export function EditorToolbar() {
                 />
              </div>
              
-             <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={exitProject}
-                  title="Home"
-                >
-                  <Home className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex items-center">
+           <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded ml-1">
                     v{packageJson.version}
                   </span>
@@ -233,10 +180,29 @@ export function EditorToolbar() {
             </TooltipTrigger>
             <TooltipContent>Redo</TooltipContent>
           </Tooltip>
-
+          <HistoryPopover />
           <Separator orientation="vertical" className="mx-2 h-6" />
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => useEditorStore.getState().setCommandPaletteOpen(true)}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Command Palette
+              <kbd className="ml-2 inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </TooltipContent>
+          </Tooltip>
 
+          <Separator orientation="vertical" className="mx-2 h-6" />
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -295,30 +261,6 @@ export function EditorToolbar() {
 
         {/* Right section */}
         <div className="flex items-center gap-1">
-          {/* Device Preview (Hidden for now) */}
-          <div className="mr-2 hidden items-center gap-0.5 rounded-lg bg-secondary p-1">
-            {deviceOptions.map((option) => (
-              <Tooltip key={option.value}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      "h-7 w-7",
-                      devicePreview === option.value &&
-                        "bg-background text-foreground shadow-sm",
-                    )}
-                    onClick={() => setDevicePreview(option.value)}
-                  >
-                    {option.icon}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{option.value}</TooltipContent>
-              </Tooltip>
-            ))}
-          </div>
-
-          <Separator orientation="vertical" className="mx-2 h-6" />
 
           {/* Zoom controls */}
           <div className="flex items-center gap-1">

@@ -11,11 +11,13 @@ import {
   FileCode,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ComponentPalette } from "@/components/editor/component-palette";
 import { ComponentTree } from "@/components/editor/component-tree";
 import { EditorCanvas } from "@/components/editor/canvas";
 import { Inspector } from "@/components/editor/inspector";
 import { CodeEditor } from "@/components/editor/code-editor";
+import { PluginManager } from "@/lib/plugin-sandbox";
 import { FileExplorer } from "@/components/editor/file-explorer";
 import { useEditorStore } from "@/lib/editor-store";
 import {
@@ -28,61 +30,40 @@ import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/editor/mobile-nav";
 import { LoadingScreen } from "@/components/loading-screen";
 import { StartScreen } from "@/components/editor/start-screen";
+import { EditorCommandPalette } from "@/components/editor/command-palette";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { StatusBar } from "@/components/editor/status-bar";
+import { useSettings } from "@/components/editor/hooks/use-settings";
 
 import { useEffect, useState } from "react";
 
 export default function HytaleUIStudio() {
   const viewMode = useEditorStore((state) => state.viewMode);
-  const devicePreview = useEditorStore((state) => state.devicePreview);
   const activeMobileTab = useEditorStore((state) => state.activeMobileTab);
-  const selectedId = useEditorStore((state) => state.selectedId);
-  const removeComponent = useEditorStore((state) => state.removeComponent);
   const currentProjectId = useEditorStore((state) => state.currentProjectId);
-  const importProject = useEditorStore((state) => state.importProject);
-  const exportProject = useEditorStore((state) => state.exportProject);
+  const activeDesktopTab = useEditorStore((state) => state.activeDesktopTab);
+  const setActiveDesktopTab = useEditorStore((state) => state.setActiveDesktopTab);
   const [isLoaded, setIsLoaded] = useState(false);
+  const appTheme = useSettings((state) => state.appTheme);
 
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
+
+  // Apply Theme
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Delete" || e.key === "Backspace") {
-        const activeTag = document.activeElement?.tagName;
-        const isInputActive =
-          activeTag === "INPUT" ||
-          activeTag === "TEXTAREA" ||
-          (document.activeElement as HTMLElement)?.isContentEditable;
-
-        if (!isInputActive && selectedId) {
-          e.preventDefault(); // Prevent back navigation on some browsers
-          removeComponent(selectedId);
-        }
-      }
-
-      // Undo / Redo
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        !e.shiftKey &&
-        e.key.toLowerCase() === "z"
-      ) {
-        e.preventDefault();
-        useEditorStore.getState().undo();
-      }
-
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        ((e.shiftKey && e.key.toLowerCase() === "z") ||
-          e.key.toLowerCase() === "y")
-      ) {
-        e.preventDefault();
-        useEditorStore.getState().redo();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedId, removeComponent]);
+    const html = document.documentElement;
+    // Remove previous theme classes safely
+    const classesToRemove = Array.from(html.classList).filter((cls) => cls.startsWith("theme-"));
+    classesToRemove.forEach((cls) => html.classList.remove(cls));
+    // Add current theme
+    html.classList.add(`theme-${appTheme}`);
+  }, [appTheme]);
 
   // Sync code on initial load / rehydration
   useEffect(() => {
+    // Initialize Plugin Listener
+    PluginManager.initListener();
+
     // 1.5s delay to ensure hydration AND give visual feedback (user requested "better loading")
     setTimeout(() => {
       // Refresh definitions (aliases) from code to fix stale cache
@@ -119,21 +100,41 @@ export default function HytaleUIStudio() {
             collapsible
             collapsedSize={0}
           >
-            <Tabs defaultValue="workspace" className="flex h-full flex-col">
+            <Tabs value={activeDesktopTab} onValueChange={setActiveDesktopTab} className="flex h-full flex-col">
               <div className="flex shrink-0 items-center border-b border-border bg-panel px-2 py-1.5">
                 <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1">
-                  <TabsTrigger value="workspace" title="Workspace" className="px-0">
-                    <FolderCode className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="components" title="Components" className="px-0">
-                    <Layers className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="tree" title="Component Tree" className="px-0">
-                    <ListTree className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="code" title="UI Code" className="px-0">
-                    <FileCode className="h-4 w-4" />
-                  </TabsTrigger>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="workspace" className="px-0">
+                        <FolderCode className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Workspace</TooltipContent>
+                  </Tooltip>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="components" className="px-0">
+                        <Layers className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Components</TooltipContent>
+                  </Tooltip>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="tree" className="px-0">
+                        <ListTree className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Component Tree</TooltipContent>
+                  </Tooltip>
+                  <Tooltip delayDuration={150}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="code" className="px-0">
+                        <FileCode className="h-4 w-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">UI Code</TooltipContent>
+                  </Tooltip>
                 </TabsList>
               </div>
 
@@ -205,6 +206,9 @@ export default function HytaleUIStudio() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+      
+      {/* Status Bar */}
+      <StatusBar />
 
       {/* Mobile Layout */}
       <div className="md:hidden flex h-full flex-col bg-background">
@@ -236,9 +240,7 @@ export default function HytaleUIStudio() {
             </button>
             <div className="w-px h-6 bg-border mx-1" />
             <button
-              onClick={() => {
-                exportProject();
-              }}
+              onClick={() => useEditorStore.getState().exportProject()}
               className="h-8 w-8 flex items-center justify-center rounded hover:bg-muted"
             >
               <Download className="h-4 w-4" />
@@ -251,7 +253,7 @@ export default function HytaleUIStudio() {
                 input.onchange = async (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (file) {
-                    importProject(file);
+                    useEditorStore.getState().importProject(file);
                   }
                 };
                 input.click();
@@ -309,6 +311,7 @@ export default function HytaleUIStudio() {
           </div>
         </div>
       </div>
+      <EditorCommandPalette />
     </div>
   );
 }

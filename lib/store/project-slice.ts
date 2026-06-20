@@ -5,6 +5,7 @@ import { parseAndMapCode } from "../hytale-parser";
 import JSZip from "jszip";
 import type { UIFile } from "../hytale-types";
 import { isTauri } from "../tauri-utils";
+import { getUniqueFileName } from "../utils";
 
 export const createProjectSlice: StateCreator<
   EditorStore,
@@ -54,7 +55,7 @@ export const createProjectSlice: StateCreator<
       components: [],
       imports: [],
       selectedId: null,
-      history: [{ components: [], imports: [] }],
+      history: [{ components: [], imports: [], actionName: "Initial State" }],
       historyIndex: 0,
       code: "",
     }));
@@ -72,7 +73,7 @@ export const createProjectSlice: StateCreator<
       components: activeFile.components,
       imports: activeFile.imports,
       selectedId: null,
-      history: [{ components: activeFile.components, imports: activeFile.imports }],
+      history: [{ components: activeFile.components, imports: activeFile.imports, actionName: "Initial State" }],
       historyIndex: 0,
     });
     get().syncCodeFromComponents();
@@ -98,8 +99,8 @@ export const createProjectSlice: StateCreator<
         imports: activeFile ? activeFile.imports : [],
         selectedId: null,
         history: activeFile
-        ? [{ components: activeFile.components, imports: activeFile.imports }]
-        : [{ components: [], imports: [] }],
+        ? [{ components: activeFile.components, imports: activeFile.imports, actionName: "Initial State" }]
+        : [{ components: [], imports: [], actionName: "Initial State" }],
         historyIndex: 0,
       };
     });
@@ -154,7 +155,7 @@ export const createProjectSlice: StateCreator<
       components: [],
       imports: [],
       selectedId: null,
-      history: [{ components: [], imports: [] }],
+      history: [{ components: [], imports: [], actionName: "Initial State" }],
       historyIndex: 0,
       code: "",
     });
@@ -165,8 +166,15 @@ export const createProjectSlice: StateCreator<
     const project = state.projects.find((p) => p.id === state.currentProjectId);
     if (!project) return;
 
+    // Dynamically import the settings store to read preferences
+    const { useSettings } = await import("../../components/editor/hooks/use-settings");
+    const settings = useSettings.getState();
+    const authorPrefix = settings.defaultAuthorName ? `${settings.defaultAuthorName.replace(/[^a-zA-Z0-9_-]/g, '')}_` : "";
+    const safeProjectName = project.name.replace(/[^a-zA-Z0-9_-]/g, '');
+    const exportName = `${authorPrefix}${safeProjectName}`;
+
     const zip = new JSZip();
-    const projectFolder = zip.folder(project.name);
+    const projectFolder = zip.folder(exportName);
 
     project.files.forEach((file) => {
       const code = componentsToCode(file.components, 0, file.imports);
@@ -180,7 +188,7 @@ export const createProjectSlice: StateCreator<
         const { save } = await import("@tauri-apps/plugin-dialog");
         const { writeFile } = await import("@tauri-apps/plugin-fs");
         const filePath = await save({
-          defaultPath: `${project.name}.zip`,
+          defaultPath: `${exportName}.zip`,
           filters: [{ name: "ZIP Archive", extensions: ["zip"] }],
         });
 
@@ -195,7 +203,7 @@ export const createProjectSlice: StateCreator<
       const url = URL.createObjectURL(content);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${project.name}.zip`;
+      link.download = `${exportName}.zip`;
       link.click();
       URL.revokeObjectURL(url);
     }
@@ -237,19 +245,32 @@ export const createProjectSlice: StateCreator<
         }
       });
 
-      const files: UIFile[] = await Promise.all(
+      const parsedFiles = await Promise.all(
         zipEntries.map(async ([relativePath, zipFile]) => {
           const content = await zipFile.async("string");
           const { components, imports } = parseAndMapCode(content);
           return {
-            id: generateId(),
             name: relativePath.split("/").pop() || "unnamed.ui",
             components,
             imports,
-            lastModified: Date.now(),
           };
         }),
       );
+
+      const files: UIFile[] = [];
+      const existingNames: string[] = [];
+
+      for (const pf of parsedFiles) {
+        const uniqueName = getUniqueFileName(existingNames, pf.name);
+        existingNames.push(uniqueName);
+        files.push({
+          id: generateId(),
+          name: uniqueName,
+          components: pf.components,
+          imports: pf.imports,
+          lastModified: Date.now(),
+        });
+      }
 
       if (files.length > 0) {
         const projectId = generateId();
@@ -268,7 +289,7 @@ export const createProjectSlice: StateCreator<
           components: files[0].components,
           imports: files[0].imports,
           selectedId: null,
-          history: [{ components: files[0].components, imports: files[0].imports }],
+          history: [{ components: files[0].components, imports: files[0].imports, actionName: "Initial State" }],
           historyIndex: 0,
         }));
         get().syncCodeFromComponents();

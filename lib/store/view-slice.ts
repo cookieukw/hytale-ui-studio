@@ -28,6 +28,10 @@ export const createViewSlice: StateCreator<
     | "setDraggingId"
     | "setShowFileExplorer"
     | "setActiveMobileTab"
+    | "activeDesktopTab"
+    | "setActiveDesktopTab"
+    | "isCommandPaletteOpen"
+    | "setCommandPaletteOpen"
   >
 > = (set) => ({
   selectedId: null,
@@ -40,18 +44,23 @@ export const createViewSlice: StateCreator<
   draggingId: null,
   showFileExplorer: true,
   activeMobileTab: "View",
+  activeDesktopTab: "workspace",
+  isCommandPaletteOpen: false,
 
+  setActiveDesktopTab: (tab) => set({ activeDesktopTab: tab }),
+  setCommandPaletteOpen: (open) => set({ isCommandPaletteOpen: open }),
   setShowFileExplorer: (show) => set({ showFileExplorer: show }),
   setSelectedId: (id) => set({ selectedId: id }),
   setViewMode: (mode) => set({ viewMode: mode }),
   
   setDevicePreview: (preview) => {
-    let newZoom = 80;
-    if (preview === "Desktop") newZoom = 80;
-    if (preview === "Hytale") newZoom = 35;
-    if (preview === "Tablet") newZoom = 70;
-    if (preview === "Mobile") newZoom = 100;
-    set({ devicePreview: preview, zoom: newZoom, fitToScreen: false });
+    const zoomByDevice: Record<typeof preview, number> = {
+      Desktop: 80,
+      Hytale: 35,
+      Tablet: 70,
+      Mobile: 100,
+    };
+    set({ devicePreview: preview, zoom: zoomByDevice[preview], fitToScreen: false });
   },
 
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
