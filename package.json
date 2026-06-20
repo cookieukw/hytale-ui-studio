@@ -1,6 +1,6 @@
 {
   "name": "hytale-ui-studio",
-  "version": "5.0.1",
+  "version": "5.0.0",
   "private": true,
   "type": "module",
   "author": "cookie",
@@ -11,6 +11,7 @@
     "dev": "vite",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "vitest run",
     "tauri": "tauri",
     "tauri:build": "tauri build",
     "tauri:dev": "tauri dev"
@@ -79,15 +80,19 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
     "@tauri-apps/cli": "^2.10.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/jszip": "^3.4.1",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
     "typescript": "^5",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vitest": "^4.1.9"
   }
 }
