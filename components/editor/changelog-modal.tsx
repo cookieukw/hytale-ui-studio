@@ -87,6 +87,54 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <div className="flex gap-3">
                     <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
                     <div>
+                      <h4 className="text-sm font-semibold text-white">Plugins & Code Editor Enhancements</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added a robust Plugin Sandbox System for dynamic component registration and palette integration. Implemented syntax highlighting for both the code editor and plugin editor, along with an optional code minimap for better navigation.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Canvas & Visual Editor Tools</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Replaced scroll-based canvas panning with a smoother transform-based implementation. Added visual margin and padding overlays to selected components, dynamic bounding box toggling for layout inspection, and new interaction controls/TextField behavior options in the inspector.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Theming, Customization & Testing</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Introduced a dynamic theme switching system with CSS classes, configurable canvas styling, and persistent user settings via a new Customization tab. Integrated Vitest and React Testing Library for comprehensive component testing.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">4</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Learn Tab & Documentation</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added a brand new "Learn" tab to the start screen containing resource cards and interactive documentation dialogs detailing Hytale UI engine concepts, scrolling layouts, and FlexWeight mechanics.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">5</div>
+                    <div>
                       <h4 className="text-sm font-semibold text-white">Power User System & Command Palette</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                         Added a new global Command Palette (Ctrl+K) for searching and running actions. Introduced advanced keyboard shortcuts for saving (Ctrl+S), duplicating (Ctrl+D), deleting (Del), toggling grid/snap natively, fit to screen (Alt+F), and exit project (Alt+Q).
@@ -112,7 +160,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <Separator className="bg-border/50" />
 
                   <div className="flex gap-3">
-                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">6</div>
                     <div>
                       <h4 className="text-sm font-semibold text-white">Accessibility & Tooltips Refactor</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -124,7 +172,7 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <Separator className="bg-border/50" />
 
                   <div className="flex gap-3">
-                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div>
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">7</div>
                     <div>
                       <h4 className="text-sm font-semibold text-white">Architecture & Hook Decoupling</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -265,9 +313,37 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                     </h3>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
+                      <h4 className="text-xs font-semibold text-white">Tree Drop for Nested Containers</h4>
+                    </div>
                     <p className="text-xs text-muted-foreground leading-relaxed pl-1">
-                      No critical fixes were required in this version. The codebase remains stable.
+                      Fixed an issue where dropping an element 'inside' nested containers in the component tree was broken, ensuring accurate hierarchical reordering.
+                    </p>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
+                      <h4 className="text-xs font-semibold text-white">Fit-to-Screen & Keyboard Shortcuts</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      Fixed the wrong dependency in the fit-to-screen effect (`setZoom` instead of `setCalculatedZoom`) and resolved a stale closure bug in the Alt+F keyboard shortcut.
+                    </p>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-bold px-1.5 py-0.2">Low</Badge>
+                      <h4 className="text-xs font-semibold text-white">History Reset Points</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      Added missing `actionName` entries in all history reset points, preventing unidentifiable actions from accumulating in the history popover.
                     </p>
                   </div>
 
@@ -438,6 +514,48 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                       Quality Improvements
                     </h3>
                   </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
+                      <RefreshCw className="h-3 w-3" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Store Optimizations</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Removed unnecessary store subscriptions from `page.tsx`, switched to using `getState()` for mobile detection effects, and replaced redundant if-chains with clean Record lookups.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
+                      <RefreshCw className="h-3 w-3" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Codebase Cleanup</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Centralized container type checking with a new `isContainerType` helper. Cleaned up dead code in the CodeEditor and removed the obsolete `RenderedComponentProps` interface and duplicate `findById` functions.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
+                      <RefreshCw className="h-3 w-3" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Blueprint Rendering</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Replaced border with outline for blueprint rendering to improve overall layout consistency without modifying the component box models.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
 
                   <div className="flex items-start gap-3">
                     <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
