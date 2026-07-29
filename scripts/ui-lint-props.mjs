@@ -1,13 +1,13 @@
 // Valida "propriedade X existe no no do tipo Y".
-// Fonte da verdade = propriedades documentadas em .agents/skills/elements/*.md
-// UNIAO com as observadas no corpus original do jogo. A uniao evita falso
-// positivo onde a doc tem buraco (ex: Scale em PlayerPreviewComponent).
+// Source of truth = properties documented in type-documentation/elements/*.md
+// UNIONED with those observed in the original game corpus. The union avoids
+// false positives where the docs have gaps (e.g. Scale on PlayerPreviewComponent).
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, basename, dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const SK = join(ROOT, ".agents", "skills", "elements");
+const SK = join(ROOT, "public", "custom-ui", "type-documentation", "elements");
 
 const walk = d => readdirSync(d).flatMap(f => {
   const p = join(d, f);

@@ -4,16 +4,17 @@ import { join } from "path";
 import { parseAndMapCode } from "../lib/hytale-parser";
 
 /**
- * Suite de paridade contra os arquivos .ui reais do cliente Hytale.
+ * Parity suite against the real .ui files shipped with the Hytale client.
  *
- * Nenhum arquivo da Hypixel e versionado neste repositorio. O corpus e lido de
- * um caminho apontado pela variavel de ambiente HYTALE_UI_CORPUS. Sem ela, os
- * testes sao pulados — entao o build continua verde para quem nao tem o jogo.
+ * No Hypixel-owned file is committed to this repository. The corpus is read
+ * from a path given by the HYTALE_UI_CORPUS environment variable. Without it
+ * these tests are skipped, so the build stays green for anyone who does not
+ * have the game installed.
  *
- *   HYTALE_UI_CORPUS=/caminho/para/Client/Data/Game/Interface pnpm test
+ *   HYTALE_UI_CORPUS=/path/to/Client/Data/Game/Interface pnpm test
  *
- * Por que isso existe: o corpus e um oraculo gratuito. Se o parser falhar num
- * arquivo escrito pelos proprios devs do jogo, o errado e o parser.
+ * Why this exists: the corpus is a free oracle. If the parser fails on a file
+ * written by the game's own developers, the parser is what is wrong.
  */
 
 const CORPUS = process.env.HYTALE_UI_CORPUS;
@@ -28,51 +29,50 @@ function walk(dir: string): string[] {
 const available = Boolean(CORPUS && existsSync(CORPUS));
 const suite = available ? describe : describe.skip;
 
-suite("paridade com o corpus real do Hytale", () => {
+suite("parity with the real Hytale corpus", () => {
   const files = available ? walk(CORPUS!) : [];
 
-  it("encontra arquivos .ui no corpus", () => {
+  it("finds .ui files in the corpus", () => {
     expect(files.length).toBeGreaterThan(0);
   });
 
-  it("parseia todo arquivo .ui sem lancar", () => {
-    const falhas: string[] = [];
+  it("parses every .ui file without throwing", () => {
+    const failures: string[] = [];
     for (const f of files) {
       try {
         parseAndMapCode(readFileSync(f, "utf8"));
       } catch (e) {
-        falhas.push(`${f.replace(CORPUS!, "")}: ${(e as Error).message}`);
+        failures.push(`${f.replace(CORPUS!, "")}: ${(e as Error).message}`);
       }
     }
-    expect(falhas).toEqual([]);
+    expect(failures).toEqual([]);
   });
 
-  it("nao produz arquivo vazio quando ha blocos de elemento", () => {
-    // Um arquivo com `Node { ... }` no fonte precisa render componentes ou
-    // templates. Zero para ambos significa que o parser nao entendeu nada —
-    // foi exatamente o caso das bibliotecas de template antes do suporte a
-    // `@Nome = Node { ... };`.
-    const vazios: string[] = [];
+  it("never yields an empty result when the source has element blocks", () => {
+    // A file containing `Node { ... }` must produce components or templates.
+    // Zero for both means the parser understood nothing — exactly what happened
+    // with template libraries before `@Name = Node { ... };` was supported.
+    const empty: string[] = [];
     for (const f of files) {
       const src = readFileSync(f, "utf8");
-      const blocos = (
+      const blocks = (
         src.replace(/\/\/.*$/gm, "").match(/^\s*[A-Z]\w*\s*(#\w+)?\s*\{/gm) || []
       ).length;
-      if (blocos === 0) continue;
+      if (blocks === 0) continue;
 
       const { components, templates } = parseAndMapCode(src);
       if (components.length === 0 && templates.length === 0) {
-        vazios.push(`${f.replace(CORPUS!, "")} (${blocos} blocos)`);
+        empty.push(`${f.replace(CORPUS!, "")} (${blocks} blocks)`);
       }
     }
-    expect(vazios).toEqual([]);
+    expect(empty).toEqual([]);
   });
 
-  it("materializa bibliotecas de template", () => {
-    // Arquivos que so declaram `@Nome = Node { ... };` devem expor templates.
-    const comTemplates = files.filter(
+  it("materialises template libraries", () => {
+    // Files that only declare `@Name = Node { ... };` must expose templates.
+    const withTemplates = files.filter(
       (f) => parseAndMapCode(readFileSync(f, "utf8")).templates.length > 0,
     );
-    expect(comTemplates.length).toBeGreaterThan(0);
+    expect(withTemplates.length).toBeGreaterThan(0);
   });
 });
