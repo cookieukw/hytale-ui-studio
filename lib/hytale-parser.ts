@@ -147,6 +147,13 @@ export class HytaleParser {
    */
   templates: ASTNode[] = [];
 
+  /**
+   * Named expressions declared by this file (`@Name = ...`), both constants and
+   * templates. This is what another file gets when it writes
+   * `$Alias = "this-file.ui";` and then `$Alias.@Name`.
+   */
+  exports: Record<string, any> = {};
+
   constructor(tokens: any[], globalScope = {}) {
     this.tokens = tokens;
     this.pos = 0;
@@ -212,13 +219,23 @@ export class HytaleParser {
     return this.pos >= this.tokens.length;
   }
 
-  parse(): { nodes: ASTNode[]; imports: string[]; templates: ASTNode[] } {
+  parse(): {
+    nodes: ASTNode[];
+    imports: string[];
+    templates: ASTNode[];
+    exports: Record<string, any>;
+  } {
     const nodes: ASTNode[] = [];
     while (!this.isAtEnd()) {
       const node = this.parseStatement();
       if (node) nodes.push(node as ASTNode);
     }
-    return { nodes, imports: this.imports, templates: this.templates };
+    return {
+      nodes,
+      imports: this.imports,
+      templates: this.templates,
+      exports: this.exports,
+    };
   }
 
   parseStatement() {
@@ -260,6 +277,7 @@ export class HytaleParser {
         const element = this.parseElement();
         if (!this.isAtEnd() && this.peek().value === ";") this.consume();
         this.variables[name] = element;
+        this.exports[name] = element;
         // Still available for instantiation through this.variables, but now
         // also exposed so the editor can display and edit the definition.
         this.templates.push({ ...element, templateName: name });
@@ -268,6 +286,7 @@ export class HytaleParser {
         const val = this.parseExpression();
         if (!this.isAtEnd() && this.peek().value === ";") this.consume();
         this.variables[name] = val;
+        this.exports[name] = val;
         return null;
       }
     }
@@ -637,21 +656,34 @@ function deepMerge(target: any, source: any) {
 // --- Adapter to HytaleComponent ---
 
 
-export function parseAndMapCode(code: string): {
+/**
+ * Scope handed to a file so it can resolve `$Alias.@Name` against other files.
+ * Keyed by import alias; the inner `props` shape is what resolveVariable walks.
+ *
+ *   { "$Common": { props: { "@TitleStyle": <value> } } }
+ */
+export type ImportScope = Record<string, { props: Record<string, any> }>;
+
+export function parseAndMapCode(
+  code: string,
+  scope: ImportScope = {},
+): {
   components: HytaleComponent[];
   imports: string[];
   templates: HytaleComponent[];
+  exports: Record<string, any>;
 } {
   try {
     const lexer = new HytaleLexer(code);
     const tokens = lexer.tokenize();
-    const parser = new HytaleParser(tokens);
+    const parser = new HytaleParser(tokens, scope);
     const result = parser.parse();
 
     return {
       components: result.nodes.map((node) => mapNodeToComponent(node)),
       imports: result.imports,
       templates: result.templates.map((node) => mapNodeToComponent(node)),
+      exports: result.exports,
     };
   } catch (e) {
     console.error("Parser Error:", e);
