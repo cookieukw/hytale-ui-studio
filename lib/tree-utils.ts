@@ -453,12 +453,30 @@ export function componentsToCode(
       );
 
       if (hasTexture) {
-        // Texture-based background: emit as PatchStyle object
-        const parts: string[] = [];
-        if (colorString) parts.push(`Color: ${colorString}`);
-        // Texture path isn't exported here (handled by alias in game)
-        if (parts.length > 0) {
-          code += `${spaces}  Background: (${parts.join(", ")});\n`;
+        const bg = comp.background;
+        const hasBorder =
+          bg.border !== undefined ||
+          bg.horizontalBorder !== undefined ||
+          bg.verticalBorder !== undefined;
+
+        if (!hasBorder && !colorString && !bg.isPatch) {
+          // Simplest and most common form in the shipped game files.
+          code += `${spaces}  Background: "${bg.texture}";\n`;
+        } else {
+          // Previously this branch dropped TexturePath and every border field,
+          // so importing a real panel and exporting it erased the artwork.
+          const parts: string[] = [`TexturePath: "${bg.texture}"`];
+          if (bg.border !== undefined) parts.push(`Border: ${bg.border}`);
+          if (bg.horizontalBorder !== undefined)
+            parts.push(`HorizontalBorder: ${bg.horizontalBorder}`);
+          if (bg.verticalBorder !== undefined)
+            parts.push(`VerticalBorder: ${bg.verticalBorder}`);
+          if (colorString) parts.push(`Color: ${colorString}`);
+
+          const body = parts.join(", ");
+          code += bg.isPatch
+            ? `${spaces}  Background: PatchStyle(${body});\n`
+            : `${spaces}  Background: (${body});\n`;
         }
       } else if (colorString) {
         // Plain color only: emit as literal (parser-friendly)

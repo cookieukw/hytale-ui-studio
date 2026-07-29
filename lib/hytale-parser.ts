@@ -816,12 +816,29 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         } else {
           component.background.color = value;
         }
+      } else if (typeof value === "string") {
+        // Bare texture path: Background: "HotbarBackground.png";
+        // This is the most common form in the shipped game files and used to
+        // be dropped entirely, because the branch above required a leading #.
+        component.background.texture = value;
       } else if (typeof value === "object" && value !== null) {
-        // Object form: Background: (Color: #fff, Border: 8);
+        // Tuple or PatchStyle(...): Background: PatchStyle(TexturePath: "p.png",
+        // Border: 46, Color: #ffffff(0.5));
         if (value.Color !== undefined)
           component.background.color = String(value.Color);
         if (value.Opacity !== undefined)
           component.background.opacity = Number(value.Opacity);
+        if (value.TexturePath !== undefined)
+          component.background.texture = String(value.TexturePath);
+        if (value.Border !== undefined)
+          component.background.border = Number(value.Border);
+        if (value.HorizontalBorder !== undefined)
+          component.background.horizontalBorder = Number(value.HorizontalBorder);
+        if (value.VerticalBorder !== undefined)
+          component.background.verticalBorder = Number(value.VerticalBorder);
+        // parseValue stores the constructor name in `_type` for calls such as
+        // PatchStyle(...) / LabelStyle(...).
+        if (value._type === "PatchStyle") component.background.isPatch = true;
       }
       continue;
     }
