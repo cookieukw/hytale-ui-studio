@@ -9,6 +9,11 @@ interface ASTNode {
   props: Record<string, any>;
   children: ASTNode[];
   alias?: string;
+  /**
+   * Nome da expressao quando o no vem de uma definicao de template
+   * (`@Subtitle = Label { ... };`). Ausente em nos comuns.
+   */
+  templateName?: string;
 }
 
 export class ParserError extends Error {
@@ -134,6 +139,14 @@ export class HytaleParser {
 
   imports: string[] = [];
 
+  /**
+   * Definicoes de template (`@Nome = Node { ... };`) na ordem em que aparecem.
+   * Ficam separadas de `nodes` porque nao sao conteudo renderizavel da tela:
+   * sao declaracoes reutilizaveis. Arquivos de biblioteca (Common.ui,
+   * Container.ui) so tem isso — antes eles resultavam em zero componentes.
+   */
+  templates: ASTNode[] = [];
+
   constructor(tokens: any[], globalScope = {}) {
     this.tokens = tokens;
     this.pos = 0;
@@ -199,13 +212,13 @@ export class HytaleParser {
     return this.pos >= this.tokens.length;
   }
 
-  parse(): { nodes: ASTNode[]; imports: string[] } {
+  parse(): { nodes: ASTNode[]; imports: string[]; templates: ASTNode[] } {
     const nodes: ASTNode[] = [];
     while (!this.isAtEnd()) {
       const node = this.parseStatement();
       if (node) nodes.push(node as ASTNode);
     }
-    return { nodes, imports: this.imports };
+    return { nodes, imports: this.imports, templates: this.templates };
   }
 
   parseStatement() {
@@ -247,6 +260,9 @@ export class HytaleParser {
         const element = this.parseElement();
         if (!this.isAtEnd() && this.peek().value === ";") this.consume();
         this.variables[name] = element;
+        // Continua disponivel para instanciacao via this.variables, mas agora
+        // tambem e exposto para o editor poder exibir e editar a definicao.
+        this.templates.push({ ...element, templateName: name });
         return null;
       } else {
         const val = this.parseExpression();
@@ -624,6 +640,7 @@ function deepMerge(target: any, source: any) {
 export function parseAndMapCode(code: string): {
   components: HytaleComponent[];
   imports: string[];
+  templates: HytaleComponent[];
 } {
   try {
     const lexer = new HytaleLexer(code);
@@ -634,6 +651,7 @@ export function parseAndMapCode(code: string): {
     return {
       components: result.nodes.map((node) => mapNodeToComponent(node)),
       imports: result.imports,
+      templates: result.templates.map((node) => mapNodeToComponent(node)),
     };
   } catch (e) {
     console.error("Parser Error:", e);
@@ -646,13 +664,16 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
 
   const component: any = {
     id: generateId(),
-    name: id || type,
+    // Templates nao tem #ID; o nome util e o da expressao (ex: "@Subtitle").
+    name: node.templateName ?? id ?? type,
     type: type as ComponentType,
     children: children ? children.map(mapNodeToComponent) : [],
     isVisible: true,
     isLocked: false,
     isExpanded: true,
     alias: node.alias,
+    isTemplate: node.templateName !== undefined,
+    templateName: node.templateName,
   };
 
   // Helper to safely set nested properties
