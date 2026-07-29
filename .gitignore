@@ -27,3 +27,6 @@ yarn-error.log*
 next-env.d.ts
 /public/custom-ui
 templates
+# Backup dos arquivos originais do cliente Hytale (proprietario - nao commitar)
+.hytale-backup/
+.agents/
