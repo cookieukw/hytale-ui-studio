@@ -1,6 +1,7 @@
 import React from "react";
 import type { HytaleComponent, Padding } from "@/lib/hytale-types";
 import { hexToRgba } from "@/lib/utils";
+import { nineSliceInsets } from "./nine-slice";
 
 
   export function getComponentStyle(
@@ -231,10 +232,29 @@ import { hexToRgba } from "@/lib/utils";
         const texture = component.background.texture.startsWith("/")
           ? component.background.texture
           : `/${component.background.texture}`;
-        style.backgroundImage = `url(${texture})`;
-        style.backgroundSize = "100% 100%";
-        style.backgroundRepeat = "no-repeat";
-        
+
+        const slice = nineSliceInsets(component.background);
+
+        if (slice) {
+          // 9-slice: Hytale keeps the corners at their native size and only
+          // stretches the edges and centre. background-size: 100% 100% would
+          // scale the whole bitmap, smearing every rounded corner and bevel.
+          // border-image reproduces the real behaviour; `fill` paints the
+          // middle region, which background-image was doing before.
+          const { top, right, bottom, left } = slice;
+          style.borderStyle = "solid";
+          style.borderWidth = `${top}px ${right}px ${bottom}px ${left}px`;
+          style.borderColor = "transparent";
+          style.borderImageSource = `url(${texture})`;
+          style.borderImageSlice = `${top} ${right} ${bottom} ${left} fill`;
+          style.borderImageWidth = `${top}px ${right}px ${bottom}px ${left}px`;
+          style.borderImageRepeat = "stretch";
+        } else {
+          style.backgroundImage = `url(${texture})`;
+          style.backgroundSize = "100% 100%";
+          style.backgroundRepeat = "no-repeat";
+        }
+
         // Note: CSS does not allow applying opacity exclusively to a background-image.
         // Applying style.opacity here would incorrectly make the children transparent.
       }
