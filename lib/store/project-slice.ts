@@ -248,11 +248,11 @@ export const createProjectSlice: StateCreator<
       const parsedFiles = await Promise.all(
         zipEntries.map(async ([relativePath, zipFile]) => {
           const content = await zipFile.async("string");
-          const { components, imports } = parseAndMapCode(content);
+          const parsed = parseAndMapCode(content);
           return {
             name: relativePath.split("/").pop() || "unnamed.ui",
-            components,
-            imports,
+            components: [...parsed.templates, ...parsed.components],
+            imports: parsed.imports,
           };
         }),
       );

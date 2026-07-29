@@ -109,11 +109,11 @@ export interface HytaleComponent {
   type: ComponentType;
   name: string;
   /**
-   * True quando o componente vem de uma definicao de template
-   * (`@Nome = Node { ... };`) e nao de conteudo direto da tela.
+   * True when the component comes from a template definition
+   * (`@Name = Node { ... };`) rather than direct screen content.
    */
   isTemplate?: boolean;
-  /** Nome da expressao do template, ex: "@Subtitle". */
+  /** Template expression name, e.g. "@Subtitle". */
   templateName?: string;
   // Layout
   anchor?: Anchor;

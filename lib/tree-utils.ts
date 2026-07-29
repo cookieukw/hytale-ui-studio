@@ -281,8 +281,15 @@ export function componentsToCode(
     // Sprite is exported as Sprite, which is default behavior
     const typeToExport = comp.alias || comp.type;
 
-    const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
-    code += `${spaces}${typeToExport}${idPart} {\n`;
+    // Template definition: `@Name = Type { ... };` instead of `Type #Id { ... }`.
+    // Without this, importing a library (Common.ui, Container.ui) and exporting
+    // it back would write `Label #@Subtitle {`, corrupting the file.
+    if (comp.isTemplate) {
+      code += `${spaces}${comp.templateName ?? comp.name} = ${typeToExport} {\n`;
+    } else {
+      const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
+      code += `${spaces}${typeToExport}${idPart} {\n`;
+    }
 
     // Visible
     if (typeof comp.isVisible === "boolean" && comp.isVisible === false) {
@@ -628,7 +635,8 @@ export function componentsToCode(
       code += componentsToCode(comp.children, depth + 1);
     }
 
-    code += `${spaces}}\n`;
+    // Template definitions require a semicolon after the closing brace.
+    code += comp.isTemplate ? `${spaces}};\n` : `${spaces}}\n`;
   });
 
   return code;

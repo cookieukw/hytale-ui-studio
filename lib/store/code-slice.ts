@@ -34,7 +34,16 @@ export const createCodeSlice: StateCreator<
 
   importFromUI: (code) => {
     try {
-      const { components, imports } = parseAndMapCode(code);
+      const parsed = parseAndMapCode(code);
+      const { imports } = parsed;
+      // Templates are added to the same list as components, marked with
+      // isTemplate. This way they inherit undo/redo, file switching, and
+      // persistence without needing a parallel field in each slice.
+      // They come first because definitions precede usage in the source.
+      const components = [...parsed.templates, ...parsed.components];
+
+      // Previously this guard was components.length > 0, so files that only
+      // define templates (Common.ui, Container.ui) were imported as nothing.
       if (components.length > 0) {
         set((state) => ({
           components,

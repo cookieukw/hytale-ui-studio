@@ -10,8 +10,8 @@ interface ASTNode {
   children: ASTNode[];
   alias?: string;
   /**
-   * Nome da expressao quando o no vem de uma definicao de template
-   * (`@Subtitle = Label { ... };`). Ausente em nos comuns.
+   * Expression name when the node comes from a template definition
+   * (`@Subtitle = Label { ... };`). Absent on regular nodes.
    */
   templateName?: string;
 }
@@ -140,10 +140,10 @@ export class HytaleParser {
   imports: string[] = [];
 
   /**
-   * Definicoes de template (`@Nome = Node { ... };`) na ordem em que aparecem.
-   * Ficam separadas de `nodes` porque nao sao conteudo renderizavel da tela:
-   * sao declaracoes reutilizaveis. Arquivos de biblioteca (Common.ui,
-   * Container.ui) so tem isso — antes eles resultavam em zero componentes.
+   * Template definitions (`@Name = Node { ... };`) in source order.
+   * Kept separate from `nodes` because they are not renderable screen content
+   * but reusable declarations. Library files (Common.ui, Container.ui) contain
+   * only these — previously they produced zero components.
    */
   templates: ASTNode[] = [];
 
@@ -260,8 +260,8 @@ export class HytaleParser {
         const element = this.parseElement();
         if (!this.isAtEnd() && this.peek().value === ";") this.consume();
         this.variables[name] = element;
-        // Continua disponivel para instanciacao via this.variables, mas agora
-        // tambem e exposto para o editor poder exibir e editar a definicao.
+        // Still available for instantiation through this.variables, but now
+        // also exposed so the editor can display and edit the definition.
         this.templates.push({ ...element, templateName: name });
         return null;
       } else {
@@ -664,7 +664,7 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
 
   const component: any = {
     id: generateId(),
-    // Templates nao tem #ID; o nome util e o da expressao (ex: "@Subtitle").
+    // Templates have no #ID; the useful name is the expression (e.g. "@Subtitle").
     name: node.templateName ?? id ?? type,
     type: type as ComponentType,
     children: children ? children.map(mapNodeToComponent) : [],
