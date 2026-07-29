@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { parseAndMapCode } from "../lib/hytale-parser";
-import { buildImportScope, parseImportLines } from "../lib/import-scope";
+import {
+  buildImportScope,
+  buildScopeFromProjectFiles,
+  parseImportLines,
+} from "../lib/import-scope";
 
 const COMMON = `
 @TitleStyle = LabelStyle(FontSize: 20, TextColor: #b4c8c9, RenderBold: true);
@@ -56,6 +60,39 @@ describe("buildImportScope", () => {
     };
     const scope = buildImportScope([`$A = "./A.ui";`], (n) => cyclic[n]);
     expect(scope.$A.props["@FromA"]).toBeDefined();
+  });
+});
+
+describe("buildScopeFromProjectFiles", () => {
+  // The store keeps parsed components, not source text, so siblings are
+  // regenerated with componentsToCode. This checks that path works.
+  const library = parseAndMapCode(COMMON);
+  const projectFiles = [
+    {
+      name: "Common.ui",
+      components: [...library.templates, ...library.components],
+      imports: library.imports,
+    },
+    { name: "Page.ui", components: [], imports: [] },
+  ];
+
+  it("exposes a sibling file's templates", () => {
+    const scope = buildScopeFromProjectFiles(
+      [`$Common = "../Common.ui";`],
+      projectFiles,
+      "Page.ui",
+    );
+    expect(scope.$Common).toBeDefined();
+    expect(Object.keys(scope.$Common.props)).toContain("@Divider");
+  });
+
+  it("refuses to import the file into itself", () => {
+    const scope = buildScopeFromProjectFiles(
+      [`$Self = "./Common.ui";`],
+      projectFiles,
+      "Common.ui",
+    );
+    expect(scope).toEqual({});
   });
 });
 
