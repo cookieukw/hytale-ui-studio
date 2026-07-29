@@ -2,6 +2,7 @@ import { StateCreator } from "zustand";
 import { EditorStore } from "./types";
 import { componentsToCode } from "../tree-utils";
 import { parseAndMapCode } from "../hytale-parser";
+import { buildScopeFromProjectFiles } from "../import-scope";
 
 export const createCodeSlice: StateCreator<
   EditorStore,
@@ -34,7 +35,23 @@ export const createCodeSlice: StateCreator<
 
   importFromUI: (code) => {
     try {
-      const parsed = parseAndMapCode(code);
+      // First pass reads the import lines. Second pass re-parses with the
+      // constants and templates those files export, so `$Common.@TitleStyle`
+      // resolves instead of silently becoming undefined.
+      const firstPass = parseAndMapCode(code);
+      const state = get();
+      const project = state.projects.find((p) => p.id === state.currentProjectId);
+      const currentFile = project?.files.find((f) => f.id === state.currentFileId);
+      const scope = project
+        ? buildScopeFromProjectFiles(
+            firstPass.imports,
+            project.files,
+            currentFile?.name,
+          )
+        : {};
+
+      const parsed =
+        Object.keys(scope).length > 0 ? parseAndMapCode(code, scope) : firstPass;
       const { imports } = parsed;
       // Templates are added to the same list as components, marked with
       // isTemplate. This way they inherit undo/redo, file switching, and

@@ -2,6 +2,7 @@ import { StateCreator } from "zustand";
 import { EditorStore } from "./types";
 import { generateId, regenerateIds, componentsToCode } from "../tree-utils";
 import { parseAndMapCode } from "../hytale-parser";
+import { buildImportScope } from "../import-scope";
 import JSZip from "jszip";
 import type { UIFile } from "../hytale-types";
 import { isTauri } from "../tauri-utils";
@@ -245,17 +246,34 @@ export const createProjectSlice: StateCreator<
         }
       });
 
-      const parsedFiles = await Promise.all(
-        zipEntries.map(async ([relativePath, zipFile]) => {
-          const content = await zipFile.async("string");
-          const parsed = parseAndMapCode(content);
-          return {
-            name: relativePath.split("/").pop() || "unnamed.ui",
-            components: [...parsed.templates, ...parsed.components],
-            imports: parsed.imports,
-          };
-        }),
+      // Read every entry first, so cross-file `$Alias.@Name` references can be
+      // resolved against the actual sources rather than regenerated ones.
+      const rawFiles = await Promise.all(
+        zipEntries.map(async ([relativePath, zipFile]) => ({
+          name: relativePath.split("/").pop() || "unnamed.ui",
+          content: await zipFile.async("string"),
+        })),
       );
+
+      const sourceByName = new Map(rawFiles.map((f) => [f.name, f.content]));
+
+      const parsedFiles = rawFiles.map(({ name, content }) => {
+        const firstPass = parseAndMapCode(content);
+        const scope = buildImportScope(firstPass.imports, (fileName) =>
+          fileName === name ? undefined : sourceByName.get(fileName),
+        );
+        const parsed =
+          Object.keys(scope).length > 0
+            ? parseAndMapCode(content, scope)
+            : firstPass;
+
+        return {
+          name,
+          // Template definitions come along (see code-slice.importFromUI).
+          components: [...parsed.templates, ...parsed.components],
+          imports: parsed.imports,
+        };
+      });
 
       const files: UIFile[] = [];
       const existingNames: string[] = [];

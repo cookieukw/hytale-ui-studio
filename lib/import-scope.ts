@@ -1,4 +1,6 @@
 import { parseAndMapCode, type ImportScope } from "./hytale-parser";
+import { componentsToCode } from "./tree-utils";
+import type { HytaleComponent } from "./hytale-types";
 
 /**
  * Cross-file `@` import resolution.
@@ -56,7 +58,7 @@ export function buildImportScope(
 
   for (const { alias, fileName } of parseImportLines(importLines)) {
     const source = resolveSource(fileName);
-    if (source === undefined) continue;
+    if (source === undefined || source.trim() === "") continue;
 
     try {
       // Resolve the imported file against its own imports too, so a constant
@@ -72,4 +74,35 @@ export function buildImportScope(
   }
 
   return scope;
+}
+
+/** Minimal shape needed from a project file; matches UIFile. */
+export interface ScopeSourceFile {
+  name: string;
+  components: HytaleComponent[];
+  imports: string[];
+}
+
+/**
+ * Convenience wrapper for the store: resolves a file's imports against the
+ * other files of the same project.
+ *
+ * The Studio keeps parsed components rather than source text, so each sibling
+ * is regenerated with componentsToCode before being parsed for its exports.
+ * That covers templates, which round-trip faithfully. Plain constants
+ * (`@Gap = 12;`) are not part of the component model yet, so they are still
+ * invisible across files — see the note in the project README.
+ */
+export function buildScopeFromProjectFiles(
+  importLines: string[],
+  files: ScopeSourceFile[],
+  currentFileName?: string,
+): ImportScope {
+  const sourceOf = (fileName: string): string | undefined => {
+    if (fileName === currentFileName) return undefined; // never import yourself
+    const file = files.find((f) => f.name === fileName);
+    if (!file) return undefined;
+    return componentsToCode(file.components, 0, file.imports);
+  };
+  return buildImportScope(importLines, sourceOf);
 }
