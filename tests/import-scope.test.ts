@@ -68,8 +68,12 @@ describe("cross-file resolution end to end", () => {
     const scope = buildImportScope(before.imports, resolve);
     const after = parseAndMapCode(PAGE, scope);
 
-    expect(after.components[0].textStyle).toBeDefined();
+    // The strongest assertion available: importing the style across files must
+    // produce exactly what writing it inline produces.
+    const inline = parseAndMapCode(
+      `Label #Title {\n  Style: LabelStyle(FontSize: 20, TextColor: #b4c8c9, RenderBold: true);\n}\n`,
+    );
+    expect(after.components[0].textStyle).toEqual(inline.components[0].textStyle);
     expect(after.components[0].textStyle?.fontSize).toBe(20);
-    expect(after.components[0].textStyle?.color).toBe("#b4c8c9");
   });
 });
