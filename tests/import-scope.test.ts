@@ -70,6 +70,6 @@ describe("cross-file resolution end to end", () => {
 
     expect(after.components[0].textStyle).toBeDefined();
     expect(after.components[0].textStyle?.fontSize).toBe(20);
-    expect(after.components[0].textStyle?.bold).toBe(true);
+    expect(after.components[0].textStyle?.color).toBe("#b4c8c9");
   });
 });

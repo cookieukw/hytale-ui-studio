@@ -582,6 +582,23 @@ export class HytaleParser {
     if (!isNaN(Number(token.value)) && token.type === "VALUE") {
       return Number(token.value);
     }
+
+    // A bare reference used as a property value, e.g. `Style: $Common.@Title;`
+    // or `Padding: @PanelPadding;`. Spread forms (`...$Common.@Title`) were
+    // already resolved elsewhere, but a direct reference used to fall through
+    // as the literal string "$Common.@Title", so the property was dropped.
+    if (
+      token.type === "IDENT" &&
+      (token.value.startsWith("$") || token.value.startsWith("@"))
+    ) {
+      const resolved = this.resolveVariable(token.value);
+      if (resolved !== null && resolved !== undefined) {
+        // Element definitions keep their node shape; value expressions and
+        // style tuples are returned as-is.
+        return resolved.props && resolved.type ? resolved : resolved;
+      }
+    }
+
     return token.value;
   }
 
