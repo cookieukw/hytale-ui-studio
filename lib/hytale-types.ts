@@ -52,6 +52,8 @@ export interface TextStyle {
   alignment?: TextAlignment;
   horizontalAlignment?: string;
   verticalAlignment?: string;
+  wrap?: boolean;
+  wrapMaxLines?: number;
 }
 
 export interface BackgroundStyle {
@@ -311,6 +313,7 @@ export interface EditorState {
   showGrid: boolean;
   snapToGrid: boolean;
   zoom: number;
+  uiScale: number;
   code: string;
   history: HistoryEntry[];
   historyIndex: number;
