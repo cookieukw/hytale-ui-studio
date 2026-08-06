@@ -158,38 +158,6 @@
   /* Inherits from :root by default */
 }
 
-.theme-intellij {
-  --background: oklch(0.19 0.008 260) !important;
-  --foreground: oklch(0.88 0.005 260) !important;
-  --card: oklch(0.21 0.008 260) !important;
-  --card-foreground: oklch(0.88 0.005 260) !important;
-  --popover: oklch(0.23 0.008 260) !important;
-  --popover-foreground: oklch(0.88 0.005 260) !important;
-  --primary: oklch(0.55 0.16 265) !important;
-  --primary-foreground: oklch(0.98 0 0) !important;
-  --secondary: oklch(0.25 0.008 260) !important;
-  --secondary-foreground: oklch(0.92 0.005 260) !important;
-  --muted: oklch(0.23 0.008 260) !important;
-  --muted-foreground: oklch(0.62 0.005 260) !important;
-  --accent: oklch(0.28 0.03 265) !important;
-  --accent-foreground: oklch(0.95 0.005 260) !important;
-  --border: oklch(0.22 0.008 260) !important;
-  --input: oklch(0.18 0.008 260) !important;
-  --ring: oklch(0.55 0.16 265) !important;
-  
-  --sidebar: oklch(0.16 0.008 260) !important;
-  --sidebar-foreground: oklch(0.85 0.005 260) !important;
-  --sidebar-primary: oklch(0.55 0.16 265) !important;
-  --sidebar-accent: oklch(0.25 0.015 265) !important;
-  --sidebar-border: oklch(0.22 0.008 260) !important;
-
-  --panel: oklch(0.19 0.008 260) !important;
-  --project-item: oklch(0.21 0.008 260) !important;
-  --panel-header: oklch(0.21 0.008 260) !important;
-  --canvas: oklch(0.14 0.008 260) !important;
-  --canvas-grid: oklch(0.22 0.008 260) !important;
-}
-
 .theme-dracula {
   --background: oklch(0.18 0.04 280) !important;
   --foreground: oklch(0.95 0.03 280) !important;

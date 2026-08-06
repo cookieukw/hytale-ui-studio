@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type CanvasBackgroundType = "transparent" | "solid" | "image";
-export type AppTheme = "default" | "intellij" | "dracula" | "monokai" | "oceanic" | "hytale";
+export type AppTheme = "default" | "dracula" | "monokai" | "oceanic" | "hytale";
 
 export interface SettingsState {
   // Editor
@@ -46,7 +46,7 @@ export const useSettings = create<SettingsState>()(
       defaultAuthorName: "Hytale Modder",
       autoSaveEnabled: true,
 
-      appTheme: "intellij",
+      appTheme: "default",
 
       updateSetting: (key, value) => set((state) => ({ ...state, [key]: value })),
     }),
