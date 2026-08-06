@@ -173,8 +173,17 @@ import { nineSliceInsets } from "./nine-slice";
         if (hasBottom && isBottomGap) style.marginBottom = `${a.bottom}px`;
         if (hasLeft && isLeftGap) style.marginLeft = `${a.left}px`;
         if (hasRight && isRightGap) style.marginRight = `${a.right}px`;
+
+        // If the anchor is in the cross-axis (not a gap), it acts as a relative offset!
+        if (hasTop && !isTopGap) style.top = `${a.top}px`;
+        if (hasBottom && !isBottomGap) style.bottom = `${a.bottom}px`;
+        if (hasLeft && !isLeftGap) style.left = `${a.left}px`;
+        if (hasRight && !isRightGap) style.right = `${a.right}px`;
       }
     }
+
+    // ─── Stack overlapping in Center modes ────────────────────────────────────
+    // (Reverted: Center modes actually flow sequentially, they don't force overlap)
 
     // ─── Padding ──────────────────────────────────────────────────────────────
     if (component.padding) {
@@ -309,25 +318,21 @@ import { nineSliceInsets } from "./nine-slice";
           style.justifyContent = "flex-end";
           break;
         case "Center":
-          // Centres children horizontally.
           style.flexDirection = "row";
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
         case "Middle":
-          // Centres children vertically.
           style.flexDirection = "column";
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
         case "CenterMiddle":
-          // Horizontal stack, centred both axes.
           style.flexDirection = "row";
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
         case "MiddleCenter":
-          // Vertical stack, centred both axes.
           style.flexDirection = "column";
           style.alignItems = "center";
           style.justifyContent = "center";
@@ -403,6 +408,22 @@ import { nineSliceInsets } from "./nine-slice";
               : "flex-start";
         style.textAlign =
           hAlign === "Center" ? "center" : hAlign === "End" ? "right" : "left";
+
+        // Hytale native wrap behavior
+        if (component.textStyle?.wrap) {
+          style.whiteSpace = "normal";
+          style.wordBreak = "break-word";
+        } else {
+          style.whiteSpace = "nowrap";
+        }
+
+        // Hytale native max lines behavior
+        if (component.textStyle?.wrapMaxLines !== undefined && component.textStyle?.wrapMaxLines > 0) {
+          style.display = "-webkit-box";
+          style.WebkitLineClamp = component.textStyle.wrapMaxLines;
+          style.WebkitBoxOrient = "vertical";
+          style.overflow = "hidden";
+        }
       }
     }
 
