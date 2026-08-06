@@ -41,6 +41,13 @@ for (const f of process.argv.slice(2)) {
   if (/:\s*auto\b/.test(ns))                    e.push("GOTCHA: 'auto' value (CSS)");
   if (/\\n/.test(code))                         e.push("GOTCHA: \\n escape in string");
 
+  // Unresolved three-way merge markers, left behind by hytale-mods.mjs apply.
+  // The structural checks above accept them happily because braces stay
+  // balanced, so without this rule a conflicted file lints clean and then
+  // fails to parse in the game.
+  if (/^(<{7}|={7}|>{7})/m.test(code))
+    e.push("unresolved merge conflict markers");
+
   for (const m of ns.matchAll(/LayoutMode\s*:\s*(\w+)/g))
     if (!LM.has(m[1])) e.push(`invalid LayoutMode: '${m[1]}'`);
   for (const m of ns.matchAll(/(?:Horizontal|Vertical)Alignment\s*:\s*(\w+)/g))
