@@ -27,11 +27,29 @@ interface ProjectItemProps {
   onDuplicate: () => void;
 }
 
-function countAllComponents(components?: any[]): number {
-  if (!components || !Array.isArray(components)) return 0;
-  return components.reduce((acc, comp) => {
-    return acc + 1 + countAllComponents(comp.children);
-  }, 0);
+function getProjectInitials(name: string): { initials: string; color: string } {
+  if (!name) return { initials: "P", color: "bg-[#4E5254]" };
+  const parts = name.split(/[\s-_]+/);
+  let initials = "";
+  if (parts.length >= 2) {
+    initials = (parts[0][0] + parts[1][0]).toUpperCase();
+  } else {
+    initials = name.slice(0, 2).toUpperCase();
+  }
+
+  // Pick deterministic IntelliJ style icon color based on char code
+  const colors = [
+    "bg-[#3574F0]", // Blue
+    "bg-[#59A869]", // Green
+    "bg-[#ED8936]", // Orange/Amber
+    "bg-[#985EFF]", // Purple
+    "bg-[#E55765]", // Red
+    "bg-[#00B4D8]", // Cyan
+  ];
+  const charCode = name.charCodeAt(0) || 0;
+  const color = colors[charCode % colors.length];
+
+  return { initials, color };
 }
 
 export function ProjectItem({
@@ -53,22 +71,29 @@ export function ProjectItem({
     }
   };
 
-  const totalComponents = project.files?.reduce(
-    (acc: number, file: any) => acc + countAllComponents(file.components),
-    0
-  ) || 0;
+  const { initials, color } = getProjectInitials(project.name);
+  const fileCount = project.files?.length || 1;
+  const projectSlug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const projectPath = `~/HytaleStudio/Projects/${projectSlug} (${fileCount} ${fileCount === 1 ? 'file' : 'files'})`;
 
   return (
     <div
       onClick={onOpen}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group flex items-center justify-between p-4 rounded-lg bg-project-item border border-transparent hover:border-primary/30 hover:bg-panel transition-all duration-200 cursor-pointer shadow-sm"
+      className="group flex items-center justify-between py-2.5 px-3 rounded-md hover:bg-[#2B2D30] transition-colors cursor-pointer"
     >
-      <div className="flex items-center gap-4 flex-1 overflow-hidden">
-        <div className="h-10 w-10 shrink-0 bg-secondary rounded-md flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
-          <Layout className="h-5 w-5" />
+      <div className="flex items-center gap-3 flex-1 overflow-hidden">
+        {/* IntelliJ Square Initial Badge */}
+        <div
+          className={cn(
+            "h-6 w-6 shrink-0 rounded flex items-center justify-center text-white text-[11px] font-bold tracking-tight shadow-xs",
+            color
+          )}
+        >
+          {initials}
         </div>
+
         <div className="flex flex-col min-w-0 flex-1">
           {isEditing ? (
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
@@ -76,29 +101,23 @@ export function ProjectItem({
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 autoFocus
-                className="h-7 text-sm py-0 bg-background border-border focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary/50 transition-colors"
+                className="h-6 text-xs py-0 bg-[#1E1F22] border-[#3A3D41] text-[#BCBEC4] focus-visible:ring-0"
                 onKeyDown={(e) => e.key === "Enter" && handleSave(e)}
               />
 
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSave}>
-                <Pencil className="h-3.5 w-3.5 text-primary" />
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSave}>
+                <Pencil className="h-3 w-3 text-[#3574F0]" />
               </Button>
             </div>
           ) : (
-            <span className="text-sm font-bold text-white truncate leading-tight">
+            <span className="text-xs font-semibold text-[#BCBEC4] group-hover:text-white truncate leading-none mb-1">
               {project.name}
             </span>
           )}
-          <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {formatDistanceToNow(project.lastModified, { addSuffix: true })}
-            </span>
-            <span className="flex items-center gap-1">
-              <Layers className="h-3 w-3" />
-              {totalComponents} components
-            </span>
-          </div>
+          
+          <span className="text-[11px] text-[#868A91] truncate font-mono leading-none">
+            {projectPath}
+          </span>
         </div>
       </div>
 
@@ -111,46 +130,48 @@ export function ProjectItem({
         <Button
           size="icon"
           variant="ghost"
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          className="h-7 w-7 text-[#868A91] hover:text-[#BCBEC4] hover:bg-[#35373B]"
           onClick={(e) => {
             e.stopPropagation();
             setIsEditing(true);
           }}
+          title="Rename"
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="h-3.5 w-3.5" />
         </Button>
         <Button
           size="icon"
           variant="ghost"
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          className="h-7 w-7 text-[#868A91] hover:text-[#BCBEC4] hover:bg-[#35373B]"
           onClick={(e) => {
             e.stopPropagation();
             onDuplicate();
           }}
+          title="Duplicate"
         >
-          <Copy className="h-4 w-4" />
+          <Copy className="h-3.5 w-3.5" />
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
               size="icon"
               variant="ghost"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              className="h-7 w-7 text-[#868A91] hover:text-[#E55765] hover:bg-[#35373B]"
               onClick={(e) => e.stopPropagation()}
+              title="Delete"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-panel border-border text-foreground">
+          <AlertDialogContent className="bg-[#2B2D30] border-[#3A3D41] text-[#BCBEC4]">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-white">Delete Project</AlertDialogTitle>
-              <AlertDialogDescription className="text-muted-foreground">
-                Are you sure you want to delete "{project.name}"? This action cannot be
-                undone.
+              <AlertDialogDescription className="text-[#868A91]">
+                Are you sure you want to delete "{project.name}"?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-transparent border-border text-foreground hover:bg-hover">
+              <AlertDialogCancel className="bg-transparent border-[#3A3D41] text-[#BCBEC4] hover:bg-[#35373B]">
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
@@ -158,22 +179,13 @@ export function ProjectItem({
                   e.stopPropagation();
                   onDelete();
                 }}
-                className="bg-destructive text-white hover:bg-destructive/90"
+                className="bg-[#E55765] text-white hover:bg-[#E55765]/90"
               >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <Separator orientation="vertical" className="h-6 mx-1 bg-border" />
-        <Button
-          size="sm"
-          variant="secondary"
-          className="h-8 font-bold bg-secondary text-foreground hover:bg-hover"
-          onClick={onOpen}
-        >
-          Open
-        </Button>
       </div>
     </div>
   );

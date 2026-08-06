@@ -87,63 +87,57 @@ export function ProjectsTab() {
 
   return (
     <>
-      {/* Projects Header */}
-      <div className="p-8 pb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white tracking-tight">
-          Hytale UI Studio
-        </h1>
+      {/* Search and Action Bar (IntelliJ Style) */}
+      <div className="px-8 py-5 flex items-center justify-between border-b border-border">
+        <div className="relative w-80">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#868A91]" />
+          <Input
+            placeholder="Search projects"
+            className="pl-9 h-8 bg-transparent border-none text-[#BCBEC4] placeholder:text-[#868A91] text-xs focus-visible:ring-0 focus-visible:bg-[#2B2D30]/50 rounded-md transition-colors"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <div className="flex items-center gap-2">
           <Button
             onClick={() => setIsCreating(true)}
-            className="h-9 px-4 font-bold shadow-sm"
+            className="h-8 px-3 text-xs font-medium bg-[#3574F0] hover:bg-[#3574F0]/90 text-white rounded-md border-none shadow-none"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-3.5 w-3.5 mr-1.5" />
             New Project
           </Button>
           <Button
             variant="outline"
-            className="h-9 px-4 border-border bg-panel hover:bg-hover text-foreground"
+            className="h-8 px-3 text-xs font-medium border-[#3A3D41] bg-[#2B2D30] hover:bg-[#35373B] text-[#BCBEC4] rounded-md"
             onClick={handleOpenLocal}
           >
-            <FolderOpen className="h-4 w-4 mr-2" />
+            <FolderOpen className="h-3.5 w-3.5 mr-1.5" />
             Open
           </Button>
         </div>
       </div>
 
-      {/* Search and List */}
-      <div className="flex-1 flex flex-col px-8 overflow-hidden">
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search projects by name..."
-            className="pl-10 h-10 bg-panel border-border text-foreground focus-visible:ring-primary/40"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
+      {/* Projects List Container */}
+      <div className="flex-1 flex flex-col px-8 py-4 overflow-hidden">
         {isCreating && (
-          <div className="mb-6 p-4 rounded-lg bg-panel border border-border animate-in fade-in slide-in-from-top-2 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <Input
-                  placeholder="Project Name"
-                  autoFocus
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                  className="bg-background border-border h-9 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary/50 transition-colors"
-                />
-              </div>
-              <Button size="sm" onClick={handleCreate} className="h-9 px-4 font-bold">
+          <div className="mb-4 p-3 rounded-md bg-[#2B2D30] border border-[#3A3D41] shadow-sm">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Project Name"
+                autoFocus
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                className="bg-[#1E1F22] border-[#3A3D41] h-8 text-xs text-[#BCBEC4] focus-visible:ring-0"
+              />
+              <Button size="sm" onClick={handleCreate} className="h-8 px-3 text-xs bg-[#3574F0] text-white">
                 Create
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => setIsCreating(false)}
-                className="h-9"
+                className="h-8 px-3 text-xs text-[#868A91] hover:text-[#BCBEC4]"
               >
                 Cancel
               </Button>

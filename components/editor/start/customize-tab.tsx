@@ -258,7 +258,8 @@ export function CustomizeTab() {
                       <SelectValue placeholder="Select a theme..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="default">Default (Dark)</SelectItem>
+                      <SelectItem value="intellij">IntelliJ Dark (New UI)</SelectItem>
+                      <SelectItem value="default">Default Dark</SelectItem>
                       <SelectItem value="dracula">Dracula</SelectItem>
                       <SelectItem value="monokai">Monokai</SelectItem>
                       <SelectItem value="oceanic">Oceanic</SelectItem>
