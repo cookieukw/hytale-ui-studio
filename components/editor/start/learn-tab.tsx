@@ -1,206 +1,260 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, MonitorPlay, Keyboard, Compass, Code, GraduationCap } from "lucide-react";
+import { BookOpen, MonitorPlay, Keyboard, Compass, Code, GraduationCap, ChevronRight, Search, Sparkles } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const LEARN_TOPICS = [
   {
     id: "getting-started",
-    icon: <MonitorPlay className="w-8 h-8 text-primary mb-2" />,
+    icon: <MonitorPlay className="h-4 w-4 text-[#3574F0]" />,
     title: "Getting Started & Core Concepts",
+    category: "Basics",
     description: "Deep dive into Hytale UI Studio's editor philosophy and workflow.",
-    shortDesc: "Learn about the architecture of UI documents, state management, and real-time syncing.",
     content: (
-      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
-        <p><strong className="text-foreground">1. The DOM vs Hytale UI:</strong> Hytale's UI is not HTML/CSS. It's a custom rendering engine based on nested Groups and strictly defined properties. The Studio bridges this by parsing your `.ui` XML-like syntax into a structured AST and rendering an HTML approximation on the Canvas.</p>
-        
-        <p><strong className="text-foreground">2. Component Properties:</strong> Elements in Hytale support specific rendering properties instead of generic CSS. For example, Text elements use <code className="text-primary bg-primary/10 px-1 rounded">Style: (FontSize: 22, TextColor: #FFFFFF)</code> instead of standalone fonts, and containers use <code className="text-primary bg-primary/10 px-1 rounded">Background</code> or <code className="text-primary bg-primary/10 px-1 rounded">Image</code> properties.</p>
+      <div className="space-y-6 text-xs text-[#BCBEC4] leading-relaxed max-w-2xl">
+        <div className="border-b border-[#2B2D30] pb-4">
+          <h2 className="text-base font-bold text-white mb-1">1. DOM vs Hytale UI Engine</h2>
+          <p className="text-[#868A91]">
+            Hytale's UI is not HTML/CSS. It's a native game UI rendering engine based on nested Groups, strictly typed Anchors, and explicit layout modes.
+          </p>
+        </div>
 
-        <p><strong className="text-foreground">3. Real-time Parser:</strong> The Code Editor tab uses a custom Lexer and Parser built specifically for Hytale UI syntax. If you make a syntax error (e.g., missing a semicolon or a closing bracket), the AST will freeze at its last valid state until the syntax is corrected. Always check the browser console if your code changes aren't reflecting!</p>
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-white">Component Properties & Styling</h3>
+          <p>
+            Elements in Hytale support specific rendering properties instead of generic CSS classes. For example, Label elements use:
+          </p>
+          <pre className="bg-[#141414] p-3 rounded-md border border-[#3A3D41] font-mono text-[11px] text-[#3574F0]">
+{`Label #MyText {
+  Text: "Hello Hytale";
+  Style: (FontSize: 22, TextColor: #FFFFFF, RenderBold: true);
+}`}
+          </pre>
+        </div>
+
+        <div className="space-y-3 pt-2">
+          <h3 className="text-sm font-semibold text-white">Real-Time Lexer & Parser</h3>
+          <p>
+            The Studio features a custom Lexer and AST Parser built specifically for Hytale `.ui` syntax. Syntax errors (like unclosed braces or missing semicolons) gracefully keep the editor in its last valid state.
+          </p>
+        </div>
       </div>
     )
   },
   {
     id: "component-reference",
-    icon: <BookOpen className="w-8 h-8 text-blue-400 mb-2" />,
-    title: "Component Reference",
-    description: "Advanced documentation on Hytale-specific properties and quirks.",
-    shortDesc: "Deep dive into Anchors, HitTestVisible, Sprites, Dropdowns, and padding/margin syntax.",
+    icon: <BookOpen className="h-4 w-4 text-[#59A869]" />,
+    title: "Component Reference & Anchors",
+    category: "Layout",
+    description: "Documentation on Hytale-specific properties, Anchors, HitTestVisible, and Sprites.",
     content: (
-      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
-        <p><strong className="text-foreground">Advanced Anchors & Layout Modes:</strong>
-          <ul className="list-disc ml-5 mt-2 space-y-2">
-            <li><code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> vs <code className="text-primary bg-primary/10 px-1 rounded">LayoutMode: Center</code>: <code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> attempts to take 100% of the parent's layout bounds. However, if the parent has <code className="text-primary bg-primary/10 px-1 rounded">LayoutMode: Center</code>, the layout bounds shrink to wrap the children, causing <code className="text-primary bg-primary/10 px-1 rounded">Full: 1</code> to collapse to 0 width/height. Always use fixed Width/Height if the parent is Centered.</li>
-            <li><strong className="text-foreground">Scrolling Layouts:</strong> Modes like <code className="text-primary bg-primary/10 px-1 rounded">TopScrolling</code> and <code className="text-primary bg-primary/10 px-1 rounded">BottomScrolling</code> enable vertical scrolling functionality for containers with overflowing content.</li>
+      <div className="space-y-6 text-xs text-[#BCBEC4] leading-relaxed max-w-2xl">
+        <div className="border-b border-[#2B2D30] pb-4">
+          <h2 className="text-base font-bold text-white mb-1">Advanced Anchors & Layout Modes</h2>
+          <p className="text-[#868A91]">
+            Understanding how containers compute bounds and distribute space.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-white">Full: 1 vs Center Layouts</h3>
+          <p>
+            <code className="text-[#3574F0] bg-[#3574F0]/10 px-1 rounded font-mono">Full: 1</code> attempts to stretch 100% to fill the parent container. However, if the parent uses <code className="text-[#3574F0] bg-[#3574F0]/10 px-1 rounded font-mono">LayoutMode: Center</code>, layout bounds shrink to wrap children, collapsing <code className="text-[#3574F0] bg-[#3574F0]/10 px-1 rounded font-mono">Full: 1</code>.
+          </p>
+          <ul className="list-disc ml-5 space-y-1.5 text-[#868A91]">
+            <li><strong className="text-[#BCBEC4]">TopScrolling / LeftScrolling:</strong> Enables vertical or horizontal scrollbar containers.</li>
+            <li><strong className="text-[#BCBEC4]">Padding & Margins:</strong> Padding offsets inner content, while Margin pushes neighboring elements apart in flow modes.</li>
           </ul>
-        </p>
-        
-        <p><strong className="text-foreground">Padding and Margin Rules:</strong>
-          <ul className="list-disc ml-5 mt-2 space-y-2">
-            <li>Padding controls the internal spacing of a Group, while Margin pushes elements away from their neighbors in flow layouts like <code className="text-primary bg-primary/10 px-1 rounded">Left</code> or <code className="text-primary bg-primary/10 px-1 rounded">Top</code>.</li>
-            <li>You can define them explicitly: <code className="text-primary bg-primary/10 px-1 rounded">Padding: (Left: 10, Right: 10)</code>.</li>
-            <li>Unlike HTML, if a container has no explicit dimensions, its size is entirely determined by its children plus padding.</li>
-          </ul>
-        </p>
+        </div>
       </div>
     )
   },
   {
     id: "shortcuts",
-    icon: <Keyboard className="w-8 h-8 text-green-400 mb-2" />,
+    icon: <Keyboard className="h-4 w-4 text-[#ED8936]" />,
     title: "Keyboard Shortcuts",
-    description: "Speed up your workflow with these essential hotkeys.",
-    shortDesc: "Master the command palette, undo/redo, and component manipulation.",
+    category: "Workflow",
+    description: "Speed up your workflow with hotkeys for palette, history, and duplicate actions.",
     content: (
-      <div className="space-y-4 text-sm text-muted-foreground mt-4">
-        <ul className="space-y-3">
-          <li className="flex items-center justify-between border-b border-border/50 pb-2">
-            <span className="text-foreground">Open Command Palette</span> 
-            <kbd className="bg-muted px-2 py-1 rounded border border-border text-xs font-mono">Ctrl+K</kbd>
-          </li>
-          <li className="flex items-center justify-between border-b border-border/50 pb-2">
-            <span className="text-foreground">Undo action</span> 
-            <kbd className="bg-muted px-2 py-1 rounded border border-border text-xs font-mono">Ctrl+Z</kbd>
-          </li>
-          <li className="flex items-center justify-between border-b border-border/50 pb-2">
-            <span className="text-foreground">Redo action</span> 
-            <kbd className="bg-muted px-2 py-1 rounded border border-border text-xs font-mono">Ctrl+Y</kbd>
-          </li>
-          <li className="flex items-center justify-between border-b border-border/50 pb-2">
-            <span className="text-foreground">Delete selected component</span> 
-            <kbd className="bg-muted px-2 py-1 rounded border border-border text-xs font-mono">Del</kbd>
-          </li>
-          <li className="flex items-center justify-between border-b border-border/50 pb-2">
-            <span className="text-foreground">Duplicate component</span> 
-            <kbd className="bg-muted px-2 py-1 rounded border border-border text-xs font-mono">Ctrl+D</kbd>
-          </li>
-          <li className="flex items-center justify-between pb-2">
-            <span className="text-foreground">Copy & Paste</span> 
-            <div className="flex gap-1">
-              <kbd className="bg-muted px-2 py-1 rounded border border-border text-xs font-mono">Ctrl+C</kbd>
-              <kbd className="bg-muted px-2 py-1 rounded border border-border text-xs font-mono">Ctrl+V</kbd>
-            </div>
-          </li>
-        </ul>
+      <div className="space-y-6 text-xs text-[#BCBEC4] max-w-2xl">
+        <div className="border-b border-[#2B2D30] pb-4">
+          <h2 className="text-base font-bold text-white mb-1">Essential Studio Hotkeys</h2>
+          <p className="text-[#868A91]">Boost your speed with these built-in keyboard shortcuts.</p>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between py-2 border-b border-[#2B2D30]">
+            <span>Command Palette (Search & Tools)</span>
+            <kbd className="bg-[#2B2D30] px-2 py-1 rounded text-[11px] font-mono text-white">Ctrl + K</kbd>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-[#2B2D30]">
+            <span>Undo Action</span>
+            <kbd className="bg-[#2B2D30] px-2 py-1 rounded text-[11px] font-mono text-white">Ctrl + Z</kbd>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-[#2B2D30]">
+            <span>Redo Action</span>
+            <kbd className="bg-[#2B2D30] px-2 py-1 rounded text-[11px] font-mono text-white">Ctrl + Y</kbd>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-[#2B2D30]">
+            <span>Duplicate Selected Component</span>
+            <kbd className="bg-[#2B2D30] px-2 py-1 rounded text-[11px] font-mono text-white">Ctrl + D</kbd>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-[#2B2D30]">
+            <span>Delete Selected Component</span>
+            <kbd className="bg-[#2B2D30] px-2 py-1 rounded text-[11px] font-mono text-white">Delete</kbd>
+          </div>
+        </div>
       </div>
     )
   },
   {
     id: "import-export",
-    icon: <Code className="w-8 h-8 text-purple-400 mb-2" />,
-    title: "XML Parser & Mod Integration",
-    description: "How Hytale UI Studio interprets your code and manages project structure.",
-    shortDesc: "Understand alias resolution, translation keys, and AST hydration during imports.",
+    icon: <Code className="h-4 w-4 text-[#985EFF]" />,
+    title: "XML Serialization & Mod Integration",
+    category: "Integration",
+    description: "How the Studio exports clean `.ui` syntax and packages `.zip` mod assets.",
     content: (
-      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
-        <p><strong className="text-foreground">Project Serialization:</strong> When you export to `.zip`, the Studio recursively converts your visual hierarchy back into valid Hytale `.ui` syntax. Properties like `FlexWeight` are formatted to match the parser's expected casing, and JSZip handles packaging the files exactly as they appear in the workspace.</p>
-        
-        <p><strong className="text-foreground">Text Properties & Formatting:</strong> Hytale's UI engine renders text directly. Use the <code className="text-primary bg-primary/10 px-1 rounded">Text: "My String"</code> property on Labels. Make sure any quotes within strings are properly escaped to avoid breaking the parser.</p>
-        
-        <p><strong className="text-foreground">AST Hydration & Duplicate Resolution:</strong> 
-          If you import a ZIP file containing multiple `.ui` files with identical filenames, Hytale UI Studio automatically appends numeric suffixes like `(1).ui` to prevent JSZip from overwriting them during your next export, keeping your project safe.
-        </p>
+      <div className="space-y-6 text-xs text-[#BCBEC4] leading-relaxed max-w-2xl">
+        <div className="border-b border-[#2B2D30] pb-4">
+          <h2 className="text-base font-bold text-white mb-1">Mod Packager & Serialization</h2>
+          <p className="text-[#868A91]">Details on how UI components convert to game code.</p>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-white">ZIP Export Architecture</h3>
+          <p>
+            When exporting a project to ZIP format, the Studio serializes every active `.ui` file using Hytale's exact property casing and wraps them inside the configured Author namespace.
+          </p>
+        </div>
       </div>
     )
   },
   {
     id: "advanced",
-    icon: <Compass className="w-8 h-8 text-orange-400 mb-2" />,
-    title: "Advanced Engine Layouts",
-    description: "Mastering the quirks of Hytale's Box Model and rendering engine.",
-    shortDesc: "Learn how to use Mixins (...), nested Groups, Flex weights, and alias overrides.",
+    icon: <Compass className="h-4 w-4 text-[#00B4D8]" />,
+    title: "FlexWeight & Advanced Layouts",
+    category: "Layout",
+    description: "Mastering FlexWeight space distribution, Z-Index stacking, and Group nesting.",
     content: (
-      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
-        <p><strong className="text-foreground">FlexWeight Mechanics:</strong> FlexWeight distributes remaining space similarly to CSS flex. It operates on the axis defined by the parent's `LayoutMode` (e.g., `Left` or `Top`). The available space is calculated as: <code className="text-primary bg-primary/10 px-1 rounded">ParentWidth - (Fixed Children) - (Padding/Margins)</code>. The remainder is divided proportionally among elements based on their `FlexWeight` values. If you use `FlexWeight` inside `LayoutMode: CenterMiddle`, it will **not** work as expected, because `CenterMiddle` has no explicit axis direction for expansion.</p>
-        
-        <p><strong className="text-foreground">Z-Index & Overlays:</strong> Hytale renders UI tree depth-first. Elements defined later in the XML are generally rendered on top. It's often necessary to structure your files carefully to ensure background overlays appear behind modals rather than over them.</p>
+      <div className="space-y-6 text-xs text-[#BCBEC4] leading-relaxed max-w-2xl">
+        <div className="border-b border-[#2B2D30] pb-4">
+          <h2 className="text-base font-bold text-white mb-1">FlexWeight & Stacking Rules</h2>
+          <p className="text-[#868A91]">How the engine distributes dynamic remaining space.</p>
+        </div>
 
-        <p><strong className="text-foreground">Nesting Groups:</strong> The key to complex Hytale UIs is liberal use of `Group` components. If things don't align, wrap them in a Group with a dedicated LayoutMode.</p>
+        <div className="space-y-3">
+          <p>
+            FlexWeight operates along the main axis of the parent's <code className="text-[#3574F0] bg-[#3574F0]/10 px-1 rounded font-mono">LayoutMode</code> (such as <code className="text-[#3574F0] bg-[#3574F0]/10 px-1 rounded font-mono">Left</code> or <code className="text-[#3574F0] bg-[#3574F0]/10 px-1 rounded font-mono">Top</code>). Remaining space is computed as:
+          </p>
+          <pre className="bg-[#141414] p-2.5 rounded border border-[#3A3D41] font-mono text-[11px] text-[#59A869]">
+ParentWidth - FixedWidthChildren - Padding = FlexSpace
+          </pre>
+        </div>
       </div>
     )
   },
   {
     id: "best-practices",
-    icon: <GraduationCap className="w-8 h-8 text-yellow-400 mb-2" />,
-    title: "Hytale UI Best Practices",
-    description: "Architecting UI files for performance, mod compatibility, and maintainability.",
-    shortDesc: "Design patterns for Common.ui usage, avoiding deeply nested hierarchies, and ID naming.",
+    icon: <GraduationCap className="h-4 w-4 text-[#E55765]" />,
+    title: "Best Practices & Performance",
+    category: "Architecture",
+    description: "Architectural guidelines to keep your Hytale UIs fast and maintainable.",
     content: (
-      <div className="space-y-5 text-sm text-muted-foreground mt-4 leading-relaxed">
-        <p><strong className="text-foreground">1. Component Depth vs Performance:</strong> The Hytale UI engine recalculates layouts recursively. Extremely deep nesting (e.g., <code className="text-primary bg-primary/10 px-1 rounded">&lt;Group&gt;</code> inside <code className="text-primary bg-primary/10 px-1 rounded">&lt;Group&gt;</code> inside <code className="text-primary bg-primary/10 px-1 rounded">&lt;Group&gt;</code> for over 10 levels) can cause lag spikes when layouts are toggled via Java. Flatten your layouts using explicit `Anchor` positioning where possible instead of stacking endless wrappers.</p>
-        
-        <p><strong className="text-foreground">2. ID Naming Conventions:</strong> Treat UI IDs like Java variable names. Use PascalCase or camelCase with a prefix designating the type (e.g. <code className="text-primary bg-primary/10 px-1 rounded">#BtnSubmit</code> instead of <code className="text-primary bg-primary/10 px-1 rounded">#Group12</code>). Never use identical IDs within the same `.ui` file, as the Java backend will typically grab the first match it finds, leading to unpredictable bug reports.</p>
-        
-        <p><strong className="text-foreground">3. Reusable UI:</strong> Whenever possible, structure your interfaces into reusable blocks. Copy-pasting the same `Group` block 10 times in your code will make it very hard to maintain if you ever want to change a padding or background color.</p>
+      <div className="space-y-6 text-xs text-[#BCBEC4] leading-relaxed max-w-2xl">
+        <div className="border-b border-[#2B2D30] pb-4">
+          <h2 className="text-base font-bold text-white mb-1">Hytale UI Architectural Guidelines</h2>
+          <p className="text-[#868A91]">Keep layout calculation recursions fast on lower-end devices.</p>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-white">Avoid Over-Nesting</h3>
+          <p>
+            Avoid nesting Groups more than 10 levels deep. Use direct Anchor coordinate positioning whenever layout structure allows.
+          </p>
+        </div>
       </div>
     )
   }
 ];
 
 export function LearnTab() {
-  const [selectedTopic, setSelectedTopic] = useState<typeof LEARN_TOPICS[0] | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<typeof LEARN_TOPICS[0]>(LEARN_TOPICS[0]);
+  const [search, setSearch] = useState("");
+
+  const filteredTopics = LEARN_TOPICS.filter((t) =>
+    t.title.toLowerCase().includes(search.toLowerCase()) ||
+    t.description.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <>
-      <div className="p-8 pb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Learn Studio
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Master Hytale UI Studio with these resources and guides.
-          </p>
+    <div className="flex flex-col h-full bg-[#1E1F22] text-[#BCBEC4] overflow-hidden select-none font-sans">
+      {/* Top Header / Breadcrumb (IntelliJ Learn Style) */}
+      <div className="h-10 shrink-0 border-b border-[#2B2D30] flex items-center justify-between px-4 bg-[#1E1F22]">
+        <div className="flex items-center gap-1.5 text-xs text-[#868A91]">
+          <span>Learn Studio</span>
+          <ChevronRight className="h-3 w-3 text-[#56585C]" />
+          <span className="text-[#BCBEC4] font-medium">{selectedTopic.title}</span>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col px-8 pb-8 overflow-hidden">
-        <ScrollArea className="flex-1 -mx-2 px-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
-            {LEARN_TOPICS.map((topic) => (
-              <Card 
-                key={topic.id}
-                className="bg-panel border-border hover:border-primary/50 transition-all cursor-pointer shadow-md hover:shadow-primary/5"
-                onClick={() => setSelectedTopic(topic)}
-              >
-                <CardHeader className="pb-3">
-                  {topic.icon}
-                  <CardTitle className="text-lg">{topic.title}</CardTitle>
-                  <CardDescription>{topic.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{topic.shortDesc}</p>
-                </CardContent>
-              </Card>
-            ))}
+      {/* Main 2-Column Split: Topic List Left + Reader Panel Right */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Column: Topic List (260px) */}
+        <div className="w-[260px] shrink-0 border-r border-[#2B2D30] flex flex-col bg-[#1E1F22]">
+          <div className="p-2 border-b border-[#2B2D30]">
+            <div className="relative">
+              <Search className="absolute left-2 top-2 h-3.5 w-3.5 text-[#868A91]" />
+              <Input
+                placeholder="Search topics..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-7 h-7 bg-[#2B2D30] border-none text-xs text-[#BCBEC4] placeholder:text-[#868A91] focus-visible:ring-0 rounded-md"
+              />
+            </div>
           </div>
-        </ScrollArea>
-      </div>
 
-      <Dialog open={!!selectedTopic} onOpenChange={(open) => !open && setSelectedTopic(null)}>
-        <DialogContent className="bg-panel border-border sm:max-w-[550px]">
-          {selectedTopic && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-background rounded-md border border-border">
-                    {selectedTopic.icon}
+          <ScrollArea className="flex-1 py-1">
+            <div className="p-1 space-y-0.5">
+              {filteredTopics.map((topic) => {
+                const isSelected = selectedTopic.id === topic.id;
+                return (
+                  <div
+                    key={topic.id}
+                    onClick={() => setSelectedTopic(topic)}
+                    className={cn(
+                      "group p-2.5 rounded-md flex items-start gap-2.5 cursor-pointer transition-colors",
+                      isSelected
+                        ? "bg-[#2E436E]/60 text-white"
+                        : "hover:bg-[#2B2D30] text-[#BCBEC4]"
+                    )}
+                  >
+                    <div className="mt-0.5 shrink-0">{topic.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <span className={cn("text-xs font-semibold block truncate", isSelected ? "text-white" : "text-[#BCBEC4] group-hover:text-white")}>
+                        {topic.title}
+                      </span>
+                      <span className="text-[10px] text-[#868A91] block truncate mt-0.5">
+                        {topic.category}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <DialogTitle className="text-xl">{selectedTopic.title}</DialogTitle>
-                    <DialogDescription>{selectedTopic.description}</DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-              <ScrollArea className="max-h-[60vh] pr-4">
-                {selectedTopic.content}
-              </ScrollArea>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Right Column: Documentation Content Reader */}
+        <div className="flex-1 flex flex-col bg-[#1E1F22] overflow-hidden">
+          <ScrollArea className="flex-1 p-8">
+            {selectedTopic.content}
+          </ScrollArea>
+        </div>
+      </div>
+    </div>
   );
 }
+
