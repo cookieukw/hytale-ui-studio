@@ -18,6 +18,7 @@ export interface EditorStore extends EditorState {
   toggleSnap: () => void;
   setCalculatedZoom: (zoom: number) => void;
   setZoom: (zoom: number) => void;
+  setUiScale: (scale: number) => void;
 
   activeMobileTab: MobileTab;
   setActiveMobileTab: (tab: MobileTab) => void;

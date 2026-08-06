@@ -22,6 +22,7 @@ import {
   Camera,
   Search,
   Maximize2,
+  MonitorIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,8 @@ export function EditorToolbar() {
   const toggleSnap = useEditorStore((s) => s.toggleSnap);
   const zoom = useEditorStore((s) => s.zoom);
   const setZoom = useEditorStore((s) => s.setZoom);
+  const uiScale = useEditorStore((s) => s.uiScale);
+  const setUiScale = useEditorStore((s) => s.setUiScale);
   const fitToScreen = useEditorStore((s) => s.fitToScreen);
   const setFitToScreen = useEditorStore((s) => s.setFitToScreen);
   const undo = useEditorStore((s) => s.undo);
@@ -261,6 +264,29 @@ export function EditorToolbar() {
 
         {/* Right section */}
         <div className="flex items-center gap-1">
+
+          {/* UI Scale controls */}
+          <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-2 text-xs font-medium"
+                >
+                  <MonitorIcon className="h-4 w-4 text-muted-foreground" />
+                  Scale {uiScale}x
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map((s) => (
+                  <DropdownMenuItem key={s} onClick={() => setUiScale(s)}>
+                    {s}x {s === 1.0 && "(Default)"}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           {/* Zoom controls */}
           <div className="flex items-center gap-1">

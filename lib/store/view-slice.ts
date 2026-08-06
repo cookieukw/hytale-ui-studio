@@ -13,6 +13,7 @@ export const createViewSlice: StateCreator<
     | "showGrid"
     | "snapToGrid"
     | "zoom"
+    | "uiScale"
     | "fitToScreen"
     | "draggingId"
     | "showFileExplorer"
@@ -24,6 +25,7 @@ export const createViewSlice: StateCreator<
     | "toggleSnap"
     | "setCalculatedZoom"
     | "setZoom"
+    | "setUiScale"
     | "setFitToScreen"
     | "setDraggingId"
     | "setShowFileExplorer"
@@ -40,6 +42,7 @@ export const createViewSlice: StateCreator<
   showGrid: true,
   snapToGrid: true,
   zoom: 35,
+  uiScale: 1.0,
   fitToScreen: false,
   draggingId: null,
   showFileExplorer: true,
@@ -71,6 +74,8 @@ export const createViewSlice: StateCreator<
   
   setZoom: (zoom) =>
     set({ zoom: Math.max(25, Math.min(200, zoom)), fitToScreen: false }),
+
+  setUiScale: (scale) => set({ uiScale: scale }),
 
   setActiveMobileTab: (tab) => set({ activeMobileTab: tab }),
   setFitToScreen: (fit) => set({ fitToScreen: fit }),
