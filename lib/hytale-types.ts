@@ -52,12 +52,28 @@ export interface TextStyle {
   alignment?: TextAlignment;
   horizontalAlignment?: string;
   verticalAlignment?: string;
+  wrap?: boolean;
+  wrapMaxLines?: number;
 }
 
 export interface BackgroundStyle {
   color?: string;
   texture?: string;
   opacity?: number;
+  /**
+   * 9-slice border inset, in pixels. Hytale stretches the middle of the
+   * texture and keeps the corners intact, like CSS border-image-slice.
+   * `Border` sets all four edges; the Horizontal/Vertical variants override
+   * left+right and top+bottom respectively.
+   */
+  border?: number;
+  horizontalBorder?: number;
+  verticalBorder?: number;
+  /**
+   * True when the source wrote `PatchStyle(...)` explicitly rather than a bare
+   * tuple. Kept so export can round-trip the original spelling.
+   */
+  isPatch?: boolean;
 }
 
 export interface ComponentState {
@@ -108,6 +124,13 @@ export interface HytaleComponent {
   id: string;
   type: ComponentType;
   name: string;
+  /**
+   * True when the component comes from a template definition
+   * (`@Name = Node { ... };`) rather than direct screen content.
+   */
+  isTemplate?: boolean;
+  /** Template expression name, e.g. "@Subtitle". */
+  templateName?: string;
   // Layout
   anchor?: Anchor;
   layoutMode?: LayoutMode;
@@ -290,6 +313,7 @@ export interface EditorState {
   showGrid: boolean;
   snapToGrid: boolean;
   zoom: number;
+  uiScale: number;
   code: string;
   history: HistoryEntry[];
   historyIndex: number;

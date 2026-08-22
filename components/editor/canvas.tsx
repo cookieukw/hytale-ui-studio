@@ -26,6 +26,7 @@ export function EditorCanvas() {
   const components = useEditorStore((state) => state.components);
   const viewMode = useEditorStore((state) => state.viewMode);
   const devicePreview = useEditorStore((state) => state.devicePreview);
+  const uiScale = useEditorStore((state) => state.uiScale);
   const showGrid = useEditorStore((state) => state.showGrid);
   const zoom = useEditorStore((state) => state.zoom);
   const addComponent = useEditorStore((state) => state.addComponent);
@@ -74,7 +75,7 @@ export function EditorCanvas() {
       case "Tablet":
         return { width: 768, height: 1024 };
       case "Hytale":
-        return { width: 2106, height: 1080 };
+        return { width: 1920, height: 1080 };
       case "Desktop":
       default:
         return { width: 1280, height: 720 };
@@ -339,8 +340,8 @@ export function EditorCanvas() {
         >
           <div
             style={{
-              width: deviceSize.width * scale,
-              height: deviceSize.height * scale,
+              width: (deviceSize.width / uiScale) * scale * uiScale,
+              height: (deviceSize.height / uiScale) * scale * uiScale,
               flexShrink: 0,
               position: "relative",
             }}
@@ -357,10 +358,10 @@ export function EditorCanvas() {
               settings.canvasBackgroundType === "transparent" ? "border-border" : "border-transparent"
             )}
             style={{
-              width: deviceSize.width,
-              height: deviceSize.height,
+              width: deviceSize.width / uiScale,
+              height: deviceSize.height / uiScale,
               transformOrigin: "top left",
-              transform: `scale(${scale})`,
+              transform: `scale(${scale * uiScale})`,
               ...(settings.canvasBackgroundType === "solid" ? { backgroundColor: settings.canvasBackgroundColor } : {}),
               ...(settings.canvasBackgroundType === "image" && settings.canvasBackgroundImage ? { 
                 backgroundImage: `url(${settings.canvasBackgroundImage})`,

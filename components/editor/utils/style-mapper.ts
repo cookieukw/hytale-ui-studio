@@ -1,6 +1,7 @@
 import React from "react";
 import type { HytaleComponent, Padding } from "@/lib/hytale-types";
 import { hexToRgba } from "@/lib/utils";
+import { nineSliceInsets } from "./nine-slice";
 
 
   export function getComponentStyle(
@@ -172,8 +173,17 @@ import { hexToRgba } from "@/lib/utils";
         if (hasBottom && isBottomGap) style.marginBottom = `${a.bottom}px`;
         if (hasLeft && isLeftGap) style.marginLeft = `${a.left}px`;
         if (hasRight && isRightGap) style.marginRight = `${a.right}px`;
+
+        // If the anchor is in the cross-axis (not a gap), it acts as a relative offset!
+        if (hasTop && !isTopGap) style.top = `${a.top}px`;
+        if (hasBottom && !isBottomGap) style.bottom = `${a.bottom}px`;
+        if (hasLeft && !isLeftGap) style.left = `${a.left}px`;
+        if (hasRight && !isRightGap) style.right = `${a.right}px`;
       }
     }
+
+    // ─── Stack overlapping in Center modes ────────────────────────────────────
+    // (Reverted: Center modes actually flow sequentially, they don't force overlap)
 
     // ─── Padding ──────────────────────────────────────────────────────────────
     if (component.padding) {
@@ -231,10 +241,29 @@ import { hexToRgba } from "@/lib/utils";
         const texture = component.background.texture.startsWith("/")
           ? component.background.texture
           : `/${component.background.texture}`;
-        style.backgroundImage = `url(${texture})`;
-        style.backgroundSize = "100% 100%";
-        style.backgroundRepeat = "no-repeat";
-        
+
+        const slice = nineSliceInsets(component.background);
+
+        if (slice) {
+          // 9-slice: Hytale keeps the corners at their native size and only
+          // stretches the edges and centre. background-size: 100% 100% would
+          // scale the whole bitmap, smearing every rounded corner and bevel.
+          // border-image reproduces the real behaviour; `fill` paints the
+          // middle region, which background-image was doing before.
+          const { top, right, bottom, left } = slice;
+          style.borderStyle = "solid";
+          style.borderWidth = `${top}px ${right}px ${bottom}px ${left}px`;
+          style.borderColor = "transparent";
+          style.borderImageSource = `url(${texture})`;
+          style.borderImageSlice = `${top} ${right} ${bottom} ${left} fill`;
+          style.borderImageWidth = `${top}px ${right}px ${bottom}px ${left}px`;
+          style.borderImageRepeat = "stretch";
+        } else {
+          style.backgroundImage = `url(${texture})`;
+          style.backgroundSize = "100% 100%";
+          style.backgroundRepeat = "no-repeat";
+        }
+
         // Note: CSS does not allow applying opacity exclusively to a background-image.
         // Applying style.opacity here would incorrectly make the children transparent.
       }
@@ -289,25 +318,21 @@ import { hexToRgba } from "@/lib/utils";
           style.justifyContent = "flex-end";
           break;
         case "Center":
-          // Centres children horizontally.
           style.flexDirection = "row";
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
         case "Middle":
-          // Centres children vertically.
           style.flexDirection = "column";
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
         case "CenterMiddle":
-          // Horizontal stack, centred both axes.
           style.flexDirection = "row";
           style.alignItems = "center";
           style.justifyContent = "center";
           break;
         case "MiddleCenter":
-          // Vertical stack, centred both axes.
           style.flexDirection = "column";
           style.alignItems = "center";
           style.justifyContent = "center";
@@ -383,6 +408,22 @@ import { hexToRgba } from "@/lib/utils";
               : "flex-start";
         style.textAlign =
           hAlign === "Center" ? "center" : hAlign === "End" ? "right" : "left";
+
+        // Hytale native wrap behavior
+        if (component.textStyle?.wrap) {
+          style.whiteSpace = "normal";
+          style.wordBreak = "break-word";
+        } else {
+          style.whiteSpace = "nowrap";
+        }
+
+        // Hytale native max lines behavior
+        if (component.textStyle?.wrapMaxLines !== undefined && component.textStyle?.wrapMaxLines > 0) {
+          style.display = "-webkit-box";
+          style.WebkitLineClamp = component.textStyle.wrapMaxLines;
+          style.WebkitBoxOrient = "vertical";
+          style.overflow = "hidden";
+        }
       }
     }
 

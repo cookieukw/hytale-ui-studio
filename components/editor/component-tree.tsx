@@ -327,6 +327,25 @@ const TreeNode = memo(function TreeNode({
   );
 });
 
+/** Small group header used to separate templates from screen elements. */
+function TreeSectionLabel({
+  icon: Icon,
+  label,
+  count,
+}: {
+  icon: typeof Square;
+  label: string;
+  count: number;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+      <Icon className="h-3 w-3" />
+      <span>{label}</span>
+      <span className="text-muted-foreground/60">{count}</span>
+    </div>
+  );
+}
+
 export function ComponentTree() {
   const components = useEditorStore((state) => state.components);
   const selectedId = useEditorStore((state) => state.selectedId);
@@ -455,6 +474,31 @@ export function ComponentTree() {
     setLocalDraggingId(null);
   }, []);
 
+  const templateComponents = components.filter((c) => c.isTemplate);
+  const elementComponents = components.filter((c) => !c.isTemplate);
+
+  const renderTreeNode = (component: (typeof components)[number]) => (
+    <TreeNode
+      key={component.id}
+      component={component}
+      depth={0}
+      selectedId={selectedId}
+      onSelect={handleSelect}
+      onUpdate={handleUpdate}
+      onRemove={handleRemove}
+      onDuplicate={handleDuplicate}
+      onCopy={copyComponent}
+      onPaste={pasteComponent}
+      hasClipboard={hasClipboard}
+      dragOverId={dragOverId}
+      dropPosition={dropPosition}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onDragEnd={handleDragEnd}
+    />
+  );
+
   return (
     <div className="flex h-full flex-col border-t border-border bg-panel">
       <div className="flex shrink-0 items-center justify-between border-b border-border px-3 py-2">
@@ -481,27 +525,27 @@ export function ComponentTree() {
           </div>
         ) : (
           <div className="py-1">
-            {components.map((component) => (
-              <TreeNode
-                key={component.id}
-                component={component}
-                depth={0}
-                selectedId={selectedId}
-                onSelect={handleSelect}
-                onUpdate={handleUpdate}
-                onRemove={handleRemove}
-                onDuplicate={handleDuplicate}
-                onCopy={copyComponent}
-                onPaste={pasteComponent}
-                hasClipboard={hasClipboard}
-                dragOverId={dragOverId}
-                dropPosition={dropPosition}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onDragEnd={handleDragEnd}
-              />
-            ))}
+            {/*
+              Template definitions (`@Name = Node { ... };`) are declarations,
+              not screen content, so they get their own labelled group. Files
+              without templates render exactly as before — no empty headers.
+            */}
+            {templateComponents.length > 0 && (
+              <>
+                <TreeSectionLabel
+                  icon={FileCode}
+                  label="Templates"
+                  count={templateComponents.length}
+                />
+                {templateComponents.map(renderTreeNode)}
+                <TreeSectionLabel
+                  icon={Square}
+                  label="Elements"
+                  count={elementComponents.length}
+                />
+              </>
+            )}
+            {elementComponents.map(renderTreeNode)}
           </div>
         )}
       </ScrollArea>

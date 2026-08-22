@@ -38,6 +38,7 @@ export const useEditorStore = create<EditorStore>()(
         snapToGrid: state.snapToGrid,
         zoom: state.zoom,
         showFileExplorer: state.showFileExplorer,
+        uiScale: state.uiScale,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;

@@ -9,6 +9,11 @@ interface ASTNode {
   props: Record<string, any>;
   children: ASTNode[];
   alias?: string;
+  /**
+   * Expression name when the node comes from a template definition
+   * (`@Subtitle = Label { ... };`). Absent on regular nodes.
+   */
+  templateName?: string;
 }
 
 export class ParserError extends Error {
@@ -134,6 +139,21 @@ export class HytaleParser {
 
   imports: string[] = [];
 
+  /**
+   * Template definitions (`@Name = Node { ... };`) in source order.
+   * Kept separate from `nodes` because they are not renderable screen content
+   * but reusable declarations. Library files (Common.ui, Container.ui) contain
+   * only these — previously they produced zero components.
+   */
+  templates: ASTNode[] = [];
+
+  /**
+   * Named expressions declared by this file (`@Name = ...`), both constants and
+   * templates. This is what another file gets when it writes
+   * `$Alias = "this-file.ui";` and then `$Alias.@Name`.
+   */
+  exports: Record<string, any> = {};
+
   constructor(tokens: any[], globalScope = {}) {
     this.tokens = tokens;
     this.pos = 0;
@@ -199,13 +219,23 @@ export class HytaleParser {
     return this.pos >= this.tokens.length;
   }
 
-  parse(): { nodes: ASTNode[]; imports: string[] } {
+  parse(): {
+    nodes: ASTNode[];
+    imports: string[];
+    templates: ASTNode[];
+    exports: Record<string, any>;
+  } {
     const nodes: ASTNode[] = [];
     while (!this.isAtEnd()) {
       const node = this.parseStatement();
       if (node) nodes.push(node as ASTNode);
     }
-    return { nodes, imports: this.imports };
+    return {
+      nodes,
+      imports: this.imports,
+      templates: this.templates,
+      exports: this.exports,
+    };
   }
 
   parseStatement() {
@@ -247,11 +277,16 @@ export class HytaleParser {
         const element = this.parseElement();
         if (!this.isAtEnd() && this.peek().value === ";") this.consume();
         this.variables[name] = element;
+        this.exports[name] = element;
+        // Still available for instantiation through this.variables, but now
+        // also exposed so the editor can display and edit the definition.
+        this.templates.push({ ...element, templateName: name });
         return null;
       } else {
         const val = this.parseExpression();
         if (!this.isAtEnd() && this.peek().value === ";") this.consume();
         this.variables[name] = val;
+        this.exports[name] = val;
         return null;
       }
     }
@@ -547,6 +582,23 @@ export class HytaleParser {
     if (!isNaN(Number(token.value)) && token.type === "VALUE") {
       return Number(token.value);
     }
+
+    // A bare reference used as a property value, e.g. `Style: $Common.@Title;`
+    // or `Padding: @PanelPadding;`. Spread forms (`...$Common.@Title`) were
+    // already resolved elsewhere, but a direct reference used to fall through
+    // as the literal string "$Common.@Title", so the property was dropped.
+    if (
+      token.type === "IDENT" &&
+      (token.value.startsWith("$") || token.value.startsWith("@"))
+    ) {
+      const resolved = this.resolveVariable(token.value);
+      if (resolved !== null && resolved !== undefined) {
+        // Element definitions keep their node shape; value expressions and
+        // style tuples are returned as-is.
+        return resolved.props && resolved.type ? resolved : resolved;
+      }
+    }
+
     return token.value;
   }
 
@@ -621,19 +673,34 @@ function deepMerge(target: any, source: any) {
 // --- Adapter to HytaleComponent ---
 
 
-export function parseAndMapCode(code: string): {
+/**
+ * Scope handed to a file so it can resolve `$Alias.@Name` against other files.
+ * Keyed by import alias; the inner `props` shape is what resolveVariable walks.
+ *
+ *   { "$Common": { props: { "@TitleStyle": <value> } } }
+ */
+export type ImportScope = Record<string, { props: Record<string, any> }>;
+
+export function parseAndMapCode(
+  code: string,
+  scope: ImportScope = {},
+): {
   components: HytaleComponent[];
   imports: string[];
+  templates: HytaleComponent[];
+  exports: Record<string, any>;
 } {
   try {
     const lexer = new HytaleLexer(code);
     const tokens = lexer.tokenize();
-    const parser = new HytaleParser(tokens);
+    const parser = new HytaleParser(tokens, scope);
     const result = parser.parse();
 
     return {
       components: result.nodes.map((node) => mapNodeToComponent(node)),
       imports: result.imports,
+      templates: result.templates.map((node) => mapNodeToComponent(node)),
+      exports: result.exports,
     };
   } catch (e) {
     console.error("Parser Error:", e);
@@ -646,13 +713,16 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
 
   const component: any = {
     id: generateId(),
-    name: id || type,
+    // Templates have no #ID; the useful name is the expression (e.g. "@Subtitle").
+    name: node.templateName ?? id ?? type,
     type: type as ComponentType,
     children: children ? children.map(mapNodeToComponent) : [],
     isVisible: true,
     isLocked: false,
     isExpanded: true,
     alias: node.alias,
+    isTemplate: node.templateName !== undefined,
+    templateName: node.templateName,
   };
 
   // Helper to safely set nested properties
@@ -795,12 +865,29 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         } else {
           component.background.color = value;
         }
+      } else if (typeof value === "string") {
+        // Bare texture path: Background: "HotbarBackground.png";
+        // This is the most common form in the shipped game files and used to
+        // be dropped entirely, because the branch above required a leading #.
+        component.background.texture = value;
       } else if (typeof value === "object" && value !== null) {
-        // Object form: Background: (Color: #fff, Border: 8);
+        // Tuple or PatchStyle(...): Background: PatchStyle(TexturePath: "p.png",
+        // Border: 46, Color: #ffffff(0.5));
         if (value.Color !== undefined)
           component.background.color = String(value.Color);
         if (value.Opacity !== undefined)
           component.background.opacity = Number(value.Opacity);
+        if (value.TexturePath !== undefined)
+          component.background.texture = String(value.TexturePath);
+        if (value.Border !== undefined)
+          component.background.border = Number(value.Border);
+        if (value.HorizontalBorder !== undefined)
+          component.background.horizontalBorder = Number(value.HorizontalBorder);
+        if (value.VerticalBorder !== undefined)
+          component.background.verticalBorder = Number(value.VerticalBorder);
+        // parseValue stores the constructor name in `_type` for calls such as
+        // PatchStyle(...) / LabelStyle(...).
+        if (value._type === "PatchStyle") component.background.isPatch = true;
       }
       continue;
     }

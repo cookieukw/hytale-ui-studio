@@ -211,6 +211,25 @@ export const formatHytaleColor = (hex?: string, opacity?: number): string => {
   return `#${cleanHex}`;
 };
 
+/**
+ * Serialises a text-valued property.
+ *
+ * Hytale markup has three unquoted text forms that must NOT be wrapped in
+ * quotes, or they turn into literals:
+ *   - `@Text`                    template parameter reference
+ *   - `%client.menu.play`        translation key
+ *   - `%client.menu.play + " "`  concatenation involving either of the above
+ *
+ * Quoting `@Text` was silently corrupting template libraries on export: the
+ * button rendered the literal string "@Text" instead of the passed value.
+ */
+export function formatTextValue(value: string): string {
+  const trimmed = value.trim();
+  const isExpression =
+    trimmed.startsWith("@") || trimmed.startsWith("%") || /\s\+\s/.test(trimmed);
+  return isExpression ? trimmed : `"${value}"`;
+}
+
 // Helper to collectAllNames
 export function collectAllNames(components: HytaleComponent[]): Set<string> {
   const names = new Set<string>();
@@ -281,8 +300,15 @@ export function componentsToCode(
     // Sprite is exported as Sprite, which is default behavior
     const typeToExport = comp.alias || comp.type;
 
-    const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
-    code += `${spaces}${typeToExport}${idPart} {\n`;
+    // Template definition: `@Name = Type { ... };` instead of `Type #Id { ... }`.
+    // Without this, importing a library (Common.ui, Container.ui) and exporting
+    // it back would write `Label #@Subtitle {`, corrupting the file.
+    if (comp.isTemplate) {
+      code += `${spaces}${comp.templateName ?? comp.name} = ${typeToExport} {\n`;
+    } else {
+      const idPart = comp.name && comp.name !== comp.type ? ` #${comp.name}` : "";
+      code += `${spaces}${typeToExport}${idPart} {\n`;
+    }
 
     // Visible
     if (typeof comp.isVisible === "boolean" && comp.isVisible === false) {
@@ -301,11 +327,11 @@ export function componentsToCode(
       // Ideally we check component type.
       // But adhering to the previous logic:
       if (comp.type !== "Dropdown" && comp.type !== "DropdownBox") {
-        code += `${spaces}  Text: "${comp.text}";\n`;
+        code += `${spaces}  Text: ${formatTextValue(comp.text)};\n`;
       }
     }
     if (comp.placeholderText) {
-      code += `${spaces}  PlaceholderText: "${comp.placeholderText}";\n`;
+      code += `${spaces}  PlaceholderText: ${formatTextValue(comp.placeholderText)};\n`;
     }
 
     // Value
@@ -427,12 +453,30 @@ export function componentsToCode(
       );
 
       if (hasTexture) {
-        // Texture-based background: emit as PatchStyle object
-        const parts: string[] = [];
-        if (colorString) parts.push(`Color: ${colorString}`);
-        // Texture path isn't exported here (handled by alias in game)
-        if (parts.length > 0) {
-          code += `${spaces}  Background: (${parts.join(", ")});\n`;
+        const bg = comp.background;
+        const hasBorder =
+          bg.border !== undefined ||
+          bg.horizontalBorder !== undefined ||
+          bg.verticalBorder !== undefined;
+
+        if (!hasBorder && !colorString && !bg.isPatch) {
+          // Simplest and most common form in the shipped game files.
+          code += `${spaces}  Background: "${bg.texture}";\n`;
+        } else {
+          // Previously this branch dropped TexturePath and every border field,
+          // so importing a real panel and exporting it erased the artwork.
+          const parts: string[] = [`TexturePath: "${bg.texture}"`];
+          if (bg.border !== undefined) parts.push(`Border: ${bg.border}`);
+          if (bg.horizontalBorder !== undefined)
+            parts.push(`HorizontalBorder: ${bg.horizontalBorder}`);
+          if (bg.verticalBorder !== undefined)
+            parts.push(`VerticalBorder: ${bg.verticalBorder}`);
+          if (colorString) parts.push(`Color: ${colorString}`);
+
+          const body = parts.join(", ");
+          code += bg.isPatch
+            ? `${spaces}  Background: PatchStyle(${body});\n`
+            : `${spaces}  Background: (${body});\n`;
         }
       } else if (colorString) {
         // Plain color only: emit as literal (parser-friendly)
@@ -478,7 +522,7 @@ export function componentsToCode(
       if (comp.displayNonExistingValue !== undefined)
         code += `${spaces}  DisplayNonExistingValue: ${comp.displayNonExistingValue};\n`;
       if (comp.noItemsText)
-        code += `${spaces}  NoItemsText: "${comp.noItemsText}";\n`;
+        code += `${spaces}  NoItemsText: ${formatTextValue(comp.noItemsText)};\n`;
 
       // Visibility / State
       if (comp.disabled !== undefined)
@@ -492,7 +536,7 @@ export function componentsToCode(
       if (comp.showSearchInput !== undefined)
         code += `${spaces}  ShowSearchInput: ${comp.showSearchInput};\n`;
       if (comp.panelTitleText)
-        code += `${spaces}  PanelTitleText: "${comp.panelTitleText}";\n`;
+        code += `${spaces}  PanelTitleText: ${formatTextValue(comp.panelTitleText)};\n`;
 
       // Interaction
       if (comp.hitTestVisible !== undefined)
@@ -502,7 +546,7 @@ export function componentsToCode(
 
       // Tooltip
       if (comp.tooltipText)
-        code += `${spaces}  TooltipText: "${comp.tooltipText}";\n`;
+        code += `${spaces}  TooltipText: ${formatTextValue(comp.tooltipText)};\n`;
       if (comp.textTooltipShowDelay !== undefined)
         code += `${spaces}  TextTooltipShowDelay: ${comp.textTooltipShowDelay};\n`;
 
@@ -628,7 +672,8 @@ export function componentsToCode(
       code += componentsToCode(comp.children, depth + 1);
     }
 
-    code += `${spaces}}\n`;
+    // Template definitions require a semicolon after the closing brace.
+    code += comp.isTemplate ? `${spaces}};\n` : `${spaces}}\n`;
   });
 
   return code;

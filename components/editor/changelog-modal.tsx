@@ -87,6 +87,71 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                   <div className="flex gap-3">
                     <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
                     <div>
+                      <h4 className="text-sm font-semibold text-white">Cross-File Scope & Import Resolution</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Implemented project-wide scope discovery to resolve variables and templates across multiple files automatically, alongside inline reference variable parsing in property values.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Enhanced Hytale Template & Engine Support</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added full AST parsing, exposure, and export for Hytale UI templates. Components are now structured between Templates and Elements in the tree. Implemented 9-slice rendering via <code className="bg-muted px-1 py-0.5 rounded text-xs">border-image</code> and complete <code className="bg-muted px-1 py-0.5 rounded text-xs">PatchStyle</code> background round-tripping.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">3</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Global UI Scaling & Text Wrapping</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added global UI scaling (<code className="bg-muted px-1 py-0.5 rounded text-xs">uiScale</code>) to editor state and style mapper. Expanded Text elements with <code className="bg-muted px-1 py-0.5 rounded text-xs">wrap</code> and <code className="bg-muted px-1 py-0.5 rounded text-xs">wrapMaxLines</code> properties.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">4</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Modernized Start Screen & Customization UI</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Redesigned sidebar with IntelliJ-inspired aesthetics, converted Template Gallery to a 2-column searchable layout, and transformed the Customization tab into a category-based side navigation layout.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-border/50" />
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">5</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Merge Tooling & CI Workflow</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Integrated a built-in three-way merge tool for file conflicts and added GitHub Actions automated cross-platform Tauri build workflow.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v5.0.0</Badge>
+                      Previous Updates
+                    </h3>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="h-6 w-6 shrink-0 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
+                    <div>
                       <h4 className="text-sm font-semibold text-white">Plugins & Code Editor Enhancements</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                         Added a robust Plugin Sandbox System for dynamic component registration and palette integration. Implemented syntax highlighting for both the code editor and plugin editor, along with an optional code minimap for better navigation.
@@ -315,6 +380,23 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
+                      <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold px-1.5 py-0.2">Medium</Badge>
+                      <h4 className="text-xs font-semibold text-white">Template Parameters & Translation Keys Quoting</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+                      Fixed serialization bug that incorrectly quoted template parameters and translation keys during code generation.
+                    </p>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v5.0.0</Badge>
+                      Previous Fixes
+                    </h3>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
                       <Badge className="bg-destructive/10 text-destructive border border-destructive/20 text-[9px] font-bold px-1.5 py-0.2">High</Badge>
                       <h4 className="text-xs font-semibold text-white">Tree Drop for Nested Containers</h4>
                     </div>
@@ -512,6 +594,25 @@ export function ChangelogModal({ open, onOpenChange }: ChangelogModalProps) {
                     <h3 className="text-sm font-bold text-emerald-500 flex items-center gap-2">
                       <Badge className="bg-emerald-500/20 text-emerald-500">v{packageJson.version}</Badge>
                       Quality Improvements
+                    </h3>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 rounded bg-muted text-muted-foreground flex items-center justify-center mt-0.5">
+                      <RefreshCw className="h-3 w-3" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Parser & Scope Suite Tests</h4>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Added unit and integration test suites covering import resolution logic, scope assertion, and bare reference variable resolution.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sticky top-0 bg-panel/95 backdrop-blur-sm z-10 pb-2 mt-8 mb-2 border-b border-border">
+                    <h3 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
+                      <Badge variant="outline" className="text-muted-foreground">v5.0.0</Badge>
+                      Previous Updates
                     </h3>
                   </div>
 

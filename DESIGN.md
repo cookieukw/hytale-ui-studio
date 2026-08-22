@@ -2,17 +2,17 @@
 name: Hytale UI Studio
 description: A powerful visual editor simulating Hytale's UI engine
 colors:
-  primary: "oklch(0.65 0.18 200)"
-  background: "oklch(0.13 0.005 260)"
-  card: "oklch(0.16 0.005 260)"
-  popover: "oklch(0.18 0.005 260)"
-  secondary: "oklch(0.22 0.005 260)"
-  muted: "oklch(0.2 0.005 260)"
-  accent: "oklch(0.7 0.15 145)"
-  destructive: "oklch(0.55 0.22 25)"
-  border: "oklch(0.25 0.005 260)"
-  panel: "oklch(0.14 0.005 260)"
-  canvas: "oklch(0.1 0.005 260)"
+  primary: "oklch(0.55 0.16 265)"
+  background: "oklch(0.19 0.008 260)"
+  card: "oklch(0.21 0.008 260)"
+  popover: "oklch(0.23 0.008 260)"
+  secondary: "oklch(0.25 0.008 260)"
+  muted: "oklch(0.23 0.008 260)"
+  accent: "oklch(0.28 0.03 265)"
+  destructive: "oklch(0.55 0.20 22)"
+  border: "oklch(0.22 0.008 260)"
+  panel: "oklch(0.19 0.008 260)"
+  canvas: "oklch(0.14 0.008 260)"
 typography:
   display:
     fontFamily: "Inter, sans-serif"

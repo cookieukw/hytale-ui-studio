@@ -17,26 +17,27 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
 
   return (
-    <div className="w-[240px] flex flex-col border-r border-border bg-sidebar">
-      <div className="p-6 pb-2">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
-            <img src="/hytale-studio_foreground.png" alt="Logo" className="h-8 w-8" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-white tracking-tight uppercase">UI Studio</span>
-            <span
-              onClick={() => setIsChangelogOpen(true)}
-              className="text-[10px] text-primary hover:text-primary/80 font-semibold cursor-pointer hover:underline flex items-center gap-1 mt-0.5"
-              title="Click to see Changelog"
-            >
-              Version {packageJson.version} ✨
-            </span>
-          </div>
+    <div className="w-[200px] shrink-0 flex flex-col border-r border-border bg-sidebar py-4 px-2">
+      {/* Header / Brand */}
+      <div className="px-3 mb-6 flex items-center gap-3">
+        <div className="h-8 w-8 bg-[#3574F0] rounded-md flex items-center justify-center shrink-0">
+          <img src="/hytale-studio_foreground.png" alt="Logo" className="h-6 w-6" />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs font-semibold text-[#BCBEC4] leading-tight truncate">
+            Hytale UI Studio
+          </span>
+          <span
+            onClick={() => setIsChangelogOpen(true)}
+            className="text-[10px] text-[#868A91] hover:text-[#3574F0] cursor-pointer mt-0.5"
+          >
+            v{packageJson.version}
+          </span>
         </div>
       </div>
 
-      <div className="flex-1 px-3 flex flex-col gap-1">
+      {/* Nav items */}
+      <div className="flex-1 flex flex-col gap-0.5">
         <NavButton
           active={activeTab === "Projects"}
           onClick={() => setActiveTab("Projects")}
@@ -65,20 +66,21 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           active={activeTab === "Learn"}
           onClick={() => setActiveTab("Learn")}
           icon={<HelpCircle className="h-4 w-4" />}
-          label="Learn Studio"
+          label="Learn"
         />
       </div>
 
-      <div className="p-4 mt-auto">
+      {/* Footer link */}
+      <div className="px-1 pt-2">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-[11px] text-muted-foreground hover:text-white"
+          className="w-full justify-start text-[11px] text-[#868A91] hover:text-[#BCBEC4] hover:bg-[#2B2D30] px-2 h-7"
           asChild
         >
-          <a href="https://github.com/cookieukw/hytale-ui-studio" target="_blank">
+          <a href="https://github.com/cookieukw/hytale-ui-studio" target="_blank" rel="noreferrer">
             <Github className="h-3.5 w-3.5 mr-2" />
-            GitHub Repository
+            GitHub
           </a>
         </Button>
       </div>

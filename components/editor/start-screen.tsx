@@ -29,7 +29,7 @@ export function StartScreen() {
           <div className="p-12 flex flex-col items-center justify-center h-full">
             <div className="text-center">
               <h2 className="text-xl font-bold mb-2 text-white">Coming Soon</h2>
-              <p className="text-[#888888]">
+              <p className="text-muted-foreground">
                 This section is currently under development.
               </p>
             </div>
