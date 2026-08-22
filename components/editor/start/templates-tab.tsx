@@ -155,7 +155,7 @@ export function TemplatesTab() {
               {/* Tags bar */}
               <div className="flex items-center gap-2 mt-4 text-[11px]">
                 <span className="px-2 py-0.5 rounded bg-[#2B2D30] text-[#BCBEC4]">Official</span>
-                <span className="pmnppx-2 py-0.5 rounded bg-[#2B2D30] text-[#BCBEC4]">XML UI</span>
+                <span className="px-2 py-0.5 rounded bg-[#2B2D30] text-[#BCBEC4]">XML UI</span>
                 <span className="px-2 py-0.5 rounded bg-[#2B2D30] text-[#BCBEC4]">Layout</span>
                 <span className="px-2 py-0.5 rounded bg-[#2B2D30] text-[#BCBEC4]">Hytale Native</span>
               </div>
