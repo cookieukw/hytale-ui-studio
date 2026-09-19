@@ -9,6 +9,22 @@ import { FileJson } from "lucide-react";
 import type { ComponentContentRendererProps } from "./types";
 // Removed DOMPurify and escapeHtml for secure AST rendering
 
+function formatDisplayText(text: string | undefined, fallback: string): string {
+  if (!text) return fallback;
+  const trimmed = text.trim();
+  if (trimmed.startsWith("%")) {
+    const parts = trimmed.substring(1).split(".");
+    const last = parts[parts.length - 1];
+    // Convert camelCase or dot key (e.g. debugbaths.btnTp -> Btn Tp) to Title Case
+    const formatted = last
+      .replace(/([A-Z])/g, " $1")
+      .replace(/_/g, " ")
+      .trim();
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  }
+  return text;
+}
+
 export function ComponentContentRenderer({
   component,
   isBlueprint,
@@ -113,7 +129,7 @@ export function ComponentContentRenderer({
         overflow: "visible",
       };
       return renderWithIndicators(
-        <span style={{ width: "100%" }}>{component.text || "Label"}</span>,
+        <span style={{ width: "100%" }}>{formatDisplayText(component.text, "Label")}</span>,
         undefined,
         labelOverrideStyle,
       );
@@ -184,7 +200,7 @@ export function ComponentContentRenderer({
     case "TertiaryTextButton":
     case "CancelTextButton":
       return renderWithIndicators(
-        component.text || "Text Button",
+        formatDisplayText(component.text, "Text Button"),
         undefined,
         getTextStyle(component, isBlueprint),
       );
