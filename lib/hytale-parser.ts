@@ -928,6 +928,29 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     }
 
     if (key === "Style" && typeof value === "object") {
+      // Unpack ButtonStyle or custom style wrappers (e.g. ButtonStyle(Default: (...)))
+      let styleObj = value;
+      if (styleObj && styleObj._type === "ButtonStyle" && styleObj.Default) {
+        styleObj = styleObj.Default;
+      }
+
+      if (styleObj.Background) {
+        const bgVal = styleObj.Background;
+        if (!component.background) component.background = {};
+        if (typeof bgVal === "object" && bgVal !== null) {
+          if (bgVal.Color !== undefined) component.background.color = String(bgVal.Color);
+          if (bgVal.Opacity !== undefined) component.background.opacity = Number(bgVal.Opacity);
+          if (bgVal.TexturePath !== undefined) component.background.texture = String(bgVal.TexturePath);
+          if (bgVal.Border !== undefined) component.background.border = Number(bgVal.Border);
+          if (bgVal.HorizontalBorder !== undefined) component.background.horizontalBorder = Number(bgVal.HorizontalBorder);
+          if (bgVal.VerticalBorder !== undefined) component.background.verticalBorder = Number(bgVal.VerticalBorder);
+          if (bgVal._type === "PatchStyle") component.background.isPatch = true;
+        } else if (typeof bgVal === "string") {
+          if (bgVal.startsWith("#")) component.background.color = bgVal;
+          else component.background.texture = bgVal;
+        }
+      }
+
       // Special handling for DropdownBox Style
       if (
         component.type === "Dropdown" ||
@@ -943,23 +966,23 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
 
       // For Label, TextField, NumberField etc: map Style to textStyle
       if (!component.textStyle) component.textStyle = {};
-      if (value.FontSize) component.textStyle.fontSize = Number(value.FontSize);
-      if (value.TextColor) component.textStyle.textColor = String(value.TextColor);
-      else if (value.Color) component.textStyle.textColor = String(value.Color);
-      if (value.RenderBold)
+      if (styleObj.FontSize) component.textStyle.fontSize = Number(styleObj.FontSize);
+      if (styleObj.TextColor) component.textStyle.textColor = String(styleObj.TextColor);
+      else if (styleObj.Color) component.textStyle.textColor = String(styleObj.Color);
+      if (styleObj.RenderBold)
         component.textStyle.renderBold =
-          value.RenderBold === true || value.RenderBold === "true";
-      if (value.RenderUppercase)
+          styleObj.RenderBold === true || styleObj.RenderBold === "true";
+      if (styleObj.RenderUppercase)
         component.textStyle.renderUppercase =
-          value.RenderUppercase === true || value.RenderUppercase === "true";
-      if (value.Alignment)
-        component.textStyle.alignment = String(value.Alignment) as any;
-      if (value.HorizontalAlignment)
+          styleObj.RenderUppercase === true || styleObj.RenderUppercase === "true";
+      if (styleObj.Alignment)
+        component.textStyle.alignment = String(styleObj.Alignment) as any;
+      if (styleObj.HorizontalAlignment)
         component.textStyle.horizontalAlignment = String(
-          value.HorizontalAlignment,
+          styleObj.HorizontalAlignment,
         );
-      if (value.VerticalAlignment)
-        component.textStyle.verticalAlignment = String(value.VerticalAlignment);
+      if (styleObj.VerticalAlignment)
+        component.textStyle.verticalAlignment = String(styleObj.VerticalAlignment);
       continue;
     }
 
