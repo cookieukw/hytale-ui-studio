@@ -399,7 +399,22 @@ export function CustomizeTab() {
                       <p className="text-[11px] text-[#868A91]">Used as author namespace prefix during UI export.</p>
                     </div>
 
-                    <div className="flex items-center justify-between w-72 pt-2">
+                    <div className="space-y-2 pt-2 border-t border-[#2B2D30]">
+                      <Label className="text-xs text-[#BCBEC4]">Local Hytale Assets Directory (Opt-In)</Label>
+                      <Input
+                        value={settings.hytaleAssetsPath || ""}
+                        onChange={(e) => settings.updateSetting("hytaleAssetsPath", e.target.value.trim() || null)}
+                        placeholder="e.g., /mnt/devhd/Assets"
+                        className="w-96 bg-[#2B2D30] border-[#3A3D41] text-xs h-8 text-[#BCBEC4] font-mono"
+                      />
+                      <p className="text-[11px] text-[#868A91] leading-relaxed">
+                        Optional local folder path containing your Hytale game assets (e.g. <code className="bg-[#2B2D30] px-1 py-0.5 rounded text-[10px]">Assets/Common/UI</code>).
+                        <br />
+                        <span className="text-[#E55765]">Legal notice:</span> Assets are never bundled or distributed with the editor. Leaving this empty uses neutral SVG/CSS fallbacks.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between w-72 pt-2 border-t border-[#2B2D30]">
                       <div className="space-y-0.5">
                         <Label className="text-xs text-[#BCBEC4]">Auto-save Workspace</Label>
                         <p className="text-[11px] text-[#868A91]">Save project edits automatically.</p>
