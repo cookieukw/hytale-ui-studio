@@ -2,6 +2,8 @@ import React from "react";
 import type { HytaleComponent, Padding } from "@/lib/hytale-types";
 import { hexToRgba } from "@/lib/utils";
 import { nineSliceInsets } from "./nine-slice";
+import { useSettings } from "../hooks/use-settings";
+import { isTauri } from "@/lib/tauri-utils";
 
 
   export function getComponentStyle(
@@ -238,9 +240,23 @@ import { nineSliceInsets } from "./nine-slice";
       }
       
       if (component.background.texture) {
-        const texture = component.background.texture.startsWith("/")
-          ? component.background.texture
-          : `/${component.background.texture}`;
+        let texturePath = component.background.texture;
+        const assetsPath = useSettings.getState().hytaleAssetsPath;
+
+        let textureUrl = texturePath.startsWith("/") ? texturePath : `/${texturePath}`;
+
+        if (assetsPath) {
+          const cleanAssetDir = assetsPath.replace(/\/+$/, "");
+          const cleanRelPath = texturePath.replace(/^\/+/, "");
+          const fullPath = `${cleanAssetDir}/${cleanRelPath}`;
+          if (isTauri()) {
+            const convertFileSrc = (window as any).__TAURI_INTERNALS__?.convertFileSrc || ((p: string) => `asset://${p}`);
+            textureUrl = convertFileSrc(fullPath);
+          } else {
+            // Local file scheme / custom protocol
+            textureUrl = `file://${fullPath}`;
+          }
+        }
 
         const slice = nineSliceInsets(component.background);
 
@@ -254,12 +270,12 @@ import { nineSliceInsets } from "./nine-slice";
           style.borderStyle = "solid";
           style.borderWidth = `${top}px ${right}px ${bottom}px ${left}px`;
           style.borderColor = "transparent";
-          style.borderImageSource = `url(${texture})`;
+          style.borderImageSource = `url("${textureUrl}")`;
           style.borderImageSlice = `${top} ${right} ${bottom} ${left} fill`;
           style.borderImageWidth = `${top}px ${right}px ${bottom}px ${left}px`;
           style.borderImageRepeat = "stretch";
         } else {
-          style.backgroundImage = `url(${texture})`;
+          style.backgroundImage = `url("${textureUrl}")`;
           style.backgroundSize = "100% 100%";
           style.backgroundRepeat = "no-repeat";
         }
