@@ -113,4 +113,27 @@ describe("cross-file resolution end to end", () => {
     expect(after.components[0].textStyle).toEqual(inline.components[0].textStyle);
     expect(after.components[0].textStyle?.fontSize).toBe(20);
   });
+
+  it("resolves $T.@BtnNeutral with ButtonStyle unpacking", () => {
+    const themeCode = `
+    @BtnTintPrimary = #C29654;
+    @BtnNeutral = ButtonStyle(
+      Default: (Background: (TexturePath: "Common/Buttons/Primary.png", Border: 12, Color: @BtnTintPrimary))
+    );
+    `;
+    const buttonCode = `
+    $T = "../Theme.ui";
+    Button #BtnTp {
+      Style: $T.@BtnNeutral;
+    }
+    `;
+    const localSources: Record<string, string> = { "Theme.ui": themeCode };
+    const localScope = buildImportScope([`$T = "../Theme.ui"`], (n) => localSources[n]);
+    const parsed = parseAndMapCode(buttonCode, localScope);
+
+    expect(parsed.components[0].background).toBeDefined();
+    expect(parsed.components[0].background?.texture).toBe("Common/Buttons/Primary.png");
+    expect(parsed.components[0].background?.border).toBe(12);
+  });
 });
+
