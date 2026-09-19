@@ -22,6 +22,7 @@ export interface SettingsState {
 
   // Global
   appTheme: AppTheme;
+  hytaleAssetsPath: string | null;
 
   // Actions
   updateSetting: <K extends keyof Omit<SettingsState, "updateSetting">>(
@@ -47,6 +48,7 @@ export const useSettings = create<SettingsState>()(
       autoSaveEnabled: true,
 
       appTheme: "default",
+      hytaleAssetsPath: null,
 
       updateSetting: (key, value) => set((state) => ({ ...state, [key]: value })),
     }),
