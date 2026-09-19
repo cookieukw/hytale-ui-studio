@@ -33,7 +33,8 @@ export function parseImportLines(lines: string[]): ParsedImport[] {
     const m = line.match(IMPORT_RE);
     if (!m) continue;
     const [, alias, path] = m;
-    out.push({ alias, path, fileName: path.split("/").pop() ?? path });
+    const cleanPath = path.replace(/^(\.\.\/)+/, "").replace(/^\.\//, "");
+    out.push({ alias, path, fileName: cleanPath.split("/").pop() ?? cleanPath });
   }
   return out;
 }
