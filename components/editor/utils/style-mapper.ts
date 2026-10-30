@@ -463,7 +463,6 @@ import { nineSliceInsets } from "./nine-slice";
     // ─── Default flexGrow for container children ──────────────────────────────
 
     if (
-      isContainerType &&
       parentId &&
       !style.height &&
       !style.flex &&
