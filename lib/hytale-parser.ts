@@ -935,9 +935,14 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
       // Button styles can carry their visual background inside Style rather
       // than as a top-level Background property. Promote it so the renderer
       // applies the imported colour or patch texture to the component.
-      if (styleValue.Background !== undefined) {
+      const defaultButtonStyle =
+        styleValue.Default && typeof styleValue.Default === "object"
+          ? styleValue.Default
+          : undefined;
+      const background = styleValue.Background ?? defaultButtonStyle?.Background;
+
+      if (background !== undefined) {
         if (!component.background) component.background = {};
-        const background = styleValue.Background;
         if (typeof background === "string" && background.startsWith("#")) {
           const alphaMatch = background.match(/^(#[0-9a-fA-F]{6})\\(([0-9.]+)\\)$/);
           if (alphaMatch) {
@@ -964,7 +969,6 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         component.type === "Dropdown" ||
         component.type === "DropdownBox" ||
         // Check for DropdownBox specific style props if type is unknown/generic
-        styleValue.Background ||
         styleValue.MaskTexturePath ||
         styleValue.OutlineColor
       ) {
