@@ -928,12 +928,16 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     }
 
     if (key === "Style" && typeof value === "object") {
+      // Imported style definitions resolve to an element-like object with its
+      // actual properties under `props`; inline tuples use the object itself.
+      const styleValue = value.props && !value.Background ? value.props : value;
+
       // Button styles can carry their visual background inside Style rather
       // than as a top-level Background property. Promote it so the renderer
       // applies the imported colour or patch texture to the component.
-      if (value.Background !== undefined) {
+      if (styleValue.Background !== undefined) {
         if (!component.background) component.background = {};
-        const background = value.Background;
+        const background = styleValue.Background;
         if (typeof background === "string" && background.startsWith("#")) {
           const alphaMatch = background.match(/^(#[0-9a-fA-F]{6})\\(([0-9.]+)\\)$/);
           if (alphaMatch) {
@@ -960,33 +964,33 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
         component.type === "Dropdown" ||
         component.type === "DropdownBox" ||
         // Check for DropdownBox specific style props if type is unknown/generic
-        value.Background ||
-        value.MaskTexturePath ||
-        value.OutlineColor
+        styleValue.Background ||
+        styleValue.MaskTexturePath ||
+        styleValue.OutlineColor
       ) {
-        component.dropdownStyle = value;
+        component.dropdownStyle = styleValue;
         continue; // Dropdown style is separate from TextStyle — skip text parsing
       }
 
       // For Label, TextField, NumberField etc: map Style to textStyle
       if (!component.textStyle) component.textStyle = {};
-      if (value.FontSize) component.textStyle.fontSize = Number(value.FontSize);
-      if (value.TextColor) component.textStyle.textColor = String(value.TextColor);
-      else if (value.Color) component.textStyle.textColor = String(value.Color);
-      if (value.RenderBold)
+      if (styleValue.FontSize) component.textStyle.fontSize = Number(styleValue.FontSize);
+      if (styleValue.TextColor) component.textStyle.textColor = String(styleValue.TextColor);
+      else if (styleValue.Color) component.textStyle.textColor = String(styleValue.Color);
+      if (styleValue.RenderBold)
         component.textStyle.renderBold =
-          value.RenderBold === true || value.RenderBold === "true";
-      if (value.RenderUppercase)
+          styleValue.RenderBold === true || styleValue.RenderBold === "true";
+      if (styleValue.RenderUppercase)
         component.textStyle.renderUppercase =
-          value.RenderUppercase === true || value.RenderUppercase === "true";
-      if (value.Alignment)
-        component.textStyle.alignment = String(value.Alignment) as any;
-      if (value.HorizontalAlignment)
+          styleValue.RenderUppercase === true || styleValue.RenderUppercase === "true";
+      if (styleValue.Alignment)
+        component.textStyle.alignment = String(styleValue.Alignment) as any;
+      if (styleValue.HorizontalAlignment)
         component.textStyle.horizontalAlignment = String(
-          value.HorizontalAlignment,
+          styleValue.HorizontalAlignment,
         );
-      if (value.VerticalAlignment)
-        component.textStyle.verticalAlignment = String(value.VerticalAlignment);
+      if (styleValue.VerticalAlignment)
+        component.textStyle.verticalAlignment = String(styleValue.VerticalAlignment);
       continue;
     }
 
