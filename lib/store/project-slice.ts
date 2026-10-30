@@ -241,7 +241,7 @@ export const createProjectSlice: StateCreator<
       // Collect entries first so async resolution preserves ZIP entry order
       const zipEntries: [string, JSZip.JSZipObject][] = [];
       zip.forEach((relativePath, zipFile) => {
-        if (relativePath.endsWith(".ui")) {
+        if (!zipFile.dir && relativePath.toLowerCase().endsWith(".ui")) {
           zipEntries.push([relativePath, zipFile]);
         }
       });
@@ -255,13 +255,26 @@ export const createProjectSlice: StateCreator<
         })),
       );
 
-      const sourceByName = new Map(rawFiles.map((f) => [f.name, f.content]));
+      const sourceByPath = new Map(
+        zipEntries.map(([relativePath], index) => [
+          relativePath.replaceAll("\\", "/").replace(/^\.\//, ""),
+          rawFiles[index].content,
+        ]),
+      );
+      const sourceByName = new Map<string, string>();
+      for (const [relativePath, content] of sourceByPath) {
+        const baseName = relativePath.split("/").pop() || relativePath;
+        if (!sourceByName.has(baseName)) sourceByName.set(baseName, content);
+      }
 
-      const parsedFiles = rawFiles.map(({ name, content }) => {
+      const parsedFiles = rawFiles.map(({ name, content }, index) => {
+        const currentPath = zipEntries[index][0].replaceAll("\\", "/").replace(/^\.\//, "");
         const firstPass = parseAndMapCode(content);
-        const scope = buildImportScope(firstPass.imports, (fileName) =>
-          fileName === name ? undefined : sourceByName.get(fileName),
-        );
+        const scope = buildImportScope(firstPass.imports, (fileName) => {
+          const normalizedName = fileName.replaceAll("\\", "/").replace(/^\.\//, "");
+          if (normalizedName === currentPath) return undefined;
+          return sourceByPath.get(normalizedName) ?? sourceByName.get(normalizedName);
+        });
         const parsed =
           Object.keys(scope).length > 0
             ? parseAndMapCode(content, scope)
