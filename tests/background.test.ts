@@ -26,4 +26,9 @@ describe("background round-trip", () => {
     expect(rt(`Group #D {\n  Background: #000000(0.55);\n}\n`))
       .toBe(`Background: #000000(0.55);`);
   });
+
+  it("imports a button background nested in Style", () => {
+    const result = parseAndMapCode(`Button #E {\n  Style: (Background: #112233);\n}\n`);
+    expect(result.components[0].background).toEqual({ color: "#112233" });
+  });
 });

@@ -928,6 +928,33 @@ function mapNodeToComponent(node: ASTNode): HytaleComponent {
     }
 
     if (key === "Style" && typeof value === "object") {
+      // Button styles can carry their visual background inside Style rather
+      // than as a top-level Background property. Promote it so the renderer
+      // applies the imported colour or patch texture to the component.
+      if (value.Background !== undefined) {
+        if (!component.background) component.background = {};
+        const background = value.Background;
+        if (typeof background === "string" && background.startsWith("#")) {
+          const alphaMatch = background.match(/^(#[0-9a-fA-F]{6})\\(([0-9.]+)\\)$/);
+          if (alphaMatch) {
+            component.background.color = alphaMatch[1];
+            component.background.opacity = parseFloat(alphaMatch[2]);
+          } else {
+            component.background.color = background;
+          }
+        } else if (typeof background === "string") {
+          component.background.texture = background;
+        } else if (typeof background === "object" && background !== null) {
+          if (background.Color !== undefined) component.background.color = String(background.Color);
+          if (background.Opacity !== undefined) component.background.opacity = Number(background.Opacity);
+          if (background.TexturePath !== undefined) component.background.texture = String(background.TexturePath);
+          if (background.Border !== undefined) component.background.border = Number(background.Border);
+          if (background.HorizontalBorder !== undefined) component.background.horizontalBorder = Number(background.HorizontalBorder);
+          if (background.VerticalBorder !== undefined) component.background.verticalBorder = Number(background.VerticalBorder);
+          if (background._type === "PatchStyle") component.background.isPatch = true;
+        }
+      }
+
       // Special handling for DropdownBox Style
       if (
         component.type === "Dropdown" ||
