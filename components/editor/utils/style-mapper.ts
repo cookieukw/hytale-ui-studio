@@ -59,7 +59,9 @@ import { nineSliceInsets } from "./nine-slice";
     //   Any single edge  → abs, sized by Width/Height
     //   Only Width/Height → relative flow
     if (component.anchor && parentId) {
-      const a = component.anchor;
+      // Work on a copy: expanding Full must not mutate the editor state during render.
+      // Mutating the anchor here made layout depend on whether Design or Blueprint rendered first.
+      const a = { ...component.anchor };
 
       // Expand 'Full' into 4 edges early so it acts like setting top/bottom/left/right
       if (a.full !== undefined) {
