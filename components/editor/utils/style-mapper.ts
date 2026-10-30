@@ -461,9 +461,6 @@ import { nineSliceInsets } from "./nine-slice";
       }
     }
     // ─── Default flexGrow for container children ──────────────────────────────
-    const isContainerType = ["Group", "Panel", "DecoratedContainer"].includes(
-      component.type,
-    );
 
     if (
       isContainerType &&
@@ -474,16 +471,6 @@ import { nineSliceInsets } from "./nine-slice";
       style.position !== "absolute"
     ) {
       style.flexGrow = 1;
-    }
-
-    // ─── Blueprint min-size for empty containers ──────────────────────────────
-    if (
-      isBlueprint &&
-      isContainerType &&
-      (!component.children || component.children.length === 0)
-    ) {
-      if (!style.minHeight && !style.height) style.minHeight = "40px";
-      if (!style.minWidth && !style.width) style.minWidth = "40px";
     }
 
     // ─── Labels inside Buttons fill the button ────────────────────────────────
